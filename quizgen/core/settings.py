@@ -63,13 +63,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # ============================================================================
 # DATABASE CONFIGURATION
 # ============================================================================
-# Supports both SQLite (development) and MySQL (production)
-# Set USE_MYSQL=True in .env to enable MySQL
-# Required for MySQL: PyMySQL must be installed
+# Supports both SQLite (development) and PostgreSQL (production)
+# Set DATABASE_URL environment variable to use PostgreSQL
+# For Render deployment: DATABASE_URL is automatically provided
 # ============================================================================
 
-USE_MYSQL = config('USE_MYSQL', default=False, cast=bool)
+import dj_database_url
 
+# Default to SQLite for local development
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -77,42 +78,32 @@ DATABASES = {
     }
 }
 
-if USE_MYSQL:
+# Override with PostgreSQL if DATABASE_URL is set
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if DATABASE_URL:
     """
-    MySQL Configuration for Production
+    PostgreSQL Configuration for Production
     
-    Environment Variables Required:
-    - DB_ENGINE: django.db.backends.mysql
-    - DB_NAME: quizgen_prod (database name)
-    - DB_USER: quizgen_user (MySQL user)
-    - DB_PASSWORD: MySQL password
-    - DB_HOST: 127.0.0.1 (or your MySQL host)
-    - DB_PORT: 3306 (default MySQL port)
+    Environment Variable Required:
+    - DATABASE_URL: Full PostgreSQL connection string
+      Format: postgresql://user:password@host:port/database
+      
+    Example:
+      DATABASE_URL=postgresql://quizgen_user:password@localhost:5432/quizgen_prod
     
-    Charset: utf8mb4 (full Unicode support including emojis)
-    Collation: utf8mb4_unicode_ci (case-insensitive Unicode collation)
+    For Render deployment:
+      DATABASE_URL is automatically set from the linked PostgreSQL database.
+      Use the "External Database URL" from Render PostgreSQL dashboard.
     
-    Connection pooling and timeouts are configured for production stability.
+    Connection pooling is configured for production stability.
     CONN_MAX_AGE=600 keeps connections alive for 10 minutes to reduce overhead.
     """
-    DATABASES['default'] = {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.mysql'),
-        'NAME': config('DB_NAME', default='quizgen_prod'),
-        'USER': config('DB_USER', default='quizgen_user'),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default='127.0.0.1'),
-        'PORT': config('DB_PORT', default='3306'),
-        'CHARSET': 'utf8mb4',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'sql_mode': 'STRICT_TRANS_TABLES',
-        },
-        # Connection pooling
-        'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
-        'ATOMIC_REQUESTS': False,  # Use transaction per request only when needed
-        'AUTOCOMMIT': True,
-    }
+    DATABASES['default'] = dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -205,20 +196,21 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@quizgen.local
 # ============================================================================
 # These settings are recommended for production use:
 #
-# For MySQL Production Deployment:
+# For PostgreSQL Production Deployment (Render):
 # 1. Set DEBUG = False
 # 2. Set SESSION_COOKIE_SECURE = True (requires HTTPS)
 # 3. Set CSRF_COOKIE_SECURE = True (requires HTTPS)
 # 4. Set SECURE_SSL_REDIRECT = True (requires HTTPS setup)
 # 5. Set ALLOWED_HOSTS to specific domain(s)
 # 6. Set SECRET_KEY to a strong random value
-# 7. Ensure MySQL user has strong password
-# 8. Configure MySQL for SSL connections
+# 7. Set DATABASE_URL from Render PostgreSQL (automatically provided)
+# 8. Add your Render deployment URL to CORS_ALLOWED_ORIGINS and CSRF_TRUSTED_ORIGINS
 #
-# For immediate testing with MySQL:
-# 1. Keep SESSION_COOKIE_SECURE = False for localhost testing
-# 2. Set USE_MYSQL = True in .env
-# 3. Ensure MySQL credentials are set in .env
+# For immediate testing with PostgreSQL locally:
+# 1. Install PostgreSQL locally
+# 2. Create a database: createdb quizgen_dev
+# 3. Set DATABASE_URL in .env:
+#    DATABASE_URL=postgresql://username:password@localhost:5432/quizgen_dev
 # 4. Run: python manage.py migrate
 # 5. Run: python manage.py loaddata backups/data.json
 # ============================================================================

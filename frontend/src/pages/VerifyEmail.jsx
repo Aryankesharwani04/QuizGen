@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { verifyEmail } from '../api/authService';
+import { useAuth } from '../context/AuthContext';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
   const [alreadyVerified, setAlreadyVerified] = useState(false);
   const [error, setError] = useState(null);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -31,6 +35,17 @@ export default function VerifyEmail() {
             setSuccess(true);
           }
           setError(null);
+
+          // Auto-redirect after 2 seconds
+          setRedirecting(true);
+          setTimeout(() => {
+            // If user is already logged in, redirect to home, otherwise to login
+            if (user) {
+              navigate('/home');
+            } else {
+              navigate('/login');
+            }
+          }, 2000);
         } else {
           setError(response.message || 'Verification failed');
           setSuccess(false);
@@ -46,7 +61,7 @@ export default function VerifyEmail() {
     };
 
     verifyToken();
-  }, [searchParams]);
+  }, [searchParams, navigate, user]);
 
   if (loading) {
     return (
@@ -75,16 +90,21 @@ export default function VerifyEmail() {
               <h1 className="text-2xl font-bold text-text-primary mb-2">
                 {alreadyVerified ? 'Email Already Verified' : 'Email Verified!'}
               </h1>
-              <p className="text-primary-dark mb-6">
-                {alreadyVerified 
+              <p className="text-primary-dark mb-4">
+                {alreadyVerified
                   ? 'Your email has already been verified. You can proceed to login.'
                   : 'Your email has been successfully verified. You can now use all features.'}
               </p>
+              {redirecting && (
+                <p className="text-sm text-primary-dark mb-6">
+                  Redirecting you to {user ? 'home' : 'login'} in 2 seconds...
+                </p>
+              )}
               <Link
-                to="/login"
+                to={user ? "/home" : "/login"}
                 className="inline-block px-6 py-2 bg-primary text-text-on-dark rounded-lg hover:bg-primary-dark transition font-medium"
               >
-                Go to Login
+                Go to {user ? 'Home' : 'Login'}
               </Link>
             </div>
           ) : (

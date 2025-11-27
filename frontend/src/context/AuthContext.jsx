@@ -1,6 +1,15 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import { checkAuth, getProfile, logoutUser } from '../api/authService';
 export const AuthContext = createContext(null);
+
+// Custom hook to use the AuthContext
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -35,15 +44,15 @@ export function AuthProvider({ children }) {
       try {
         // First check if user is authenticated
         const authResponse = await checkAuth();
-        
+
         console.log('Auth check response:', authResponse);
-        
+
         // If checkAuth returns success with data, user is authenticated
         if (authResponse.success && authResponse.data) {
           // Extract data if response has nested data property
           const userData = authResponse.data.data || authResponse.data;
           console.log('Setting user to:', userData);
-          
+
           setUser(userData);
           setIsAuthenticated(true);
           setError(null);

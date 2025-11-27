@@ -532,13 +532,20 @@ class VerifyEmailView(APIView):
     def get(self, request):
         token = request.query_params.get('token')
         
+        # Debug logging
+        print(f"[EMAIL VERIFICATION] Received token: {token[:20] if token else 'None'}...")
+        print(f"[EMAIL VERIFICATION] Full query params: {dict(request.query_params)}")
+        
         if not token:
+            print("[EMAIL VERIFICATION] Error: No token provided")
             return ResponseFormatter.error(
                 message="Verification token required",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         
         success, message = verify_email_token(token)
+        
+        print(f"[EMAIL VERIFICATION] Result: success={success}, message={message}")
         
         if success:
             return ResponseFormatter.success(

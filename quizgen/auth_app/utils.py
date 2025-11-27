@@ -33,25 +33,31 @@ def generate_email_verification_token(user_profile):
 
 
 def verify_email_token(token):
+    print(f"[VERIFY_TOKEN] Looking for token: {token[:20]}...")
     try:
         profile = UserProfile.objects.get(email_verification_token=token)
+        print(f"[VERIFY_TOKEN] Found profile: {profile.user.email}, verified={profile.email_verified}")
         
         # Check if already verified
         if profile.email_verified:
+            print("[VERIFY_TOKEN] Email already verified")
             return True, "Email is already verified"
         
         # Token expires after 48 hours
         if profile.email_verification_sent_at:
             expires_at = profile.email_verification_sent_at + timedelta(hours=48)
             if timezone.now() > expires_at:
+                print(f"[VERIFY_TOKEN] Token expired. Sent at: {profile.email_verification_sent_at}, Expires: {expires_at}")
                 return False, "Token has expired. Please request a new verification email."
         
         profile.email_verified = True
         profile.email_verification_token = None
         profile.email_verification_sent_at = None
         profile.save()
+        print(f"[VERIFY_TOKEN] Email verified successfully for {profile.user.email}")
         return True, "Email verified successfully"
     except UserProfile.DoesNotExist:
+        print("[VERIFY_TOKEN] Profile not found with this token")
         # Try to find profile that's already verified with this scenario
         # This might be a case where user already verified
         return False, "Invalid or already used verification link. If your email is verified, you can proceed to login."
