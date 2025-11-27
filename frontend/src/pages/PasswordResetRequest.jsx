@@ -34,13 +34,13 @@ export default function PasswordResetRequest() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-granny-apple flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+        <div className="bg-bg-light rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-text-primary mb-2 text-center">
             Reset Password
           </h1>
-          <p className="text-gray-600 text-center mb-8">
+          <p className="text-primary-dark text-center mb-8">
             Enter your email address and we'll send you a link to reset your password
           </p>
 
@@ -62,9 +62,9 @@ export default function PasswordResetRequest() {
           />
 
           <div className="mt-6 text-center text-sm">
-            <p className="text-gray-600">
+            <p className="text-primary-dark">
               Remember your password?{' '}
-              <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/login" className="text-primary hover:text-primary-dark font-medium">
                 Sign in here
               </Link>
             </p>

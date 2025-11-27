@@ -16,7 +16,6 @@ export default function SimpleForm({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error for this field when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -36,15 +35,15 @@ export default function SimpleForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Error Alert */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="p-4 bg-ocean-green border border-accent rounded-lg">
+          <p className="text-sm text-bg-dark">{error}</p>
         </div>
       )}
 
       {/* Success Alert */}
       {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-700">{success}</p>
+        <div className="p-4 bg-accent-light border border-accent rounded-lg">
+          <p className="text-sm text-text-primary">{success}</p>
         </div>
       )}
 
@@ -53,7 +52,7 @@ export default function SimpleForm({
         <div key={field.name}>
           <label
             htmlFor={field.name}
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-text-primary mb-1"
           >
             {field.label || field.name.charAt(0).toUpperCase() + field.name.slice(1)}
           </label>
@@ -66,8 +65,8 @@ export default function SimpleForm({
               placeholder={field.placeholder}
               disabled={loading}
               rows={field.rows || 4}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 ${
-                fieldErrors[field.name] ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-accent-light ${
+                fieldErrors[field.name] ? 'border-ocean-green' : 'border-accent'
               }`}
             />
           ) : field.type === 'select' ? (
@@ -77,8 +76,8 @@ export default function SimpleForm({
               value={formData[field.name]}
               onChange={handleChange}
               disabled={loading}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 ${
-                fieldErrors[field.name] ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-accent-light ${
+                fieldErrors[field.name] ? 'border-ocean-green' : 'border-accent'
               }`}
             >
               <option value="">Select {field.label}</option>
@@ -98,13 +97,13 @@ export default function SimpleForm({
               placeholder={field.placeholder}
               disabled={loading}
               required={field.required}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 ${
-                fieldErrors[field.name] ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-accent-light ${
+                fieldErrors[field.name] ? 'border-ocean-green' : 'border-accent'
               }`}
             />
           )}
           {fieldErrors[field.name] && (
-            <p className="text-xs text-red-500 mt-1">{fieldErrors[field.name]}</p>
+            <p className="text-xs text-ocean-green mt-1">{fieldErrors[field.name]}</p>
           )}
         </div>
       ))}
@@ -113,14 +112,14 @@ export default function SimpleForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 transition font-medium"
+        className="w-full px-4 py-2 bg-primary text-text-on-dark rounded-lg hover:bg-primary-dark disabled:bg-accent-light transition font-medium"
       >
         {loading ? 'Processing...' : buttonText}
       </button>
 
       {/* Footer Text */}
       {footerText && (
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-primary-dark">
           {footerText}
         </p>
       )}

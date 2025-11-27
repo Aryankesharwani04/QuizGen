@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import SimpleForm from '../components/SimpleForm';
-import { loginUser, getProfile } from '../api/authService';
+import GoogleSignInButton from '../components/GoogleSignInButton';
+import { loginUser, googleSignIn } from '../api/authService';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
@@ -25,7 +26,7 @@ export default function Login() {
       if (response.success) {
         // Fetch full profile and update context
         await refreshProfile();
-        navigate('/profile');
+        navigate('/home');
         return { success: true };
       } else {
         setError(response.message || 'Login failed');
@@ -40,15 +41,32 @@ export default function Login() {
     }
   };
 
+  const handleGoogleSuccess = (userData) => {
+    console.log('Google sign-in successful:', userData);
+    // User is already authenticated via the GoogleSignInButton component
+    navigate('/home');
+  };
+
+  const handleGoogleError = () => {
+    setError('Google Sign-In failed. Please try again.');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-granny-apple flex flex-col items-center justify-center p-4">
+      {/* Logo at Top */}
+      <Link to="/home" className="mb-8">
+        <div className="text-4xl font-bold text-primary">
+          QuizGen
+        </div>
+      </Link>
+
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+        <div className="bg-bg-light rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-text-primary mb-2 text-center">
             Welcome Back
           </h1>
-          <p className="text-gray-600 text-center mb-8">
+          <p className="text-primary-dark text-center mb-8">
             Sign in to your account to continue
           </p>
 
@@ -76,16 +94,31 @@ export default function Login() {
             buttonText="Sign In"
           />
 
+          {/* Divider */}
+          <div className="mt-6 flex items-center gap-4">
+            <div className="flex-1 border-t-2 border-primary-light"></div>
+            <span className="text-primary-dark text-sm">or</span>
+            <div className="flex-1 border-t-2 border-primary-light"></div>
+          </div>
+
+          {/* Google Sign-In */}
+          <div className="mt-6">
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+          </div>
+
           {/* Footer Links */}
           <div className="mt-6 space-y-2 text-center text-sm">
-            <p className="text-gray-600">
+            <p className="text-primary-dark">
               Don't have an account?{' '}
-              <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/register" className="text-primary hover:text-primary-dark font-medium">
                 Register here
               </Link>
             </p>
-            <p className="text-gray-600">
-              <Link to="/password-reset" className="text-primary-600 hover:text-primary-700 font-medium">
+            <p className="text-primary-dark">
+              <Link to="/password-reset" className="text-primary hover:text-primary-dark font-medium">
                 Forgot password?
               </Link>
             </p>

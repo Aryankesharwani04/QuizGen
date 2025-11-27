@@ -1,9 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Header from './components/Header';
+import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider } from './context/AuthContext';
-
-// Pages
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -16,41 +15,51 @@ import PasswordResetConfirm from './pages/PasswordResetConfirm';
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
-      <Route path="/password-reset" element={<PasswordResetRequest />} />
-      <Route path="/reset-password" element={<PasswordResetConfirm />} />
-      {/* Protected Routes */}
+      {/* Public Routes without Header/Footer */}
+      <Route path="/login" element={<Layout hideHeaderFooter={true}><Login /></Layout>} />
+      <Route path="/register" element={<Layout hideHeaderFooter={true}><Register /></Layout>} />
+      <Route path="/verify-email" element={<Layout hideHeaderFooter={true}><VerifyEmail /></Layout>} />
+      <Route path="/password-reset" element={<Layout hideHeaderFooter={true}><PasswordResetRequest /></Layout>} />
+      <Route path="/reset-password" element={<Layout hideHeaderFooter={true}><PasswordResetConfirm /></Layout>} />
+
+      {/* Public Routes with Header/Footer */}
+      <Route path="/home" element={<Layout><Home /></Layout>} />
+
+      {/* Protected Routes with Header/Footer */}
       <Route
         path="/profile"
         element={
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
+          <Layout>
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          </Layout>
         }
       />
       <Route
         path="/avatar"
         element={
-          <PrivateRoute>
-            <AvatarUpload />
-          </PrivateRoute>
+          <Layout>
+            <PrivateRoute>
+              <AvatarUpload />
+            </PrivateRoute>
+          </Layout>
         }
       />
       <Route
         path="/history"
         element={
-          <PrivateRoute>
-            <History />
-          </PrivateRoute>
+          <Layout>
+            <PrivateRoute>
+              <History />
+            </PrivateRoute>
+          </Layout>
         }
       />
 
-      {/* Root & Fallback */}
-      <Route path="/" element={<Navigate to="/profile" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Fallback - redirect root to home */}
+      <Route path="/" element={<Navigate to="/home" replace />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
 }
@@ -59,12 +68,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Header />
-          <main>
-            <AppRoutes />
-          </main>
-        </div>
+        <AppRoutes />
       </Router>
     </AuthProvider>
   );

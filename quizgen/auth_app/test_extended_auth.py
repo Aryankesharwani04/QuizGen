@@ -1,9 +1,3 @@
-"""
-Comprehensive test suite for extended authentication module.
-Tests all endpoints, rate limiting, session management, and recovery flows.
-Run with: python manage.py test auth_app.test_extended_auth
-"""
-
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -20,8 +14,6 @@ from datetime import timedelta
 
 
 class UserRegistrationTests(TestCase):
-    """Test user registration endpoint"""
-    
     def setUp(self):
         self.client = Client()
         self.valid_data = {
@@ -32,7 +24,6 @@ class UserRegistrationTests(TestCase):
         }
     
     def test_successful_registration(self):
-        """Test successful user registration"""
         response = self.client.post(
             '/api/auth/register/',
             json.dumps(self.valid_data),
@@ -44,7 +35,6 @@ class UserRegistrationTests(TestCase):
         self.assertEqual(User.objects.count(), 1)
     
     def test_duplicate_email_rejection(self):
-        """Test that duplicate emails are rejected"""
         User.objects.create_user(
             username='john@example.com',
             email='john@example.com',
@@ -59,9 +49,7 @@ class UserRegistrationTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
-class UserAuthenticationTests(TestCase):
-    """Test login, logout, and authentication"""
-    
+class UserAuthenticationTests(TestCase):    
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(
@@ -71,7 +59,6 @@ class UserAuthenticationTests(TestCase):
         )
     
     def test_successful_login(self):
-        """Test successful login"""
         response = self.client.post(
             '/api/auth/login/',
             json.dumps({
@@ -83,9 +70,7 @@ class UserAuthenticationTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class ProfileManagementTests(TestCase):
-    """Test profile endpoints"""
-    
+class ProfileManagementTests(TestCase):    
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(
@@ -96,14 +81,11 @@ class ProfileManagementTests(TestCase):
         self.client.login(username='test@example.com', password='SecurePass123')
     
     def test_get_profile(self):
-        """Test retrieving user profile"""
         response = self.client.get('/api/auth/profile/')
         self.assertEqual(response.status_code, 200)
 
 
-class PasswordRecoveryTests(TestCase):
-    """Test password reset flow"""
-    
+class PasswordRecoveryTests(TestCase):    
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(
@@ -113,7 +95,6 @@ class PasswordRecoveryTests(TestCase):
         )
     
     def test_password_reset_request(self):
-        """Test password reset request"""
         response = self.client.post(
             '/api/auth/password-reset/',
             json.dumps({'email': 'test@example.com'}),

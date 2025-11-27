@@ -2,6 +2,7 @@ export const API = {
   BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
   REGISTER: '/auth/register/',
   LOGIN: '/auth/login/',
+  GOOGLE_LOGIN: '/auth/google-login/',
   LOGOUT: '/auth/logout/',
   CHECK: '/auth/check/',
   PROFILE: '/auth/profile/',

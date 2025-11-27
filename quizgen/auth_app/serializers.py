@@ -23,7 +23,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return obj.is_session_valid()
     
     def get_avatar_file(self, obj):
-        """Return full URL for avatar_file if it exists"""
         if obj.avatar_file:
             request = self.context.get('request')
             if request:
@@ -33,21 +32,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for updating user profile"""
     class Meta:
         model = UserProfile
         fields = ['full_name', 'avatar', 'bio', 'preferences']
     
     def validate_preferences(self, value):
-        """Validate preferences is a valid dict"""
         if not isinstance(value, dict):
             raise serializers.ValidationError("Preferences must be a JSON object")
         return value
 
 
 class AvatarUploadSerializer(serializers.ModelSerializer):
-    """Serializer for avatar file upload"""
-    # Accept 'avatar' as alternative field name
     avatar = serializers.FileField(required=False, write_only=True)
     
     class Meta:
@@ -55,10 +50,8 @@ class AvatarUploadSerializer(serializers.ModelSerializer):
         fields = ['avatar_file', 'avatar']
     
     def validate_avatar(self, value):
-        """Validate avatar file"""
         if value.size > 5 * 1024 * 1024:  # 5MB limit
             raise serializers.ValidationError("Avatar file must be smaller than 5MB")
-        # Check file extension
         valid_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
         file_extension = value.name.split('.')[-1].lower()
         if file_extension not in valid_extensions:
@@ -66,7 +59,6 @@ class AvatarUploadSerializer(serializers.ModelSerializer):
         return value
     
     def update(self, instance, validated_data):
-        """Update avatar file"""
         avatar = validated_data.get('avatar')
         if avatar:
             # Remove old avatar file if exists
@@ -78,23 +70,17 @@ class AvatarUploadSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.Serializer):
-    """
-    Serializer for user registration.
-    Validates and creates a new user with email and password.
-    """
     full_name = serializers.CharField(max_length=255, required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(min_length=8, write_only=True, required=True)
     password_confirm = serializers.CharField(min_length=8, write_only=True, required=True)
 
     def validate_email(self, value):
-        """Ensure email is unique"""
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already registered.")
         return value
 
     def validate_password(self, value):
-        """Validate password strength"""
         if len(value) < 8:
             raise serializers.ValidationError("Password must be at least 8 characters long.")
         if value.isdigit():
@@ -102,20 +88,17 @@ class UserRegistrationSerializer(serializers.Serializer):
         return value
 
     def validate(self, data):
-        """Ensure passwords match"""
         if data['password'] != data['password_confirm']:
             raise serializers.ValidationError({"password": "Passwords do not match."})
         return data
 
     def create(self, validated_data):
-        """Create user - UserProfile is auto-created via Django signals"""
         user = User.objects.create_user(
             username=validated_data['email'],
             email=validated_data['email'],
             password=validated_data['password']
         )
         
-        # Update the auto-created profile with the name
         profile = UserProfile.objects.get(user=user)
         profile.full_name = validated_data['full_name']
         profile.save()
@@ -124,21 +107,17 @@ class UserRegistrationSerializer(serializers.Serializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    """
-    Serializer for user login.
-    Validates email and password credentials.
-    """
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
 
     def validate(self, data):
-        """Validate user credentials"""
         email = data.get('email')
         password = data.get('password')
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+        # Use filter().first() to handle potential duplicates gracefully
+        user = User.objects.filter(email=email).first()
+        
+        if not user:
             raise serializers.ValidationError("Invalid email or password.")
 
         if not user.check_password(password):
@@ -149,24 +128,20 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
-    """Serializer for requesting password reset"""
     email = serializers.EmailField(required=True)
     
     def validate_email(self, value):
-        """Verify email exists"""
         if not User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email not found.")
         return value
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
-    """Serializer for confirming password reset"""
     token = serializers.CharField(required=True)
     password = serializers.CharField(min_length=8, write_only=True, required=True)
     password_confirm = serializers.CharField(min_length=8, write_only=True, required=True)
     
     def validate(self, data):
-        """Validate token and passwords"""
         token = data.get('token')
         password = data.get('password')
         password_confirm = data.get('password_confirm')
@@ -187,14 +162,10 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 
 class EmailVerificationSerializer(serializers.Serializer):
-    """Serializer for email verification"""
     token = serializers.CharField(required=True)
 
 
 class UserDetailSerializer(serializers.Serializer):
-    """
-    Serializer for returning authenticated user details.
-    """
     id = serializers.IntegerField()
     email = serializers.EmailField()
     full_name = serializers.CharField()

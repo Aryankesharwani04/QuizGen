@@ -3,74 +3,54 @@
 @tailwind utilities;
 
 /* Base Styles */
-html {
-  scroll-behavior: smooth;
+:root {
+  --color-primary-dark: #1b4332; 
+  --color-primary: #2d6a4f; 
+  --color-primary-light: #40916c;
+
+  --color-accent-dark: #52b788;  
+  --color-accent: #74c69d;   
+  --color-accent-light: #95d5b2; 
+
+  --color-background-dark: #081c15; 
+  --color-background-light: #d8f3dc; 
+  --color-background-offwhite: #b7e4c7; 
+
+  --color-text-primary: #081c15; 
+  --color-text-on-dark: #d8f3dc; 
+
+  --color-vista-blue: #95d5b2;
+  --color-fringy-flower: #b7e4c7;
+  --color-green-pea: #2d6a4f;
+  --color-everglade: #1b4332;
+  --color-granny-apple: #d8f3dc;
+  --color-ocean-green: #52b788;
+  --color-black-bean: #081c15;
+  --color-eucalyptus: #40916c;
+  --color-silver-tree: #74c69d;
 }
 
 body {
-  @apply bg-gray-50;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--color-background-light);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Inter'; 
 }
 
-/* Smooth transitions */
-* {
-  @apply transition-colors duration-200;
-}
+:root {
+  --gradient-stops: #95d5b2, #b7e4c7, #2d6a4f, #1b4332, #d8f3dc, #52b788, #081c15, #40916c, #74c69d;
 
-/* Utility Classes */
-.btn-primary {
-  @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium;
-}
+  --gradient-top: linear-gradient(0deg, var(--gradient-stops));
+  --gradient-right: linear-gradient(90deg, var(--gradient-stops));
+  --gradient-bottom: linear-gradient(180deg, var(--gradient-stops));
+  --gradient-left: linear-gradient(270deg, var(--gradient-stops));
 
-.btn-secondary {
-  @apply px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium;
-}
+  --gradient-top-right: linear-gradient(45deg, var(--gradient-stops));
+  --gradient-bottom-right: linear-gradient(135deg, var(--gradient-stops));
+  --gradient-top-left: linear-gradient(225deg, var(--gradient-stops));
+  --gradient-bottom-left: linear-gradient(315deg, var(--gradient-stops));
 
-.btn-danger {
-  @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium;
+  --gradient-radial: radial-gradient(var(--gradient-stops));
 }
-
-.input-base {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500;
-}
-
-.card {
-  @apply bg-white rounded-lg shadow p-6;
-}
-
-.badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
-}
-
-.badge-primary {
-  @apply badge bg-primary-100 text-primary-700;
-}
-
-.badge-green {
-  @apply badge bg-green-100 text-green-700;
-}
-
-.badge-red {
-  @apply badge bg-red-100 text-red-700;
-}
-
-/* Loading Animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Responsive Typography */
-@media (max-width: 640px) {
-  h1 {
-    @apply text-2xl;
-  }
-  h2 {
-    @apply text-xl;
-  }
+html {
+  scroll-behavior: smooth;
 }

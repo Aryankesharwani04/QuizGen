@@ -1,13 +1,3 @@
-"""
-Signals for Quiz App
-
-Automatically handles:
-- Creating UserScoreHistory when a user is created
-- Updating UserScoreHistory when quiz sessions are completed
-- Updating CategoryStatistics when quiz sessions are completed
-- Tracking last_active on quiz events
-"""
-
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import User
@@ -22,9 +12,6 @@ from quiz_app.models import (
 
 @receiver(post_save, sender=User)
 def create_user_score_history(sender, instance, created, **kwargs):
-    """
-    Signal handler to create UserScoreHistory when a new User is created.
-    """
     if created:
         if not UserScoreHistory.objects.filter(user=instance).exists():
             UserScoreHistory.objects.create(user=instance)
@@ -32,9 +19,6 @@ def create_user_score_history(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_score_history(sender, instance, **kwargs):
-    """
-    Signal handler to ensure UserScoreHistory exists when User is saved.
-    """
     if hasattr(instance, 'score_history'):
         instance.score_history.save()
     else:
@@ -43,10 +27,6 @@ def save_user_score_history(sender, instance, **kwargs):
 
 @receiver(post_save, sender=QuizSession)
 def update_user_score_history(sender, instance, created, **kwargs):
-    """
-    Signal handler to update UserScoreHistory when a QuizSession is completed.
-    Called after every QuizSession save, but only processes completed quizzes.
-    """
     if instance.status == 'completed' and instance.completed_at:
         try:
             score_history = instance.user.score_history
@@ -103,9 +83,6 @@ def update_user_score_history(sender, instance, created, **kwargs):
 
 
 def update_category_statistics(category, subcategory=None):
-    """
-    Helper function to update CategoryStatistics for a given category/subcategory.
-    """
     # Get or create statistics record
     stats, _ = CategoryStatistics.objects.get_or_create(
         category=category,
@@ -144,9 +121,6 @@ def update_category_statistics(category, subcategory=None):
 
 @receiver(post_delete, sender=QuizSession)
 def update_stats_on_session_delete(sender, instance, **kwargs):
-    """
-    Signal handler to update stats when a QuizSession is deleted.
-    """
     user = instance.user
     
     # Trigger score history update by querying remaining sessions

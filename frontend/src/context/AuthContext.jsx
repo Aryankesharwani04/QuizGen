@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
         
         console.log('Auth check response:', authResponse);
         
-        // If checkAuth returns data (user object), user is authenticated
+        // If checkAuth returns success with data, user is authenticated
         if (authResponse.success && authResponse.data) {
           // Extract data if response has nested data property
           const userData = authResponse.data.data || authResponse.data;
@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
           setIsAuthenticated(true);
           setError(null);
         } else {
-          // User is not authenticated
+          // User is not authenticated (either success: false or no data)
           setUser(null);
           setIsAuthenticated(false);
           setError(null);
@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
     checkAuthStatus();
   }, []);
 
-  // Auto-refresh profile every 5 minutes (optional)
+  // Auto-refresh profile every 5 minutes
   useEffect(() => {
     if (!isAuthenticated) return;
 

@@ -1,7 +1,3 @@
-"""
-Custom middleware for authentication handling and session management.
-"""
-
 import json
 from django.utils.deprecation import MiddlewareMixin
 from django.http import JsonResponse
@@ -11,10 +7,6 @@ from auth_app.utils import update_last_active, is_session_active, get_client_ip
 
 
 class CsrfExemptMiddleware(MiddlewareMixin):
-    """
-    Middleware to exempt API endpoints from CSRF protection.
-    Marks /api/ requests as CSRF-exempt.
-    """
     def process_request(self, request):
         if request.path.startswith('/api/'):
             request.csrf_processing_done = True
@@ -22,11 +14,6 @@ class CsrfExemptMiddleware(MiddlewareMixin):
 
 
 class SessionHardeningMiddleware(MiddlewareMixin):
-    """
-    Middleware to enforce session validity and update activity timestamps.
-    Rejects requests from inactive or revoked sessions.
-    """
-    
     # Endpoints that don't require session validation
     EXEMPT_PATHS = [
         '/api/auth/login/',
@@ -39,7 +26,6 @@ class SessionHardeningMiddleware(MiddlewareMixin):
     ]
     
     def process_request(self, request):
-        """Check session validity for authenticated requests"""
         # Skip exempt paths
         if any(request.path.startswith(path) for path in self.EXEMPT_PATHS):
             return None
@@ -65,16 +51,7 @@ class SessionHardeningMiddleware(MiddlewareMixin):
 
 
 class AuthenticationMiddleware(MiddlewareMixin):
-    """
-    Custom middleware to handle authentication checks and clean request/response flow.
-    Adds user context to requests and ensures proper API response headers.
-    """
-    
     def process_request(self, request):
-        """
-        Process incoming request.
-        Add user information to request context if authenticated.
-        """
         # Check if user exists and is authenticated
         if hasattr(request, 'user') and request.user and hasattr(request.user, 'is_authenticated'):
             if request.user.is_authenticated:
@@ -86,10 +63,6 @@ class AuthenticationMiddleware(MiddlewareMixin):
         return None
 
     def process_response(self, request, response):
-        """
-        Process outgoing response.
-        Ensures proper headers for API responses.
-        """
         if 'application/json' in response.get('Content-Type', ''):
             response['X-Requested-With'] = 'XMLHttpRequest'
             response['X-Content-Type-Options'] = 'nosniff'
@@ -98,15 +71,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
 
 
 class RequestValidationMiddleware(MiddlewareMixin):
-    """
-    Middleware to validate incoming requests.
-    Validates JSON content for POST/PUT/PATCH requests.
-    """
-    
     def process_request(self, request):
-        """
-        Validate request format and content.
-        """
         if request.method in ['POST', 'PUT', 'PATCH']:
             content_type = request.META.get('CONTENT_TYPE', '')
             

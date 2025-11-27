@@ -1,7 +1,3 @@
-"""
-URL Configuration for authentication app.
-"""
-
 from django.urls import path
 from auth_app.views import (
     RegisterView,
@@ -16,6 +12,7 @@ from auth_app.views import (
     PasswordResetConfirmView,
     SendEmailVerificationView,
     VerifyEmailView,
+    GoogleSignInView,
 )
 
 urlpatterns = [

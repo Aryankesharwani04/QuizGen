@@ -13,16 +13,16 @@ export default function PasswordResetConfirm() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-granny-apple flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid Link</h1>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-bg-light rounded-lg shadow-lg p-8 text-center">
+            <h1 className="text-2xl font-bold text-text-primary mb-4">Invalid Link</h1>
+            <p className="text-primary-dark mb-6">
               The password reset link is invalid or expired. Please request a new one.
             </p>
             <Link
               to="/password-reset"
-              className="inline-block px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium"
+              className="inline-block px-6 py-2 bg-primary text-text-on-dark rounded-lg hover:bg-primary-dark transition font-medium"
             >
               Request New Link
             </Link>
@@ -62,13 +62,13 @@ export default function PasswordResetConfirm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-granny-apple flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+        <div className="bg-bg-light rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-text-primary mb-2 text-center">
             Set New Password
           </h1>
-          <p className="text-gray-600 text-center mb-8">
+          <p className="text-primary-dark text-center mb-8">
             Enter your new password below
           </p>
 
@@ -97,8 +97,8 @@ export default function PasswordResetConfirm() {
           />
 
           <div className="mt-6 text-center text-sm">
-            <p className="text-gray-600">
-              <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+            <p className="text-primary-dark">
+              <Link to="/login" className="text-primary hover:text-primary-dark font-medium">
                 Back to Login
               </Link>
             </p>

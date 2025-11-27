@@ -2,22 +2,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 
-export default function Header() {
+export default function PageHeader() {
   const { isAuthenticated, user, logout, loading } = useAuth();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
-    <header className="bg-white shadow">
+    <header className="bg-bg-light shadow sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-primary-600">
+          <Link to="/home" className="text-2xl font-bold text-primary">
             QuizGen
           </Link>
 
@@ -28,7 +28,7 @@ export default function Header() {
                 <div className="relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-accent-light transition"
                   >
                     {user?.avatar && (
                       <img
@@ -37,8 +37,8 @@ export default function Header() {
                         className="w-8 h-8 rounded-full object-cover"
                       />
                     )}
-                    <span className="text-sm font-medium text-gray-700">
-                      {user?.full_name || 'User'}
+                    <span className="text-sm font-medium text-text-primary">
+                      {user?.full_name || user?.data?.full_name || 'User'}
                     </span>
                     <svg
                       className={`w-4 h-4 transition ${
@@ -59,24 +59,24 @@ export default function Header() {
 
                   {/* Dropdown Menu */}
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
+                    <div className="absolute right-0 mt-2 w-48 bg-bg-light rounded-lg shadow-lg z-10">
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                        className="block px-4 py-2 text-text-primary hover:bg-accent-light rounded-t-lg"
                         onClick={() => setIsDropdownOpen(false)}
                       >
                         Profile
                       </Link>
                       <Link
                         to="/avatar"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-text-primary hover:bg-accent-light"
                         onClick={() => setIsDropdownOpen(false)}
                       >
                         Change Avatar
                       </Link>
                       <Link
                         to="/history"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-text-primary hover:bg-accent-light"
                         onClick={() => setIsDropdownOpen(false)}
                       >
                         History
@@ -86,7 +86,7 @@ export default function Header() {
                           setIsDropdownOpen(false);
                           handleLogout();
                         }}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 rounded-b-lg"
+                        className="w-full text-left px-4 py-2 text-ocean-green hover:bg-accent-light rounded-b-lg"
                       >
                         Logout
                       </button>
@@ -97,13 +97,13 @@ export default function Header() {
                 <div className="flex gap-2">
                   <Link
                     to="/login"
-                    className="px-4 py-2 rounded-lg text-primary-600 hover:bg-primary-50 transition"
+                    className="px-4 py-2 rounded-lg text-primary hover:bg-accent-light transition"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition"
+                    className="px-4 py-2 rounded-lg bg-primary text-text-on-dark hover:bg-primary-dark transition"
                   >
                     Register
                   </Link>

@@ -5,7 +5,6 @@ from django.utils import timezone
 import uuid
 
 class UserProfile(models.Model):
-    """Extended user profile with session and activity tracking"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     full_name = models.CharField(max_length=255, blank=True, help_text="User's full name")
     avatar = models.URLField(blank=True, null=True, help_text="URL to user's avatar image")
@@ -42,7 +41,6 @@ class UserProfile(models.Model):
         return f"{self.full_name or self.user.username} - {self.user.email}"
     
     def is_session_valid(self):
-        """Check if current session is still valid"""
         if not self.is_active:
             return False
         
@@ -53,7 +51,6 @@ class UserProfile(models.Model):
 
 
 class PasswordReset(models.Model):
-    """Model to track password reset tokens"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_resets')
     token = models.CharField(max_length=255, unique=True, help_text="Unique reset token")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -70,7 +67,6 @@ class PasswordReset(models.Model):
         ]
 
     def is_valid(self):
-        """Check if token is still valid"""
         return not self.is_used and timezone.now() < self.expires_at
     
     def __str__(self):
@@ -78,7 +74,6 @@ class PasswordReset(models.Model):
 
 
 class LoginAttempt(models.Model):
-    """Track login attempts for rate limiting"""
     ip_address = models.GenericIPAddressField(help_text="IP address of login attempt")
     email = models.EmailField(help_text="Email attempting to login")
     success = models.BooleanField(default=False, help_text="Whether login was successful")

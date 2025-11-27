@@ -1,6 +1,3 @@
-"""
-Utility functions for authentication and security.
-"""
 import secrets
 import string
 from django.utils import timezone
@@ -11,13 +8,11 @@ from django.contrib.auth.models import User
 
 
 def generate_token(length=32):
-    """Generate a secure random token"""
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
 def generate_password_reset_token(user):
-    """Generate and store a password reset token"""
     token = generate_token()
     expires_at = timezone.now() + timedelta(hours=24)
     
@@ -30,7 +25,6 @@ def generate_password_reset_token(user):
 
 
 def generate_email_verification_token(user_profile):
-    """Generate and store an email verification token"""
     token = generate_token()
     user_profile.email_verification_token = token
     user_profile.email_verification_sent_at = timezone.now()
@@ -39,36 +33,31 @@ def generate_email_verification_token(user_profile):
 
 
 def verify_email_token(token):
-    """Verify email token and mark email as verified"""
     try:
         profile = UserProfile.objects.get(email_verification_token=token)
+        
+        # Check if already verified
+        if profile.email_verified:
+            return True, "Email is already verified"
+        
         # Token expires after 48 hours
         if profile.email_verification_sent_at:
             expires_at = profile.email_verification_sent_at + timedelta(hours=48)
             if timezone.now() > expires_at:
-                return False, "Token has expired"
+                return False, "Token has expired. Please request a new verification email."
         
         profile.email_verified = True
         profile.email_verification_token = None
+        profile.email_verification_sent_at = None
         profile.save()
         return True, "Email verified successfully"
     except UserProfile.DoesNotExist:
-        return False, "Invalid token"
+        # Try to find profile that's already verified with this scenario
+        # This might be a case where user already verified
+        return False, "Invalid or already used verification link. If your email is verified, you can proceed to login."
 
 
 def check_rate_limit(ip_address, limit_type='login', attempts=5, window_minutes=15):
-    """
-    Check if an IP/email has exceeded rate limit.
-    
-    Args:
-        ip_address: IP address to check
-        limit_type: Type of limit ('login', 'reset', 'verify')
-        attempts: Max attempts in window
-        window_minutes: Time window in minutes
-    
-    Returns:
-        (is_limited: bool, attempts_remaining: int, retry_after_seconds: int)
-    """
     now = timezone.now()
     window_start = now - timedelta(minutes=window_minutes)
     
@@ -94,7 +83,6 @@ def check_rate_limit(ip_address, limit_type='login', attempts=5, window_minutes=
 
 
 def record_login_attempt(ip_address, email, success=False):
-    """Record a login attempt"""
     LoginAttempt.objects.create(
         ip_address=ip_address,
         email=email,
@@ -107,7 +95,6 @@ def record_login_attempt(ip_address, email, success=False):
 
 
 def get_client_ip(request):
-    """Extract client IP from request"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
@@ -117,7 +104,6 @@ def get_client_ip(request):
 
 
 def sanitize_profile_data(data):
-    """Sanitize profile data to prevent injection attacks"""
     sanitized = {}
     
     # Allowed fields
@@ -146,7 +132,6 @@ def sanitize_profile_data(data):
 
 
 def update_last_active(user):
-    """Update user's last_active timestamp"""
     try:
         profile = user.profile
         profile.last_active = timezone.now()
@@ -156,7 +141,6 @@ def update_last_active(user):
 
 
 def is_session_active(user):
-    """Check if user's session is still active"""
     try:
         profile = user.profile
         return profile.is_session_valid()
@@ -165,7 +149,6 @@ def is_session_active(user):
 
 
 def send_password_reset_email(user, token, request=None):
-    """Send password reset email to user"""
     from django.core.mail import send_mail
     from django.urls import reverse
     
@@ -173,7 +156,6 @@ def send_password_reset_email(user, token, request=None):
         # Build reset link - point to frontend, not Django backend
         # Frontend will call the API endpoint with the token
         reset_url = f'http://localhost:3000/reset-password?token={token}'
-        
         subject = 'Password Reset Request - Quiz Gen'
         message = f"""
 Hello {user.first_name or user.username},
@@ -227,7 +209,6 @@ Quiz Gen Team
 
 
 def send_email_verification(user, token, request=None):
-    """Send email verification link to user"""
     from django.core.mail import send_mail
     
     try:

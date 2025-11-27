@@ -1,10 +1,3 @@
-"""
-Django Admin Configuration for Quiz App
-
-Registers all quiz models with comprehensive admin interface configuration.
-Includes list displays, search fields, filters, and read-only fields.
-"""
-
 from django.contrib import admin
 from django.utils.html import format_html
 from quiz_app.models import (
@@ -19,9 +12,6 @@ from quiz_app.models import (
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    """
-    Admin interface for Category model.
-    """
     list_display = (
         'name',
         'slug',
@@ -49,16 +39,12 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
     def subcategory_count(self, obj):
-        """Display count of subcategories."""
         return obj.subcategories.count()
     subcategory_count.short_description = 'Subcategories'
 
 
 @admin.register(SubCategory)
 class SubCategoryAdmin(admin.ModelAdmin):
-    """
-    Admin interface for SubCategory model.
-    """
     list_display = (
         'name',
         'parent_category',
@@ -85,7 +71,6 @@ class SubCategoryAdmin(admin.ModelAdmin):
     )
 
     def question_count(self, obj):
-        """Display count of questions in this subcategory."""
         return QuizQuestion.objects.filter(
             quiz_session__subcategory=obj
         ).count()
@@ -94,9 +79,6 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(QuizSession)
 class QuizSessionAdmin(admin.ModelAdmin):
-    """
-    Admin interface for QuizSession model.
-    """
     list_display = (
         'session_id',
         'user',
@@ -139,12 +121,10 @@ class QuizSessionAdmin(admin.ModelAdmin):
     )
 
     def session_id(self, obj):
-        """Display short session ID."""
         return f"Quiz #{obj.id}"
     session_id.short_description = 'Session'
 
     def status_badge(self, obj):
-        """Display status with color-coded badge."""
         colors = {
             'in_progress': '#FFC107',
             'completed': '#28A745',
@@ -161,7 +141,6 @@ class QuizSessionAdmin(admin.ModelAdmin):
     status_badge.short_description = 'Status'
 
     def progress_bar(self, obj):
-        """Display progress bar."""
         percentage = obj.get_progress_percentage()
         return format_html(
             '<div style="width: 100px; height: 20px; background-color: #E9ECEF; '
@@ -176,19 +155,16 @@ class QuizSessionAdmin(admin.ModelAdmin):
     progress_bar.short_description = 'Progress'
 
     def duration(self, obj):
-        """Display formatted duration."""
         minutes = obj.time_spent_seconds // 60
         seconds = obj.time_spent_seconds % 60
         return f"{minutes}m {seconds}s"
     duration.short_description = 'Duration'
 
     def progress_percentage(self, obj):
-        """Display progress percentage."""
         return f"{obj.get_progress_percentage()}%"
     progress_percentage.short_description = 'Progress %'
 
     def formatted_metadata(self, obj):
-        """Display formatted metadata."""
         import json
         metadata = obj.get_metadata()
         return format_html('<pre>{}</pre>', json.dumps(metadata, indent=2))
@@ -197,9 +173,6 @@ class QuizSessionAdmin(admin.ModelAdmin):
 
 @admin.register(QuizQuestion)
 class QuizQuestionAdmin(admin.ModelAdmin):
-    """
-    Admin interface for QuizQuestion model.
-    """
     list_display = (
         'id',
         'quiz_session',
@@ -236,7 +209,6 @@ class QuizQuestionAdmin(admin.ModelAdmin):
     )
 
     def is_correct_badge(self, obj):
-        """Display correct/incorrect status with badge."""
         if obj.is_correct:
             return format_html(
                 '<span style="background-color: #28A745; color: white; '
@@ -250,21 +222,18 @@ class QuizQuestionAdmin(admin.ModelAdmin):
     is_correct_badge.short_description = 'Result'
 
     def user_answer_preview(self, obj):
-        """Display user answer preview."""
         if obj.user_answer:
             return obj.user_answer[:50] + '...' if len(obj.user_answer) > 50 else obj.user_answer
         return '-'
     user_answer_preview.short_description = 'User Answer'
 
     def formatted_options(self, obj):
-        """Display formatted options."""
         import json
         options = obj.get_options()
         return format_html('<pre>{}</pre>', json.dumps(options, indent=2))
     formatted_options.short_description = 'Options (JSON)'
 
     def formatted_ai_metadata(self, obj):
-        """Display formatted AI metadata."""
         import json
         metadata = obj.get_ai_metadata()
         return format_html('<pre>{}</pre>', json.dumps(metadata, indent=2))
@@ -273,9 +242,6 @@ class QuizQuestionAdmin(admin.ModelAdmin):
 
 @admin.register(UserScoreHistory)
 class UserScoreHistoryAdmin(admin.ModelAdmin):
-    """
-    Admin interface for UserScoreHistory model.
-    """
     list_display = (
         'user',
         'total_quizzes',
@@ -320,7 +286,6 @@ class UserScoreHistoryAdmin(admin.ModelAdmin):
     can_delete = False
 
     def accuracy_badge(self, obj):
-        """Display accuracy percentage with color-coded badge."""
         accuracy = obj.get_accuracy_percentage()
         if accuracy >= 80:
             color = '#28A745'
@@ -338,16 +303,12 @@ class UserScoreHistoryAdmin(admin.ModelAdmin):
     accuracy_badge.short_description = 'Accuracy'
 
     def accuracy_percentage(self, obj):
-        """Display accuracy percentage."""
         return f"{obj.get_accuracy_percentage():.1f}%"
     accuracy_percentage.short_description = 'Accuracy %'
 
 
 @admin.register(CategoryStatistics)
 class CategoryStatisticsAdmin(admin.ModelAdmin):
-    """
-    Admin interface for CategoryStatistics model.
-    """
     list_display = (
         'id',
         'category',

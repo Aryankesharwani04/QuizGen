@@ -32,11 +32,11 @@ from auth_app.utils import (
     send_email_verification,
 )
 import json
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
 
 
-class ResponseFormatter:
-    """Helper class to format API responses consistently"""
-    
+class ResponseFormatter:    
     @staticmethod
     def success(data=None, message="Success", status_code=200):
         return Response({
@@ -56,17 +56,9 @@ class ResponseFormatter:
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(APIView):
-    """
-    API endpoint for user registration.
-    POST: Create a new user account
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """
-        Handle user registration.
-        Expected fields: name, email, password, password_confirm
-        """
         serializer = UserRegistrationSerializer(data=request.data)
         
         if serializer.is_valid():
@@ -99,18 +91,9 @@ class RegisterView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
-    """
-    API endpoint for user login.
-    POST: Authenticate user and create session
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):
-        """
-        Handle user login.
-        Expected fields: email, password
-        Returns session token and user info
-        """
         # Get client IP for rate limiting
         client_ip = get_client_ip(request)
         email = request.data.get('email', '')
@@ -171,17 +154,9 @@ class LoginView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LogoutView(APIView):
-    """
-    API endpoint for user logout.
-    POST: Terminate user session
-    """
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        """
-        Handle user logout.
-        Terminates the active session.
-        """
         try:
             logout(request)
             return ResponseFormatter.success(
@@ -197,16 +172,9 @@ class LogoutView(APIView):
 
 
 class ProfileView(APIView):
-    """
-    API endpoint for fetching authenticated user profile.
-    GET: Retrieve current authenticated user's profile
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        """
-        Fetch the current authenticated user's profile.
-        """
         try:
             profile = UserProfile.objects.get(user=request.user)
             serializer = UserProfileSerializer(profile, context={'request': request})
@@ -231,17 +199,9 @@ class ProfileView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ProfileUpdateView(APIView):
-    """
-    API endpoint for updating user profile.
-    PUT: Update user profile information
-    """
     permission_classes = [IsAuthenticated]
     
     def put(self, request):
-        """
-        Update the current authenticated user's profile.
-        Expected fields: full_name (optional), avatar (optional), bio (optional), preferences (optional)
-        """
         try:
             profile = request.user.profile
             serializer = ProfileUpdateSerializer(data=request.data, partial=True)
@@ -283,18 +243,9 @@ class ProfileUpdateView(APIView):
 
 
 class CheckAuthView(APIView):
-    """
-    API endpoint to check if user is authenticated.
-    GET: Check authentication status
-    """
     permission_classes = [AllowAny]
 
     def get(self, request):
-        """
-        Check if the current user is authenticated.
-        Returns user profile if authenticated, empty data if not.
-        Always returns 200 OK with authenticated flag.
-        """
         # Check if user is authenticated
         if request.user and request.user.is_authenticated:
             try:
@@ -313,27 +264,18 @@ class CheckAuthView(APIView):
                     status_code=status.HTTP_200_OK
                 )
         else:
-            # Return 200 OK for unauthenticated users, not 401
-            return ResponseFormatter.success(
-                data=None,
+            # Return 401 for unauthenticated users
+            return ResponseFormatter.error(
                 message="User is not authenticated",
-                status_code=status.HTTP_200_OK
+                status_code=status.HTTP_401_UNAUTHORIZED
             )
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AvatarUploadView(APIView):
-    """
-    API endpoint for uploading user avatar.
-    POST/PUT: Upload/update avatar file
-    """
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        """
-        Upload or update user's avatar.
-        Accepts multipart/form-data with 'avatar' field.
-        """
         try:
             profile = request.user.profile
             serializer = AvatarUploadSerializer(profile, data=request.FILES, partial=True)
@@ -368,10 +310,6 @@ class AvatarUploadView(APIView):
             )
     
     def put(self, request):
-        """
-        Upload or update user's avatar.
-        Accepts multipart/form-data with 'avatar_file' field.
-        """
         try:
             profile = request.user.profile
             serializer = AvatarUploadSerializer(profile, data=request.FILES, partial=True)
@@ -407,16 +345,9 @@ class AvatarUploadView(APIView):
 
 
 class ProfileHistoryView(APIView):
-    """
-    API endpoint for user activity/history.
-    GET: Return basic activity information like last login, last_active
-    """
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """
-        Retrieve user activity information.
-        """
         try:
             profile = request.user.profile
             data = {
@@ -448,17 +379,9 @@ class ProfileHistoryView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PasswordResetRequestView(APIView):
-    """
-    API endpoint to request password reset.
-    POST: Generate and send password reset token
-    """
     permission_classes = [AllowAny]
     
     def post(self, request):
-        """
-        Request password reset.
-        Expected fields: email
-        """
         client_ip = get_client_ip(request)
         
         # Check rate limit
@@ -524,17 +447,9 @@ class PasswordResetRequestView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PasswordResetConfirmView(APIView):
-    """
-    API endpoint to confirm password reset with token.
-    POST: Set new password using reset token
-    """
     permission_classes = [AllowAny]
     
     def post(self, request):
-        """
-        Confirm password reset.
-        Expected fields: token, password, password_confirm
-        """
         serializer = PasswordResetConfirmSerializer(data=request.data)
         
         if serializer.is_valid():
@@ -565,16 +480,9 @@ class PasswordResetConfirmView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SendEmailVerificationView(APIView):
-    """
-    API endpoint to request email verification.
-    POST: Send email verification link
-    """
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        """
-        Request email verification.
-        """
         try:
             profile = request.user.profile
             
@@ -619,17 +527,9 @@ class SendEmailVerificationView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class VerifyEmailView(APIView):
-    """
-    API endpoint to verify email with token.
-    GET: Confirm email verification token
-    """
     permission_classes = [AllowAny]
     
     def get(self, request):
-        """
-        Verify email with token.
-        Expected query params: token
-        """
         token = request.query_params.get('token')
         
         if not token:
@@ -646,7 +546,102 @@ class VerifyEmailView(APIView):
                 status_code=status.HTTP_200_OK
             )
         else:
+            # Return 400 only for truly invalid/expired tokens, not for already verified
+            status_code = status.HTTP_400_BAD_REQUEST if "already verified" not in message.lower() else status.HTTP_200_OK
             return ResponseFormatter.error(
                 message=message,
+                status_code=status_code
+            )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class GoogleSignInView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        token = request.data.get('token')
+
+        if not token:
+            return ResponseFormatter.error(
+                message="Google token is required",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Verify the token with Google
+            idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_CLIENT_ID)
+
+            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                raise ValueError('Wrong issuer.')
+
+            # Extract user info
+            google_id = idinfo['sub']
+            email = idinfo['email']
+            full_name = idinfo.get('name', '')
+            avatar = idinfo.get('picture', '')
+            email_verified = idinfo.get('email_verified', False)
+
+            # Check if user exists
+            try:
+                user = User.objects.get(email=email)
+                profile = user.profile
+            except User.DoesNotExist:
+                # Create new user
+                username = email.split('@')[0]
+                # Ensure username is unique
+                base_username = username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}_{counter}"
+                    counter += 1
+
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    first_name=full_name.split(' ')[0] if full_name else '',
+                    last_name=' '.join(full_name.split(' ')[1:]) if full_name and len(full_name.split(' ')) > 1 else ''
+                )
+
+                # Create profile
+                profile = UserProfile.objects.create(
+                    user=user,
+                    full_name=full_name,
+                    avatar=avatar,
+                    google_id=google_id,
+                    email_verified=email_verified
+                )
+
+            # Update profile with latest Google info
+            profile.google_id = google_id
+            profile.avatar = avatar
+            profile.email_verified = email_verified
+            if not profile.full_name and full_name:
+                profile.full_name = full_name
+            profile.last_login = timezone.now()
+            profile.save()
+
+            # Log the user in
+            login(request, user)
+
+            # Serialize profile data
+            serializer = UserProfileSerializer(profile, context={'request': request})
+
+            return ResponseFormatter.success(
+                data=serializer.data,
+                message="Google sign-in successful",
+                status_code=status.HTTP_200_OK
+            )
+
+        except ValueError as e:
+            return ResponseFormatter.error(
+                message="Invalid Google token",
+                errors={'detail': str(e)},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            print(f"Google sign-in error: {str(e)}")
+            return ResponseFormatter.error(
+                message="Google sign-in failed",
+                errors={'detail': str(e)},
                 status_code=status.HTTP_400_BAD_REQUEST
             )

@@ -1,9 +1,3 @@
-"""
-Utility functions for Quiz App
-
-Provides helper functions for quiz operations, scoring, and analytics.
-"""
-
 from django.utils import timezone
 from django.db.models import Avg, Count, Max, Min, Q
 from datetime import timedelta
@@ -19,15 +13,6 @@ from quiz_app.models import (
 
 
 def calculate_session_score(session: QuizSession) -> int:
-    """
-    Calculate the final score for a quiz session based on correct answers.
-    
-    Args:
-        session: QuizSession object
-    
-    Returns:
-        Score as percentage (0-100)
-    """
     if session.total_questions == 0:
         return 0
     
@@ -41,15 +26,6 @@ def calculate_session_score(session: QuizSession) -> int:
 
 
 def get_user_stats(user) -> Dict:
-    """
-    Get comprehensive statistics for a user.
-    
-    Args:
-        user: Django User object
-    
-    Returns:
-        Dictionary with user statistics
-    """
     try:
         history = user.score_history
     except UserScoreHistory.DoesNotExist:
@@ -77,16 +53,6 @@ def get_user_stats(user) -> Dict:
 
 
 def get_category_stats(category: Category, subcategory: Optional[SubCategory] = None) -> Dict:
-    """
-    Get analytics for a category or subcategory.
-    
-    Args:
-        category: Category object
-        subcategory: Optional SubCategory object
-    
-    Returns:
-        Dictionary with category statistics
-    """
     try:
         stats = CategoryStatistics.objects.get(
             category=category,

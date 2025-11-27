@@ -56,37 +56,37 @@ export default function AvatarUpload() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Change Avatar</h1>
+    <div className="max-w-2xl mx-auto p-6 py-12">
+      <h1 className="text-3xl font-bold text-text-primary mb-8">Change Avatar</h1>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="mb-6 p-4 bg-ocean-green border border-accent rounded-lg">
+          <p className="text-sm text-bg-dark">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-700">{success}</p>
+        <div className="mb-6 p-4 bg-accent-light border border-accent rounded-lg">
+          <p className="text-sm text-text-primary">{success}</p>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="bg-bg-light rounded-lg shadow p-8">
         {/* Preview */}
         <div className="mb-8">
-          <p className="text-sm font-medium text-gray-700 mb-4">Preview</p>
-          <div className="w-48 h-48 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+          <p className="text-sm font-medium text-text-primary mb-4">Preview</p>
+          <div className="w-48 h-48 rounded-lg bg-accent-light flex items-center justify-center overflow-hidden">
             {preview ? (
               <img src={preview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-6xl text-gray-400">👤</span>
+              <span className="text-6xl text-primary-dark">👤</span>
             )}
           </div>
         </div>
 
         {/* File Input */}
         <div className="mb-8">
-          <label className="block text-sm font-medium text-gray-700 mb-4">
+          <label className="block text-sm font-medium text-text-primary mb-4">
             Select Image File
           </label>
           <input
@@ -94,9 +94,9 @@ export default function AvatarUpload() {
             accept="image/*"
             onChange={handleFileChange}
             disabled={loading}
-            className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:bg-primary-600 file:text-white file:cursor-pointer file:border-0"
+            className="w-full px-4 py-3 border-2 border-dashed border-accent rounded-lg text-primary-dark file:mr-3 file:px-4 file:py-2 file:rounded-lg file:bg-primary file:text-text-on-dark file:cursor-pointer file:border-0"
           />
-          <p className="text-xs text-gray-500 mt-2">Supported: JPG, PNG, GIF (max 5MB)</p>
+          <p className="text-xs text-primary-dark mt-2">Supported: JPG, PNG, GIF (max 5MB)</p>
         </div>
 
         {/* Buttons */}
@@ -104,13 +104,13 @@ export default function AvatarUpload() {
           <button
             onClick={handleUpload}
             disabled={!file || loading}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 transition font-medium"
+            className="px-6 py-2 bg-primary text-text-on-dark rounded-lg hover:bg-primary-dark disabled:bg-accent-light transition font-medium"
           >
             {loading ? 'Uploading...' : 'Upload'}
           </button>
           <button
             onClick={() => navigate('/profile')}
-            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
+            className="px-6 py-2 bg-accent-light text-text-primary rounded-lg hover:bg-accent transition font-medium"
           >
             Cancel
           </button>

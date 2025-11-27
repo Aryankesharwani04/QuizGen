@@ -74,6 +74,13 @@ export async function loginUser(credentials) {
     body: JSON.stringify(credentials),
   });
 }
+
+export async function googleSignIn(googleToken) {
+  return apiCall(API.GOOGLE_LOGIN, {
+    method: 'POST',
+    body: JSON.stringify({ token: googleToken }),
+  });
+}
 export async function logoutUser() {
   return apiCall(API.LOGOUT, {
     method: 'POST',
@@ -205,6 +212,7 @@ export function hasSessionCookie() {
 export default {
   registerUser,
   loginUser,
+  googleSignIn,
   logoutUser,
   checkAuth,
   getProfile,

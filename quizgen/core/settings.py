@@ -1,12 +1,3 @@
-"""
-Django settings for quizgen project.
-
-Database Configuration:
-- Supports both SQLite (default) and MySQL (production)
-- Set USE_MYSQL=True in .env to use MySQL
-- MySQL requires: PyMySQL installed and credentials in .env
-"""
-
 from pathlib import Path
 import os
 from decouple import config, Csv
@@ -190,21 +181,8 @@ AUTH_SETTINGS = {
     'PASSWORD_RESET_WINDOW': 60,  # Time window in minutes
 }
 
-# Email configuration
-# For development: Uses console backend (emails print to terminal)
-# For production: Configure SMTP (Gmail, SendGrid, etc.)
-# 
-# Gmail Setup:
-# 1. Enable 2FA on Gmail: https://myaccount.google.com/security
-# 2. Create App Password: https://myaccount.google.com/apppasswords
-# 3. Add to .env:
-#    EMAIL_USE_SMTP=True
-#    EMAIL_HOST=smtp.gmail.com
-#    EMAIL_PORT=587
-#    EMAIL_USE_TLS=True
-#    EMAIL_HOST_USER=your-email@gmail.com
-#    EMAIL_HOST_PASSWORD=your-app-password
-#    DEFAULT_FROM_EMAIL=your-email@gmail.com
+# Google OAuth settings
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='your-google-client-id')
 
 USE_EMAIL_SMTP = config('EMAIL_USE_SMTP', default=False, cast=bool)
 
