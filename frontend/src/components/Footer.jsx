@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Footer() {
+  const { user } = useAuth();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -24,16 +26,20 @@ export default function Footer() {
                   Home
                 </Link>
               </li>
-              <li>
-                <Link to="/login" className="text-granny-apple hover:text-text-on-dark transition">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link to="/register" className="text-granny-apple hover:text-text-on-dark transition">
-                  Register
-                </Link>
-              </li>
+              {!user && (
+                <>
+                  <li>
+                    <Link to="/login" className="text-granny-apple hover:text-text-on-dark transition">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/register" className="text-granny-apple hover:text-text-on-dark transition">
+                      Register
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { updateProfile, sendVerificationEmail } from '../api/authService';
+import PreferencesModal from '../components/PreferencesModal';
 
 export default function Profile() {
   const { user, loading, refreshProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingPreferences, setIsEditingPreferences] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
   });
@@ -224,6 +226,40 @@ export default function Profile() {
           </div>
         )}
       </div>
+      {/* Preferences Section */}
+      <div className="bg-bg-light rounded-lg shadow mb-6 p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-text-primary">My Interests</h2>
+          <button
+            onClick={() => setIsEditingPreferences(true)}
+            className="px-4 py-2 bg-primary text-text-on-dark rounded-lg hover:bg-primary-dark transition"
+          >
+            Edit Interests
+          </button>
+        </div>
+
+        {user?.preferences?.categories?.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {user.preferences.categories.map(catId => {
+              // Simple mapping for display (in a real app, this might come from a constant or API)
+              const catName = catId.charAt(0).toUpperCase() + catId.slice(1);
+              return (
+                <span key={catId} className="px-3 py-1 bg-accent-light text-text-primary rounded-full text-sm font-medium border border-accent">
+                  {catName}
+                </span>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-primary-dark italic">No interests selected yet.</p>
+        )}
+      </div>
+
+      <PreferencesModal
+        isOpen={isEditingPreferences}
+        onClose={() => setIsEditingPreferences(false)}
+        initialPreferences={user?.preferences?.categories || []}
+      />
     </div>
   );
 }

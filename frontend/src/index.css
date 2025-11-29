@@ -4,40 +4,56 @@
 
 /* Base Styles */
 :root {
-  --color-primary-dark: #1b4332; 
-  --color-primary: #2d6a4f; 
-  --color-primary-light: #40916c;
+  /* Primary Colors (Botanical Garden) */
+  --color-primary-dark: #064E3B;    /* Emerald-900 */
+  --color-primary: #047857;         /* Emerald-700 */
+  --color-primary-light: #34D399;   /* Emerald-400 */
 
-  --color-accent-dark: #52b788;  
-  --color-accent: #74c69d;   
-  --color-accent-light: #95d5b2; 
+  /* Accent Colors */
+  --color-accent-dark: #881337;     /* Rose-900 */
+  --color-accent: #BE123C;          /* Rose-700 */
+  --color-accent-light: #FDA4AF;    /* Rose-300 */
 
-  --color-background-dark: #081c15; 
-  --color-background-light: #d8f3dc; 
-  --color-background-offwhite: #b7e4c7; 
+  /* Background Colors */
+  --color-background-dark: #1C1917;  /* Stone-900 */
+  --color-background-light: #FAFAF9; /* Stone-50 */
+  --color-background-offwhite: #FFFFFF; /* White */
 
-  --color-text-primary: #081c15; 
-  --color-text-on-dark: #d8f3dc; 
+  /* Text Colors */
+  --color-text-primary: #1C1917;   /* Stone-900 */
+  --color-text-on-dark: #FAFAF9;   /* Stone-50 */
 
-  --color-vista-blue: #95d5b2;
-  --color-fringy-flower: #b7e4c7;
-  --color-green-pea: #2d6a4f;
-  --color-everglade: #1b4332;
-  --color-granny-apple: #d8f3dc;
-  --color-ocean-green: #52b788;
-  --color-black-bean: #081c15;
-  --color-eucalyptus: #40916c;
-  --color-silver-tree: #74c69d;
+  /* Named Colors (Aliases) */
+  --color-vista-blue: #047857;
+  --color-fringy-flower: #BE123C;
+  --color-green-pea: #064E3B;
+  --color-everglade: #1C1917;
+  --color-granny-apple: #FAFAF9;
+  --color-ocean-green: #BE123C;
+  --color-black-bean: #1C1917;
+  --color-eucalyptus: #34D399;
+  --color-silver-tree: #FFFFFF;
 }
 
 body {
   background-color: var(--color-background-light);
   color: var(--color-text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Inter'; 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+    'Helvetica Neue', Arial, sans-serif, 'Inter';
 }
 
+/* Gradients (Botanical Garden) */
 :root {
-  --gradient-stops: #95d5b2, #b7e4c7, #2d6a4f, #1b4332, #d8f3dc, #52b788, #081c15, #40916c, #74c69d;
+  --gradient-stops: 
+    #047857, /* Emerald-700 */
+    #BE123C, /* Rose-700 */
+    #34D399, /* Emerald-400 */
+    #1C1917, /* Stone-900 */
+    #FAFAF9, /* Stone-50 */
+    #BE123C, /* Rose-700 */
+    #1C1917, /* Stone-900 */
+    #047857, /* Emerald-700 */
+    #FFFFFF; /* White */
 
   --gradient-top: linear-gradient(0deg, var(--gradient-stops));
   --gradient-right: linear-gradient(90deg, var(--gradient-stops));
@@ -51,6 +67,7 @@ body {
 
   --gradient-radial: radial-gradient(var(--gradient-stops));
 }
+
 html {
   scroll-behavior: smooth;
 }

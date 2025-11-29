@@ -72,12 +72,24 @@ class RegisterView(APIView):
             except Exception as e:
                 print(f"Failed to send verification email: {str(e)}")
             
+            # Log the user in
+            login(request, user)
+            
+            # Create or get profile (should be created by signal, but good to be safe)
+            try:
+                profile = user.profile
+                # Initialize preferences if empty
+                if not profile.preferences:
+                    profile.preferences = {}
+                    profile.save(update_fields=['preferences'])
+            except UserProfile.DoesNotExist:
+                profile = UserProfile.objects.create(user=user, preferences={})
+
+            # Serialize profile data for frontend
+            profile_serializer = UserProfileSerializer(profile, context={'request': request})
+
             return ResponseFormatter.success(
-                data={
-                    'id': user.id,
-                    'email': user.email,
-                    'message': 'User registered successfully. Check your email to verify.'
-                },
+                data=profile_serializer.data,
                 message="Registration successful",
                 status_code=status.HTTP_201_CREATED
             )

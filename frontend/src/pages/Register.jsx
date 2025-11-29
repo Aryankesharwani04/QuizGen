@@ -29,9 +29,17 @@ export default function Register() {
       });
 
       if (response.success) {
-        setSuccess('Registration successful! Redirecting to login...');
+        setSuccess('Registration successful! Redirecting...');
+
+        // Login user with returned data
+        if (response.data) {
+          login(response.data);
+          await refreshProfile();
+        }
+
         setTimeout(() => {
-          navigate('/login');
+          // Redirect to home with flag to show preferences modal
+          navigate('/home', { state: { showPreferences: true } });
         }, 1500);
         return { success: true };
       } else {
