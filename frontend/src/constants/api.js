@@ -17,14 +17,12 @@ export const API = {
   QUIZ_SUBCATEGORIES: '/quiz/categories/:id/subcategories/',
   QUIZ_START: '/quiz/start/',
   QUIZ_SUBMIT: '/quiz/submit/',
-  QUIZ_LEADERBOARD: '/quiz/leaderboard/',
-  QUIZ_STATS: '/quiz/stats/',
-};
-export const SESSION_TIMEOUT_MINUTES = parseInt(
-  import.meta.env.VITE_SESSION_TIMEOUT || '1440',
-  10
-);
-export const HTTP_STATUS = {
+  QUIZ_CREATE_CONFIG: '/quiz/create-config/',
+  QUIZ_START_NEW: '/quiz/start/',
+  QUIZ_MOCK_LIST: '/quiz/mock-list/',
+  QUIZ_SUBMIT_NEW: '/quiz/submit/',
+  QUIZ_HISTORY_NEW: '/quiz/history/',
+  QUIZ_HISTORY_DELETE: '/quiz/history/delete/',
   OK: 200,
   CREATED: 201,
   BAD_REQUEST: 400,

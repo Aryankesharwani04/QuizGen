@@ -279,3 +279,63 @@ class CategoryStatistics(models.Model):
         if self.subcategory:
             return f"{self.category.name} > {self.subcategory.name}"
         return f"{self.category.name} (All)"
+
+
+class Quiz(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('Easy', 'Easy'),
+        ('Medium', 'Medium'),
+        ('Hard', 'Hard'),
+        ('Mixed', 'Mixed'),
+    ]
+
+    quiz_id = models.CharField(max_length=5, unique=True, db_index=True, help_text="5-digit unique quiz ID")
+    title = models.CharField(max_length=255)
+    topic = models.CharField(max_length=255, help_text="Interest or topic of the quiz")
+    difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
+    image_link = models.URLField(blank=True, null=True)
+    num_questions = models.IntegerField(validators=[MinValueValidator(1)])
+    duration_minutes = models.IntegerField(help_text="Quiz duration in minutes", validators=[MinValueValidator(1)])
+    is_mock = models.BooleanField(default=False, help_text="If True, this is a pre-defined mock quiz")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.quiz_id})"
+
+    class Meta:
+        verbose_name = 'Generated Quiz'
+        verbose_name_plural = 'Generated Quizzes'
+        ordering = ['-created_at']
+
+
+class Question(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    options = models.JSONField(help_text="List of options")
+    correct_answer = models.CharField(max_length=255)
+    order = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.quiz.title} - Q: {self.question_text[:50]}"
+
+    class Meta:
+        ordering = ['order']
+
+
+class QuizHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_history')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='attempted_by')
+    score = models.IntegerField(null=True, blank=True)
+    total_questions = models.IntegerField()
+    questions = models.JSONField(default=list, help_text="List of questions generated for this attempt")
+    user_answers = models.JSONField(default=list, help_text="List of user answers with correctness")
+    completed_at = models.DateTimeField(blank=True, null=True)
+    started_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.quiz.title} - {self.score}/{self.total_questions}"
+
+    class Meta:
+        verbose_name = 'Quiz History'
+        verbose_name_plural = 'Quiz Histories'
+        ordering = ['-completed_at']

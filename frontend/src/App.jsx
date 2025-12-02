@@ -11,6 +11,8 @@ import History from './pages/History';
 import VerifyEmail from './pages/VerifyEmail';
 import PasswordResetRequest from './pages/PasswordResetRequest';
 import PasswordResetConfirm from './pages/PasswordResetConfirm';
+import QuizPlayer from './components/QuizPlayer';
+import QuizResult from './components/QuizResult';
 
 function AppRoutes() {
   return (
@@ -52,6 +54,26 @@ function AppRoutes() {
           <Layout>
             <PrivateRoute>
               <History />
+            </PrivateRoute>
+          </Layout>
+        }
+      />
+      <Route
+        path="/quiz/start/:quizId"
+        element={
+          <Layout hideHeaderFooter={true}>
+            <PrivateRoute>
+              <QuizPlayer />
+            </PrivateRoute>
+          </Layout>
+        }
+      />
+      <Route
+        path="/quiz/result"
+        element={
+          <Layout hideHeaderFooter={true}>
+            <PrivateRoute>
+              <QuizResult />
             </PrivateRoute>
           </Layout>
         }

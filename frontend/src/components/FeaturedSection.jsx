@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import QuizCard from './QuizCard';
 import PreferenceCategory from './PreferenceCategory';
 import PreferencesModal from './PreferencesModal';
-import { fetchFeaturedQuizzes, startQuiz } from '../api/quizService';
+import { fetchMockQuizzes } from '../api/quizService';
 import { useAuth } from '../hooks/useAuth';
 
 export default function FeaturedSection() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [selectedPreferences, setSelectedPreferences] = useState([]);
     const [mixSelected, setMixSelected] = useState(false);
     const [quizzes, setQuizzes] = useState([]);
@@ -27,31 +29,58 @@ export default function FeaturedSection() {
     ];
 
     useEffect(() => {
+        let isCancelled = false;
+
+        const loadQuizzes = async () => {
+            const CACHE_KEY = 'featured_quizzes';
+
+            // Helper to filter quizzes based on current preferences
+            const applyFilter = (data) => {
+                if (!mixSelected && selectedPreferences.length > 0) {
+                    return data.filter(q =>
+                        selectedPreferences.some(pref => q.topic.toLowerCase().includes(pref))
+                    );
+                }
+                return data;
+            };
+
+            // 1. Load from Cache first (Instant Load)
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            if (cachedData && !isCancelled) {
+                try {
+                    const parsedData = JSON.parse(cachedData);
+                    setQuizzes(applyFilter(parsedData));
+                    setLoading(false);
+                } catch (e) {
+                    console.error("Error parsing cached quizzes:", e);
+                }
+            } else if (!isCancelled) {
+                setLoading(true);
+            }
+
+            // 2. Fetch from API in background (Stale-While-Revalidate)
+            try {
+                const response = await fetchMockQuizzes();
+                if (response.success && !isCancelled) {
+                    // Update Cache
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
+
+                    // Update State with fresh data
+                    setQuizzes(applyFilter(response.data));
+                }
+            } catch (error) {
+                console.error("Failed to fetch featured quizzes", error);
+            } finally {
+                if (!isCancelled) setLoading(false);
+            }
+        };
+
         loadQuizzes();
+
+        return () => {
+            isCancelled = true;
+        };
     }, [selectedPreferences, mixSelected]);
-
-    const loadQuizzes = async () => {
-        setLoading(true);
-        try {
-            // If mix is selected, we pass empty preferences to get all (or handle specifically in service)
-            // If specific preferences selected, pass them
-            // If neither, fetchFeaturedQuizzes handles default logic (maybe empty or all)
-
-            let prefsToFetch = [];
-            if (!mixSelected && selectedPreferences.length > 0) {
-                prefsToFetch = selectedPreferences;
-            }
-
-            const response = await fetchFeaturedQuizzes(prefsToFetch);
-            if (response.success) {
-                setQuizzes(response.data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch featured quizzes", error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handlePreferenceToggle = (prefId) => {
         setSelectedPreferences(prev =>
@@ -158,20 +187,10 @@ export default function FeaturedSection() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                             {quizzes.map(quiz => (
                                 <QuizCard
-                                    key={quiz.id}
+                                    key={quiz.quiz_id || quiz.id}
                                     quiz={quiz}
-                                    onPlay={async (quiz) => {
-                                        try {
-                                            const response = await startQuiz(quiz.id);
-                                            if (response.success) {
-                                                console.log('Starting quiz:', response.data);
-                                                alert(`Starting quiz: ${quiz.title}`);
-                                            } else {
-                                                alert('Failed to start quiz');
-                                            }
-                                        } catch (error) {
-                                            console.error('Error starting quiz:', error);
-                                        }
+                                    onPlay={(quiz) => {
+                                        navigate(`/quiz/start/${quiz.quiz_id || quiz.id}`);
                                     }}
                                 />
                             ))}

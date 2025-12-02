@@ -1,128 +1,109 @@
-// Mock quiz data
-const MOCK_QUIZZES = [
-  {
-    id: '10001',
-    title: 'Famous Artists of the Renaissance',
-    description: 'Test your knowledge about Renaissance art and artists',
-    category: 'Art',
-    preference: 'art',
-    difficulty: 'medium',
-    questions_count: 10,
-    estimated_time: 5,
-    image: null,
-  },
-  {
-    id: '10002',
-    title: 'Video Game Trivia',
-    description: 'Can you name these popular video games?',
-    category: 'Gaming',
-    preference: 'gaming',
-    difficulty: 'easy',
-    questions_count: 8,
-    estimated_time: 4,
-    image: null,
-  },
-  {
-    id: '10003',
-    title: 'Random Facts Challenge',
-    description: 'Think you know random facts? Prove it!',
-    category: 'Facts',
-    preference: 'facts',
-    difficulty: 'hard',
-    questions_count: 15,
-    estimated_time: 10,
-    image: null,
-  },
-  {
-    id: '10004',
-    title: 'Biology Basics',
-    description: 'Test your knowledge of fundamental biology',
-    category: 'Science',
-    preference: 'science',
-    difficulty: 'medium',
-    questions_count: 12,
-    estimated_time: 8,
-    image: null,
-  },
-  {
-    id: '10005',
-    title: 'World History Quiz',
-    description: 'Major events and dates in world history',
-    category: 'History',
-    preference: 'history',
-    difficulty: 'hard',
-    questions_count: 20,
-    estimated_time: 12,
-    image: null,
-  },
-];
+import { API } from '../constants/api';
+import { getCSRFToken } from '../utils/csrf';
 
-export const fetchQuizzes = async (params = {}) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  let filtered = [...MOCK_QUIZZES];
-
-  if (params.search) {
-    const term = params.search.toLowerCase();
-    filtered = filtered.filter(quiz => 
-      quiz.title.toLowerCase().includes(term) ||
-      quiz.description.toLowerCase().includes(term)
-    );
-  }
-
-  if (params.category) {
-    filtered = filtered.filter(quiz => quiz.category === params.category);
-  }
+// Helper function for API calls (similar to authService)
+async function apiCall(endpoint, options = {}) {
+  const url = `${API.BASE_URL}${endpoint}`;
   
-  if (params.preferences && params.preferences.length > 0) {
-      filtered = filtered.filter(quiz => params.preferences.includes(quiz.preference));
+  const headers = {
+    ...options.headers,
+  };
+
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes((options.method || 'GET').toUpperCase())) {
+    const csrfToken = getCSRFToken();
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
+    }
   }
 
-  return {
-    success: true,
-    data: filtered,
-  };
-};
+  if (!headers['Content-Type'] && !(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
-export const fetchFeaturedQuizzes = async (preferences = []) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+  try {
+    const response = await fetch(url, {
+      credentials: 'include',
+      ...options,
+      headers,
+    });
     
-    let filtered = [...MOCK_QUIZZES];
-    
-    if (preferences.length > 0) {
-        filtered = filtered.filter(quiz => preferences.includes(quiz.preference));
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+    const data = isJson ? await response.json() : { message: response.statusText };
+
+    if (!response.ok) {
+      return {
+        success: false,
+        data: null,
+        message: data.message || data.error || 'An error occurred',
+        statusCode: response.status,
+        errors: data.errors || {},
+      };
     }
-    
+
     return {
-        success: true,
-        data: filtered
+      success: true,
+      data: data,
+      message: data.message || 'Success',
+      statusCode: response.status,
     };
-};
+  } catch (error) {
+    console.error(`API Error (${endpoint}):`, error);
+    return {
+      success: false,
+      data: null,
+      message: error.message || 'Network error occurred',
+      statusCode: 0,
+    };
+  }
+}
 
-export const verifyQuizCode = async (code) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const quiz = MOCK_QUIZZES.find(q => q.id === code);
-    
-    if (quiz) {
-        return { success: true, data: quiz };
-    } else {
-        return { success: false, message: 'Invalid quiz code' };
-    }
+export const createQuizConfig = async (configData) => {
+    return apiCall(API.QUIZ_CREATE_CONFIG, {
+        method: 'POST',
+        body: JSON.stringify(configData)
+    });
 };
 
 export const startQuiz = async (quizId) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const quiz = MOCK_QUIZZES.find(q => q.id === quizId);
-    
-    if (quiz) {
-        return { success: true, data: { sessionId: 'session_' + Date.now(), quiz } };
-    } else {
-        return { success: false, message: 'Quiz not found' };
+    return apiCall(`${API.QUIZ_START_NEW}${quizId}/`, {
+        method: 'POST'
+    });
+};
+
+export const submitQuiz = async (attemptId, submissionData) => {
+    return apiCall(`${API.QUIZ_SUBMIT_NEW}${attemptId}/`, {
+        method: 'POST',
+        body: JSON.stringify(submissionData)
+    });
+};
+
+export const fetchMockQuizzes = async () => {
+    return apiCall(API.QUIZ_MOCK_LIST, {
+        method: 'GET'
+    });
+};
+
+export const fetchQuizHistory = async () => {
+    return apiCall(API.QUIZ_HISTORY_NEW, {
+        method: 'GET'
+    });
+};
+
+export const deleteQuizHistory = async (ids = [], deleteAll = false) => {
+    return apiCall(API.QUIZ_HISTORY_DELETE, {
+        method: 'POST',
+        body: JSON.stringify({ ids, delete_all: deleteAll })
+    });
+};
+
+// Legacy functions (kept for compatibility if needed, but should be replaced)
+export const verifyQuizCode = async (code) => {
+    // For now, assume code is quiz_id and try to start it? 
+    // Or maybe we need a specific endpoint to check if quiz exists.
+    // Let's just return success for now if it looks like a 5-digit ID.
+    if (code && code.length === 5) {
+        return { success: true, data: { id: code } };
     }
+    return { success: false, message: 'Invalid quiz code' };
 };

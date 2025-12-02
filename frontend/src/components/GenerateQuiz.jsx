@@ -7,6 +7,7 @@ export default function GenerateQuiz({ onGenerate }) {
     const [difficulty, setDifficulty] = useState('Medium');
     const [questionCount, setQuestionCount] = useState(10);
     const [time, setTime] = useState(15);
+    const [loading, setLoading] = useState(false);
 
     const predefinedTitles = [
         'General Knowledge',
@@ -34,17 +35,48 @@ export default function GenerateQuiz({ onGenerate }) {
         }
     };
 
-    const handleGenerateClick = () => {
-        // Mock generation for now
-        const mockQuiz = {
-            id: Math.floor(Math.random() * 10000),
-            title: selectedTitles.length > 0 ? selectedTitles.join(', ') : 'Generated Quiz',
-            description: `A ${difficulty} quiz with ${questionCount} questions.`,
-            questionCount: questionCount,
-            timeLimit: time,
-            difficulty: difficulty,
-        };
-        onGenerate(mockQuiz);
+    const handleGenerateClick = async () => {
+        if (selectedTitles.length === 0) {
+            alert('Please select at least one topic.');
+            return;
+        }
+
+        setLoading(true);
+        const topic = selectedTitles.join(', ');
+
+        try {
+            // Import dynamically to avoid circular dependency issues if any, or just standard import
+            const { createQuizConfig } = await import('../api/quizService');
+
+            const configData = {
+                topic: topic,
+                difficulty: difficulty,
+                num_questions: questionCount
+            };
+
+            const response = await createQuizConfig(configData);
+
+            if (response.success) {
+                const quiz = {
+                    id: response.data.quiz_id,
+                    quiz_id: response.data.quiz_id, // Explicitly add quiz_id for QuizCard
+                    title: `${topic} Quiz`,
+                    description: `A ${difficulty} quiz with ${questionCount} questions.`,
+                    questions_count: questionCount,
+                    estimated_time: questionCount * 1, // Assuming 1 min per question
+                    difficulty: difficulty,
+                    is_new: response.data.is_new
+                };
+                onGenerate(quiz);
+            } else {
+                alert('Failed to generate quiz configuration: ' + response.message);
+            }
+        } catch (error) {
+            console.error('Error generating quiz:', error);
+            alert('An error occurred while generating the quiz.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -74,8 +106,8 @@ export default function GenerateQuiz({ onGenerate }) {
                                 key={level}
                                 onClick={() => setDifficulty(level)}
                                 className={`flex-1 py-2 rounded-lg border-2 font-medium transition ${difficulty === level
-                                        ? 'bg-accent text-text-primary border-accent'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:border-accent'
+                                    ? 'bg-accent text-text-primary border-accent'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-accent'
                                     }`}
                             >
                                 {level}
@@ -113,9 +145,22 @@ export default function GenerateQuiz({ onGenerate }) {
                 {/* Generate Button */}
                 <button
                     onClick={handleGenerateClick}
-                    className="w-full px-6 py-3 bg-primary text-text-on-dark rounded-lg hover:bg-primary-dark transition font-bold text-lg shadow-md mt-2"
+                    disabled={loading}
+                    className={`w-full px-6 py-3 rounded-lg transition font-bold text-lg shadow-md mt-2 flex justify-center items-center gap-2 ${loading
+                        ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+                        : 'bg-primary text-text-on-dark hover:bg-primary-dark'}`}
                 >
-                    Generate Quiz
+                    {loading ? (
+                        <>
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Generating...
+                        </>
+                    ) : (
+                        'Generate Quiz'
+                    )}
                 </button>
             </div>
 
@@ -131,8 +176,8 @@ export default function GenerateQuiz({ onGenerate }) {
                                     key={title}
                                     onClick={() => handleTitleToggle(title)}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium border transition ${selectedTitles.includes(title)
-                                            ? 'bg-primary text-white border-primary'
-                                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                                        ? 'bg-primary text-white border-primary'
+                                        : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                                         }`}
                                 >
                                     {title}

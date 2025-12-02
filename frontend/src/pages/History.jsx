@@ -1,35 +1,91 @@
 import { useState, useEffect } from 'react';
-import { getHistory } from '../api/authService';
+import { useNavigate } from 'react-router-dom';
+import { fetchQuizHistory, deleteQuizHistory } from '../api/quizService';
 
 export default function History() {
+  const navigate = useNavigate();
   const [history, setHistory] = useState([]);
-  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedItems, setSelectedItems] = useState(new Set());
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await getHistory();
-
-        if (response.success) {
-          setHistory(response.data.scores || []);
-          setStats(response.data.stats || null);
-        } else {
-          setError(response.message || 'Failed to load history');
-        }
-      } catch (err) {
-        setError('An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHistory();
+    loadHistory();
   }, []);
+
+  const loadHistory = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchQuizHistory();
+      if (response.success) {
+        setHistory(response.data || []);
+      } else {
+        setError(response.message || 'Failed to load history');
+      }
+    } catch (err) {
+      setError('An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReview = (attempt) => {
+    navigate('/quiz/result', {
+      state: {
+        score: attempt.score,
+        total: attempt.total_questions,
+        answers: attempt.user_answers,
+        questions: attempt.questions,
+        quizTitle: attempt.quiz_title
+      }
+    });
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedItems(new Set(history.map(h => h.id)));
+    } else {
+      setSelectedItems(new Set());
+    }
+  };
+
+  const handleSelectItem = (id) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const handleDelete = async (deleteAll = false) => {
+    if (!deleteAll && selectedItems.size === 0) return;
+
+    const message = deleteAll
+      ? "Are you sure you want to delete ALL quiz history? This cannot be undone."
+      : `Are you sure you want to delete ${selectedItems.size} selected item(s)?`;
+
+    if (!window.confirm(message)) return;
+
+    try {
+      const response = await deleteQuizHistory(
+        deleteAll ? [] : Array.from(selectedItems),
+        deleteAll
+      );
+
+      if (response.success) {
+        setSelectedItems(new Set());
+        loadHistory(); // Reload to reflect changes
+      } else {
+        alert(response.message || "Failed to delete history");
+      }
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("An error occurred while deleting");
+    }
+  };
 
   if (loading) {
     return (
@@ -44,37 +100,31 @@ export default function History() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 py-12">
-      <h1 className="text-4xl font-bold text-text-primary mb-8">Quiz History</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-text-primary">Quiz History</h1>
+        <div className="space-x-4">
+          {selectedItems.size > 0 && (
+            <button
+              onClick={() => handleDelete(false)}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            >
+              Delete Selected ({selectedItems.size})
+            </button>
+          )}
+          {history.length > 0 && (
+            <button
+              onClick={() => handleDelete(true)}
+              className="px-4 py-2 border border-red-500 text-red-500 rounded hover:bg-red-50 transition"
+            >
+              Clear All History
+            </button>
+          )}
+        </div>
+      </div>
 
       {error && (
         <div className="mb-6 p-4 bg-ocean-green border border-accent rounded-lg">
           <p className="text-sm text-bg-dark">{error}</p>
-        </div>
-      )}
-
-      {/* Statistics Section */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-bg-light rounded-lg shadow p-6">
-            <p className="text-sm text-primary-dark mb-2">Total Quizzes</p>
-            <p className="text-3xl font-bold text-primary">{stats.total_attempts || 0}</p>
-          </div>
-          <div className="bg-bg-light rounded-lg shadow p-6">
-            <p className="text-sm text-primary-dark mb-2">Average Score</p>
-            <p className="text-3xl font-bold text-accent">
-              {stats.average_score ? stats.average_score.toFixed(1) : 'N/A'}%
-            </p>
-          </div>
-          <div className="bg-bg-light rounded-lg shadow p-6">
-            <p className="text-sm text-primary-dark mb-2">Best Score</p>
-            <p className="text-3xl font-bold text-accent-dark">{stats.best_score || 0}%</p>
-          </div>
-          <div className="bg-bg-light rounded-lg shadow p-6">
-            <p className="text-sm text-primary-dark mb-2">Total Time</p>
-            <p className="text-3xl font-bold text-ocean-green">
-              {stats.total_time_minutes || 0}m
-            </p>
-          </div>
         </div>
       )}
 
@@ -84,34 +134,51 @@ export default function History() {
           <table className="w-full">
             <thead className="bg-accent-light border-b">
               <tr>
+                <th className="px-6 py-3 text-center w-12">
+                  <input
+                    type="checkbox"
+                    checked={history.length > 0 && selectedItems.size === history.length}
+                    onChange={handleSelectAll}
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">Quiz</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">Category</th>
                 <th className="px-6 py-3 text-center text-sm font-semibold text-text-primary">Score</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-text-primary">Time</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-text-primary">Date</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-text-primary">Date</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-text-primary">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {history.map((attempt, index) => (
                 <tr key={index} className="hover:bg-accent-light transition">
-                  <td className="px-6 py-4 text-text-primary font-medium">
-                    {attempt.quiz_name || 'Unnamed Quiz'}
+                  <td className="px-6 py-4 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.has(attempt.id)}
+                      onChange={() => handleSelectItem(attempt.id)}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
                   </td>
-                  <td className="px-6 py-4 text-primary-dark">
-                    {attempt.category || 'Uncategorized'}
+                  <td className="px-6 py-4 text-text-primary font-medium">
+                    {attempt.quiz_title || 'Unnamed Quiz'}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent text-text-primary font-semibold">
-                      {attempt.score || 0}%
+                    <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-accent text-text-primary font-semibold text-sm">
+                      {attempt.score} / {attempt.total_questions}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center text-primary-dark">
-                    {attempt.time_taken ? `${attempt.time_taken}m` : 'N/A'}
+                  <td className="px-6 py-4 text-center text-primary-dark text-sm">
+                    {attempt.completed_at
+                      ? new Date(attempt.completed_at).toLocaleDateString()
+                      : 'Incomplete'}
                   </td>
-                  <td className="px-6 py-4 text-primary-dark text-sm">
-                    {attempt.attempted_at
-                      ? new Date(attempt.attempted_at).toLocaleDateString()
-                      : 'N/A'}
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => handleReview(attempt)}
+                      className="text-primary hover:text-primary-dark font-semibold underline"
+                    >
+                      Review
+                    </button>
                   </td>
                 </tr>
               ))}

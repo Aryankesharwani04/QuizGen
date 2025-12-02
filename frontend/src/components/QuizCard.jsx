@@ -37,7 +37,7 @@ export default function QuizCard({ quiz, onPlay }) {
         <h3 className="text-lg font-semibold text-text-primary mb-2 line-clamp-2">
           {quiz.title}
         </h3>
-        
+
         <p className="text-sm text-primary-dark mb-3 line-clamp-2 flex-grow">
           {quiz.description || 'Test your knowledge on this topic'}
         </p>
@@ -48,11 +48,10 @@ export default function QuizCard({ quiz, onPlay }) {
               {quiz.category || 'General'}
             </span>
             {quiz.difficulty && (
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                quiz.difficulty === 'easy' ? 'bg-accent text-text-primary' :
+              <span className={`text-xs px-2 py-1 rounded-full font-medium ${quiz.difficulty === 'easy' ? 'bg-accent text-text-primary' :
                 quiz.difficulty === 'medium' ? 'bg-ocean-green text-bg-dark' :
-                'bg-accent-dark text-text-on-dark'
-              }`}>
+                  'bg-accent-dark text-text-on-dark'
+                }`}>
                 {quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}
               </span>
             )}
@@ -61,6 +60,9 @@ export default function QuizCard({ quiz, onPlay }) {
 
         {/* Quiz Stats */}
         <div className="text-xs text-primary-dark mb-4 space-y-1 flex-grow">
+          {quiz.quiz_id && (
+            <p className="font-mono text-lg font-bold text-primary mb-2">ID: {quiz.quiz_id}</p>
+          )}
           {quiz.questions_count && (
             <p>📝 {quiz.questions_count} questions</p>
           )}

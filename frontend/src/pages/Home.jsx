@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AboutSection from '../components/AboutSection';
 import FeaturedSection from '../components/FeaturedSection';
 import JoinQuiz from '../components/JoinQuiz';
@@ -7,6 +8,7 @@ import QuizCard from '../components/QuizCard';
 import { startQuiz } from '../api/quizService';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [generatedQuiz, setGeneratedQuiz] = useState(null);
   const generatedQuizRef = useRef(null);
 
@@ -55,9 +57,8 @@ export default function Home() {
             <div className="flex justify-center">
               <QuizCard
                 quiz={generatedQuiz}
-                onPlay={async (quiz) => {
-                  // Mock play action
-                  alert(`Starting generated quiz: ${quiz.title}`);
+                onPlay={(quiz) => {
+                  navigate(`/quiz/start/${quiz.id}`);
                 }}
               />
             </div>
