@@ -13,6 +13,8 @@ import PasswordResetRequest from './pages/PasswordResetRequest';
 import PasswordResetConfirm from './pages/PasswordResetConfirm';
 import QuizPlayer from './components/QuizPlayer';
 import QuizResult from './components/QuizResult';
+import LandingPage from './pages/LandingPage';
+import CategoriesPage from './pages/CategoriesPage/CategoriesPage';
 
 function AppRoutes() {
   return (
@@ -26,6 +28,8 @@ function AppRoutes() {
 
       {/* Public Routes with Header/Footer */}
       <Route path="/home" element={<Layout><Home /></Layout>} />
+      <Route path="/landing" element={<Layout><LandingPage/></Layout>} />
+      <Route path="/categories" element={<Layout><CategoriesPage/></Layout>} />
 
       {/* Protected Routes with Header/Footer */}
       <Route
