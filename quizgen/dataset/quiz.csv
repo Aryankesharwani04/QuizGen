@@ -1,0 +1,11 @@
+quiz_id,category,title,level,num_questions,duration_seconds,question_order,question_text,options_json,correct_answer,created_at
+41445,Study,Programming,easy,10,600,1,What is the standard entry point function for a C++ program?,"[""start()"", ""run()"", ""main()"", ""begin()""]",main(),2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,2,Which header file is typically included to use the 'cout' object for output in C++?,"[""<stdio.h>"", ""<iostream>"", ""<stdlib.h>"", ""<math.h>""]",<iostream>,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,3,Which symbol is used to terminate a statement in C++?,"["":"", "";"", ""."", "",""]",;,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,4,What keyword is used to define a variable that cannot be changed after initialization in C++?,"[""static"", ""volatile"", ""const"", ""final""]",const,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,5,Which operator is used for assignment in C++?,"[""=="", ""="", ""=>"", ""!=""]",=,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,6,Which data type is used to store whole numbers (integers) in C++?,"[""float"", ""char"", ""bool"", ""int""]",int,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,7,"In C++, what does 'endl' typically do when used with 'cout'?","[""Inserts a space"", ""Inserts a newline and flushes the buffer"", ""Inserts a tab"", ""Ends the program execution""]",Inserts a newline and flushes the buffer,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,8,What are single-line comments denoted by in C++?,"[""/*"", ""//"", ""#"", ""--""]",//,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,9,What is the correct way to declare a variable named 'age' of type integer?,"[""integer age;"", ""age int;"", ""int age;"", ""declare int age;""]",int age;,2025-12-12T17:37:31.439398+00:00
+41445,Study,Programming,easy,10,600,10,Which control flow statement is used for decision making based on a condition in C++?,"[""loop"", ""while"", ""if"", ""switch""]",if,2025-12-12T17:37:31.439398+00:00

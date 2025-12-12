@@ -283,21 +283,28 @@ class CategoryStatistics(models.Model):
 
 class Quiz(models.Model):
     DIFFICULTY_CHOICES = [
-        ('Easy', 'Easy'),
-        ('Medium', 'Medium'),
-        ('Hard', 'Hard'),
-        ('Mixed', 'Mixed'),
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('hard', 'Hard'),
+        ('mixed', 'Mixed'),
     ]
 
     quiz_id = models.CharField(max_length=5, unique=True, db_index=True, help_text="5-digit unique quiz ID")
+    category = models.CharField(max_length=255, help_text="Quiz category (e.g., Mathematics, Science)", db_index=True, blank=True, null=True)
     title = models.CharField(max_length=255)
     topic = models.CharField(max_length=255, help_text="Interest or topic of the quiz")
-    difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
+    level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, db_index=True, help_text="Difficulty level", blank=True, null=True)
+    # Legacy field for backwards compatibility
+    difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, blank=True, null=True)
     image_link = models.URLField(blank=True, null=True)
     num_questions = models.IntegerField(validators=[MinValueValidator(1)])
-    duration_minutes = models.IntegerField(help_text="Quiz duration in minutes", validators=[MinValueValidator(1)])
+    duration_seconds = models.IntegerField(help_text="Quiz duration in seconds", validators=[MinValueValidator(1)], blank=True, null=True)
+    # Legacy field for backwards compatibility
+    duration_minutes = models.IntegerField(help_text="Quiz duration in minutes (legacy)", validators=[MinValueValidator(1)], blank=True, null=True)
     is_mock = models.BooleanField(default=False, help_text="If True, this is a pre-defined mock quiz")
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_quizzes')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     def __str__(self):
         return f"{self.title} ({self.quiz_id})"
@@ -306,20 +313,35 @@ class Quiz(models.Model):
         verbose_name = 'Generated Quiz'
         verbose_name_plural = 'Generated Quizzes'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['quiz_id']),
+            models.Index(fields=['category']),
+            models.Index(fields=['level']),
+            models.Index(fields=['created_at']),
+        ]
+
 
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
-    question_text = models.TextField()
-    options = models.JSONField(help_text="List of options")
-    correct_answer = models.CharField(max_length=255)
-    order = models.IntegerField(default=0)
+    text = models.TextField(help_text="Question text")
+    # Legacy field for backwards compatibility
+    question_text = models.TextField(blank=True, null=True, help_text="Question text (legacy)")
+    options = models.JSONField(help_text="List of 4 options")
+    correct_answer = models.CharField(max_length=255, help_text="Correct answer - must match one of the options")
+    order = models.IntegerField(default=0, help_text="Question order in quiz (1-based)")
+    metadata = models.JSONField(default=dict, blank=True, help_text="Additional metadata (hints, tags, explanations)")
 
     def __str__(self):
-        return f"{self.quiz.title} - Q: {self.question_text[:50]}"
+        text_to_show = self.text or self.question_text or ""
+        return f"{self.quiz.title} - Q{self.order}: {text_to_show[:50]}"
 
     class Meta:
         ordering = ['order']
+        indexes = [
+            models.Index(fields=['quiz', 'order']),
+        ]
+
 
 
 class QuizHistory(models.Model):

@@ -3,9 +3,81 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Mail, Lock, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, FormEvent } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const { register, loading } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [formErrors, setFormErrors] = useState<{
+    fullName?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    terms?: string;
+  }>({});
+
+  const validateForm = () => {
+    const errors: {
+      fullName?: string;
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+      terms?: string;
+    } = {};
+
+    if (!fullName) {
+      errors.fullName = "Full name is required";
+    }
+
+    if (!email) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = "Email is invalid";
+    }
+
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (password.length < 8) {
+      errors.password = "Password must be at least 8 characters";
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    if (!termsAccepted) {
+      errors.terms = "You must accept the Terms and Conditions";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      await register(fullName, email, password, confirmPassword);
+      navigate("/dashboard");
+    } catch (error) {
+      // Error handling is done in the auth context
+      console.error("Registration error:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 p-4">
       <div className="w-full max-w-md animate-fade-in-scale">
@@ -27,7 +99,7 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
@@ -37,8 +109,14 @@ const Register = () => {
                     type="text"
                     placeholder="John Doe"
                     className="pl-10"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    disabled={loading}
                   />
                 </div>
+                {formErrors.fullName && (
+                  <p className="text-sm text-red-500">{formErrors.fullName}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -49,8 +127,14 @@ const Register = () => {
                     type="email"
                     placeholder="you@example.com"
                     className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
                   />
                 </div>
+                {formErrors.email && (
+                  <p className="text-sm text-red-500">{formErrors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -61,8 +145,14 @@ const Register = () => {
                     type="password"
                     placeholder="••••••••"
                     className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
                   />
                 </div>
+                {formErrors.password && (
+                  <p className="text-sm text-red-500">{formErrors.password}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirm Password</Label>
@@ -73,24 +163,46 @@ const Register = () => {
                     type="password"
                     placeholder="••••••••"
                     className="pl-10"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={loading}
                   />
                 </div>
+                {formErrors.confirmPassword && (
+                  <p className="text-sm text-red-500">{formErrors.confirmPassword}</p>
+                )}
               </div>
-              <div className="flex items-start gap-2">
-                <input type="checkbox" className="mt-1 rounded" id="terms" />
-                <label htmlFor="terms" className="text-sm text-muted-foreground">
-                  I agree to the{" "}
-                  <a href="#" className="text-primary hover:underline">
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a href="#" className="text-primary hover:underline">
-                    Privacy Policy
-                  </a>
-                </label>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    className="mt-1 rounded"
+                    id="terms"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    disabled={loading}
+                  />
+                  <label htmlFor="terms" className="text-sm text-muted-foreground">
+                    I agree to the{" "}
+                    <a href="#" className="text-primary hover:underline">
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a href="#" className="text-primary hover:underline">
+                      Privacy Policy
+                    </a>
+                  </label>
+                </div>
+                {formErrors.terms && (
+                  <p className="text-sm text-red-500">{formErrors.terms}</p>
+                )}
               </div>
-              <Button type="submit" className="w-full gradient-primary text-white font-semibold py-6 text-lg">
-                Create Account
+              <Button
+                type="submit"
+                className="w-full gradient-primary text-white font-semibold py-6 text-lg"
+                disabled={loading}
+              >
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 

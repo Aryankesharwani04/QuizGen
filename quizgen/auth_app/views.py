@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+﻿from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -664,3 +664,277 @@ class GoogleSignInView(APIView):
                 errors={'detail': str(e)},
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+
+
+# Quiz History Views
+from quiz_app.models import Quiz, Question, QuizHistory
+
+class SaveQuizAttemptView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from quiz_app.utils import generate_unique_quiz_id
+        from django.utils import timezone
+        
+        quiz_id = request.data.get('quiz_id')
+        selected_answers = request.data.get('selected_answers', {})
+        time_taken = request.data.get('time_taken', 0)
+        
+        if not quiz_id:
+            return ResponseFormatter.error("quiz_id is required", status_code=400)
+        
+        try:
+            quiz = Quiz.objects.filter(quiz_id=quiz_id).first()
+            if not quiz:
+                return ResponseFormatter.error("Quiz not found", status_code=404)
+            
+            questions = list(Question.objects.filter(quiz=quiz).order_by('order').values(
+                'id', 'order', 'text', 'question_text', 'options', 'correct_answer'
+            ))
+            
+            score = 0
+            user_answers_list = []
+            for q in questions:
+                q_id = str(q['order'] - 1)
+                user_answer = selected_answers.get(q_id, '')
+                is_correct = user_answer == q['correct_answer']
+                if is_correct:
+                    score += 1
+                
+                user_answers_list.append({
+                    'question_id': q['id'],
+                    'question_text': q['text'] or q['question_text'],
+                    'user_answer': user_answer,
+                    'correct_answer': q['correct_answer'],
+                    'is_correct': is_correct
+                })
+            
+            history = QuizHistory.objects.create(
+                user=request.user,
+                quiz=quiz,
+                score=score,
+                total_questions=len(questions),
+                questions=questions,
+                user_answers=user_answers_list,
+                completed_at=timezone.now()
+            )
+            
+            # Update user's daily streak
+            from auth_app.streak_utils import update_user_streak
+            update_user_streak(request.user, history.completed_at)
+            
+            percentage = round((score / len(questions)) * 100) if questions else 0
+            
+            return ResponseFormatter.success({
+                'attempt_id': history.id,
+                'score': score,
+                'total_questions': len(questions),
+                'percentage': percentage,
+                'time_taken': time_taken
+            }, status_code=201)
+            
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to save: {str(e)}", status_code=500)
+
+
+class GetHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            history = QuizHistory.objects.filter(
+                user=request.user,
+                completed_at__isnull=False
+            ).select_related('quiz').order_by('-completed_at')
+            
+            attempts = []
+            for h in history:
+                percentage = round((h.score / h.total_questions * 100)) if h.total_questions > 0 else 0
+                attempts.append({
+                    'attempt_id': h.id,
+                    'quiz_id': h.quiz.quiz_id,
+                    'title': h.quiz.title,
+                    'topic': h.quiz.category or h.quiz.topic,
+                    'level': h.quiz.level or h.quiz.difficulty_level,
+                    'questions_answered': h.score,
+                    'total_questions': h.total_questions,
+                    'score': h.score,
+                    'percentage': percentage,
+                    'completed_at': h.completed_at.isoformat() if h.completed_at else None
+                })
+            
+            return ResponseFormatter.success({'attempts': attempts, 'count': len(attempts)})
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to fetch: {str(e)}", status_code=500)
+
+
+class GetHistoryDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            history = QuizHistory.objects.filter(user=request.user, completed_at__isnull=False)
+            total_quizzes = history.count()
+            
+            if total_quizzes == 0:
+                return ResponseFormatter.success({
+                    'total_quizzes_attempted': 0,
+                    'average_score_percentage': 0,
+                    'total_questions_answered': 0,
+                    'total_questions_not_answered': 0,
+                    'total_time_spent': 0
+                })
+            
+            total_score = sum(h.score or 0 for h in history)
+            total_questions = sum(h.total_questions for h in history)
+            avg_percentage = round((total_score / total_questions * 100)) if total_questions > 0 else 0
+            
+            total_answered = sum(1 for h in history for ans in h.user_answers if ans.get('user_answer'))
+            total_not_answered = total_questions - total_answered
+            
+            return ResponseFormatter.success({
+                'total_quizzes_attempted': total_quizzes,
+                'average_score_percentage': avg_percentage,
+                'total_questions_answered': total_answered,
+                'total_questions_not_answered': total_not_answered,
+                'total_time_spent': 0
+            })
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to fetch: {str(e)}", status_code=500)
+
+
+class GetQuizHistoryByIdView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, attempt_id):
+        try:
+            history = QuizHistory.objects.filter(
+                id=attempt_id,
+                user=request.user
+            ).select_related('quiz').first()
+            
+            if not history:
+                return ResponseFormatter.error("Quiz attempt not found", status_code=404)
+            
+            percentage = round((history.score / history.total_questions * 100)) if history.total_questions > 0 else 0
+            
+            questions_with_answers = []
+            for ans in history.user_answers:
+                questions_with_answers.append({
+                    'text': ans.get('question_text', ''),
+                    'user_answer': ans.get('user_answer', ''),
+                    'correct_answer': ans.get('correct_answer', ''),
+                    'is_correct': ans.get('is_correct', False)
+                })
+            
+            return ResponseFormatter.success({
+                'attempt_id': history.id,
+                'quiz_id': history.quiz.quiz_id,
+                'title': history.quiz.title,
+                'category': history.quiz.category or history.quiz.topic,
+                'level': history.quiz.level or history.quiz.difficulty_level,
+                'score': history.score,
+                'total_questions': history.total_questions,
+                'percentage': percentage,
+                'completed_at': history.completed_at.isoformat() if history.completed_at else None,
+                'questions': questions_with_answers
+            })
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to fetch: {str(e)}", status_code=500)
+
+
+
+class GetCategoryPerformanceView(APIView):
+    """
+    Get user's performance by category - top 3 categories by average score.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            history = QuizHistory.objects.filter(
+                user=request.user,
+                completed_at__isnull=False
+            ).select_related('quiz')
+            
+            if not history.exists():
+                return ResponseFormatter.success({
+                    'categories': [],
+                    'message': 'No quizzes attempted yet'
+                })
+            
+            # Calculate average score per category
+            category_stats = {}
+            for h in history:
+                category = h.quiz.category or h.quiz.topic or 'General'
+                percentage = round((h.score / h.total_questions * 100)) if h.total_questions > 0 else 0
+                
+                if category not in category_stats:
+                    category_stats[category] = {
+                        'total_score': 0,
+                        'count': 0,
+                        'category': category
+                    }
+                
+                category_stats[category]['total_score'] += percentage
+                category_stats[category]['count'] += 1
+            
+            # Calculate averages and sort
+            categories = []
+            for cat, stats in category_stats.items():
+                avg_score = round(stats['total_score'] / stats['count'])
+                categories.append({
+                    'category': cat,
+                    'average_score': avg_score,
+                    'quiz_count': stats['count']
+                })
+            
+            # Sort by average score descending and get top 3
+            categories.sort(key=lambda x: x['average_score'], reverse=True)
+            top_categories = categories[:3]
+            
+            return ResponseFormatter.success({
+                'categories': top_categories,
+                'total_categories': len(categories)
+            })
+            
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to fetch: {str(e)}", status_code=500)
+
+
+class GetUserStreakView(APIView):
+    """
+    Get user's daily streak statistics.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = request.user.profile
+            
+            return ResponseFormatter.success({
+                'current_streak': profile.current_streak,
+                'longest_streak': profile.longest_streak,
+                'last_activity_date': profile.last_activity_date.isoformat() if profile.last_activity_date else None
+            })
+            
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to fetch streak: {str(e)}", status_code=500)
+
+
+class GetUserXPView(APIView):
+    """
+    Get user's total XP score.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = request.user.profile
+            
+            return ResponseFormatter.success({
+                'xp_score': profile.xp_score
+            })
+            
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to fetch XP: {str(e)}", status_code=500)

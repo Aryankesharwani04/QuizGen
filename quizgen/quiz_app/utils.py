@@ -423,3 +423,98 @@ def export_user_data(user) -> Dict:
         export['quiz_sessions'].append(session_data)
     
     return export
+import random
+import csv
+import os
+import logging
+from pathlib import Path
+from django.db import transaction
+from django.utils import timezone
+
+logger = logging.getLogger(__name__)
+
+
+def generate_unique_quiz_id(max_retries=10):
+    """
+    Generate a unique 5-digit quiz ID.
+    
+    Args:
+        max_retries: Maximum number of retry attempts
+        
+    Returns:
+        str: Unique 5-digit quiz ID
+        
+    Raises:
+        ValueError: If unable to generate unique ID after max_retries
+    """
+    from quiz_app.models import Quiz
+    
+    for attempt in range(max_retries):
+        quiz_id = str(random.randint(10000, 99999))
+        
+        if not Quiz.objects.filter(quiz_id=quiz_id).exists():
+            logger.info(f"Generated unique quiz_id: {quiz_id} (attempt {attempt + 1})")
+            return quiz_id
+    
+    raise ValueError(f"Failed to generate unique quiz_id after {max_retries} attempts")
+
+
+def append_quiz_to_csv(quiz, questions):
+    """
+    Append quiz and its questions to dataset/quiz.csv
+    
+    Args:
+        quiz: Quiz model instance
+        questions: List of Question model instances
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Create dataset directory if it doesn't exist
+        dataset_dir = Path(__file__).parent.parent / 'dataset'
+        dataset_dir.mkdir(exist_ok=True)
+        
+        csv_path = dataset_dir / 'quiz.csv'
+        
+        # Check if file exists to determine if we need to write headers
+        file_exists = csv_path.exists()
+        
+        # Open file in append mode with UTF-8 encoding
+        with open(csv_path, 'a', newline='', encoding='utf-8') as csvfile:
+            fieldnames = [
+                'quiz_id', 'category', 'title', 'level', 'num_questions',
+                'duration_seconds', 'question_order', 'question_text',
+                'options_json', 'correct_answer', 'created_at'
+            ]
+            
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            
+            # Write header if file is new
+            if not file_exists:
+                writer.writeheader()
+                logger.info(f"Created new CSV file at {csv_path}")
+            
+            # Write each question as a row
+            for question in questions:
+                import json
+                writer.writerow({
+                    'quiz_id': quiz.quiz_id,
+                    'category': quiz.category,
+                    'title': quiz.title,
+                    'level': quiz.level,
+                    'num_questions': quiz.num_questions,
+                    'duration_seconds': quiz.duration_seconds,
+                    'question_order': question.order,
+                    'question_text': question.text,
+                    'options_json': json.dumps(question.options),
+                    'correct_answer': question.correct_answer,
+                    'created_at': quiz.created_at.isoformat(),
+                })
+            
+            logger.info(f"Appended {len(questions)} questions for quiz {quiz.quiz_id} to CSV")
+            return True
+            
+    except Exception as e:
+        logger.error(f"Failed to append quiz to CSV: {str(e)}")
+        return False

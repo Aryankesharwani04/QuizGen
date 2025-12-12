@@ -21,6 +21,14 @@ class UserProfile(models.Model):
     email_verification_token = models.CharField(max_length=255, blank=True, null=True)
     email_verification_sent_at = models.DateTimeField(blank=True, null=True)
     
+    # Daily Streak Tracking
+    current_streak = models.IntegerField(default=0, help_text="Current consecutive days streak")
+    longest_streak = models.IntegerField(default=0, help_text="Longest streak ever achieved")
+    last_activity_date = models.DateField(blank=True, null=True, help_text="Last quiz activity date (4am cutoff)")
+    
+    # XP System
+    xp_score = models.IntegerField(default=0, help_text="Total experience points earned")
+    
     # Account security
     is_active = models.BooleanField(default=True, help_text="Whether account is active")
     session_timeout_minutes = models.IntegerField(default=30, help_text="Session timeout in minutes")

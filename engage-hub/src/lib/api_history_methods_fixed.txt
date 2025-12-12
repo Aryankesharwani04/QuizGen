@@ -1,0 +1,26 @@
+﻿  async getHistorySummary(): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/history/summary/`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error("Failed to fetch history summary");
+    return response.json();
+  }
+
+  async getQuizHistory(): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/history/`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error("Failed to fetch quiz history");
+    return response.json();
+  }
+
+  async getQuizHistoryById(attemptId: number): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/history/${attemptId}/`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error("Failed to fetch quiz attempt");
+    return response.json();
+  }

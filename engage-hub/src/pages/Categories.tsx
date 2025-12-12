@@ -59,13 +59,13 @@ const Categories = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold mb-4">
-              Explore Quiz <span className="gradient-primary bg-clip-text text-transparent">Categories</span>
+              Explore Quiz <span className="text-foreground">Categories</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Choose from our wide range of topics and start testing your knowledge today

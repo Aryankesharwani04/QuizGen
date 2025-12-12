@@ -7,12 +7,31 @@ import { Brain, Zap, Target, TrendingUp, Clock, Award } from "lucide-react";
 import academicIcon from "@/assets/academic-icon.png";
 import entertainmentIcon from "@/assets/entertainment-icon.png";
 import knowledgeIcon from "@/assets/knowledge-icon.png";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
+
+  // Show loading or nothing while checking auth
+  if (loading) {
+    return null;
+  }
+
+  // Only show landing page to unauthenticated users
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       {/* Hero Section */}
       <Hero />
 
