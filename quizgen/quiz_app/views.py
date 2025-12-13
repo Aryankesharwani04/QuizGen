@@ -1,192 +1,209 @@
-from rest_framework.views import APIView
+﻿from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions, generics
-from django.shortcuts import get_object_or_404
-from .models import Quiz, Question, QuizHistory
-from .serializers import QuizSerializer, QuizGenerationSerializer, QuizHistorySerializer
-from .gemini_utils import generate_quiz_content
-import uuid
-import random
-import string
+from rest_framework import status, permissions
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from .utils import generate_unique_quiz_id, append_quiz_to_csv
+from .gemini_utils import generate_quiz_questions
+from .models import Quiz, Question
+from django.db import transaction
+import logging
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions, generics
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from .models import Quiz, Question, QuizHistory
-from .serializers import QuizSerializer, QuizGenerationSerializer, QuizHistorySerializer
-from .gemini_utils import generate_quiz_content
-import random
-import string
+logger = logging.getLogger(__name__)
 
-class CreateQuizConfigView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CreateQuizView(APIView):
+    """
+    Create a new quiz with AI-generated questions.
+    Saves to CSV file for dataset collection.
+    """
+    permission_classes = [permissions.AllowAny]  # Dashboard is protected, so user is already logged in
 
     def post(self, request):
-        serializer = QuizGenerationSerializer(data=request.data)
-        if serializer.is_valid():
-            topic = serializer.validated_data['topic']
-            difficulty = serializer.validated_data['difficulty']
-            num_questions = serializer.validated_data['num_questions']
-
-            # Check if a similar quiz config already exists
-            existing_quiz = Quiz.objects.filter(
-                topic=topic,
-                difficulty_level=difficulty,
-                num_questions=num_questions,
-                is_mock=False
-            ).first()
-
-            if existing_quiz:
-                return Response({
-                    "quiz_id": existing_quiz.quiz_id,
-                    "message": "Existing quiz configuration found",
-                    "is_new": False
-                }, status=status.HTTP_200_OK)
-
-            # Generate unique 5-digit ID
-            while True:
-                quiz_id = ''.join(random.choices(string.digits, k=5))
-                if not Quiz.objects.filter(quiz_id=quiz_id).exists():
-                    break
-
-            # Create Quiz (Config only, no questions yet)
-            quiz = Quiz.objects.create(
-                quiz_id=quiz_id,
-                title=f"{topic} Quiz",
-                topic=topic,
-                difficulty_level=difficulty,
-                num_questions=num_questions,
-                duration_minutes=num_questions * 1,  # Assuming 1 min per question
-                is_mock=False
+        # Get quiz details from request
+        category = request.data.get('category')
+        title = request.data.get('title')
+        level = request.data.get('level', 'easy')
+        num_questions = request.data.get('num_questions', 10)
+        duration_seconds = request.data.get('duration_seconds', 600)
+        additional_instructions = request.data.get('additional_instructions', '')
+        
+        # Validate required fields
+        if not category or not title:
+            return Response(
+                {"error": "Category and title are required"},
+                status=status.HTTP_400_BAD_REQUEST
             )
-
-            return Response({
-                "quiz_id": quiz.quiz_id,
-                "message": "Quiz configuration created successfully",
-                "is_new": True
-            }, status=status.HTTP_201_CREATED)
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class StartQuizView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, quiz_id):
-        quiz = get_object_or_404(Quiz, quiz_id=quiz_id)
-        
-        # Check for existing incomplete attempt to resume
-        existing_attempt = QuizHistory.objects.filter(
-            user=request.user, 
-            quiz=quiz, 
-            completed_at__isnull=True
-        ).first()
-
-        if existing_attempt:
-            return Response({
-                "attempt_id": existing_attempt.id,
-                "quiz_id": quiz.quiz_id,
-                "title": quiz.title,
-                "duration_minutes": quiz.duration_minutes,
-                "questions": existing_attempt.questions
-            }, status=status.HTTP_200_OK)
-        
-        # Generate questions at runtime using Gemini
-        # User confirmed questions should only be generated when starting the quiz
-        
-        generated_data, error_msg = generate_quiz_content(
-            quiz.topic, 
-            quiz.difficulty_level, 
-            quiz.num_questions
-        )
-        
-        if not generated_data:
-                return Response(
-                {"error": f"Failed to generate questions: {error_msg}"}, 
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
+        try:
+            # Step 1: Generate unique quiz_id
+            logger.info(f"Generating quiz: {title} - {category}")
+            quiz_id = generate_unique_quiz_id()
+            logger.info(f"Generated quiz_id: {quiz_id}")
+            
+            # Step 2: Generate questions using Gemini
+            logger.info(f"Calling Gemini API for {num_questions} questions")
+            questions_data, error_msg = generate_quiz_questions(
+                category=category,
+                title=title,
+                level=level,
+                num_questions=num_questions,
+                additional_instructions=additional_instructions
             )
             
-        questions_data = generated_data.get('questions', [])
-        
-        # Assign unique IDs to questions
-        for q in questions_data:
-            q['id'] = str(uuid.uuid4())
-
-        # Create QuizHistory entry
-        history = QuizHistory.objects.create(
-            user=request.user,
-            quiz=quiz,
-            total_questions=len(questions_data),
-            questions=questions_data,
-            score=0, # Initial score
-            started_at=timezone.now()
-        )
-        
-        return Response({
-            "attempt_id": history.id,
-            "quiz_id": quiz.quiz_id,
-            "title": quiz.title,
-            "duration_minutes": quiz.duration_minutes,
-            "questions": questions_data
-        }, status=status.HTTP_201_CREATED)
-
-class SubmitQuizView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, attempt_id):
-        history = get_object_or_404(QuizHistory, id=attempt_id, user=request.user)
-        
-        if history.completed_at:
-             return Response(
-                {"error": "This quiz attempt has already been submitted."}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        score = request.data.get('score')
-        user_answers = request.data.get('user_answers', [])
-
-        if score is None:
+            if not questions_data:
+                logger.error(f"Gemini API failed: {error_msg}")
+                return Response(
+                    {"error": "Failed to generate questions", "details": error_msg},
+                    status=status.HTTP_502_BAD_GATEWAY
+                )
+            
+            logger.info(f"Successfully generated {len(questions_data)} questions")
+            
+            # Step 3: Create Quiz and Question objects for CSV
+            with transaction.atomic():
+                # Create quiz
+                quiz = Quiz.objects.create(
+                    quiz_id=quiz_id,
+                    category=category,
+                    title=title,
+                    topic=category,
+                    level=level,
+                    difficulty_level=level,
+                    num_questions=num_questions,
+                    duration_seconds=duration_seconds,
+                    duration_minutes=duration_seconds // 60,
+                    created_by=request.user if request.user.is_authenticated else None,
+                    is_mock=False
+                )
+                
+                # Create question objects
+                question_objects = []
+                for idx, q_data in enumerate(questions_data, start=1):
+                    question = Question(
+                        quiz=quiz,
+                        order=idx,
+                        text=q_data['text'],
+                        question_text=q_data['text'],
+                        options=q_data['options'],
+                        correct_answer=q_data['correct_answer'],
+                        metadata={}
+                    )
+                    question_objects.append(question)
+                
+                # Save to database
+                Question.objects.bulk_create(question_objects)
+                
+                # Step 4: Append to CSV file
+                csv_success = append_quiz_to_csv(quiz, question_objects)
+                if not csv_success:
+                    logger.warning(f"CSV append failed for quiz {quiz_id}")
+                else:
+                    logger.info(f"Successfully saved quiz {quiz_id} to CSV")
+            
+            # Step 5: Return success response
+            return Response({
+                "success": True,
+                "message": "Quiz created successfully",
+                "quiz_id": quiz.quiz_id,
+                "num_questions": len(question_objects),
+                "category": quiz.category,
+                "title": quiz.title,
+                "level": quiz.level
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.error(f"Error creating quiz: {str(e)}")
             return Response(
-                {"error": "Score is required."}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Failed to create quiz", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        history.score = score
-        history.user_answers = user_answers
-        history.completed_at = timezone.now()
-        history.save()
 
-        return Response({"message": "Quiz result saved successfully"}, status=status.HTTP_200_OK)
-
-class MockQuizListView(generics.ListAPIView):
-    serializer_class = QuizSerializer
+class QuizListView(APIView):
+    """
+    Get list of all available quizzes with basic details.
+    """
     permission_classes = [permissions.AllowAny]
 
-    def get_queryset(self):
-        return Quiz.objects.filter(is_mock=True)
+    def get(self, request):
+        try:
+            quizzes = Quiz.objects.all().order_by('-created_at')
+            
+            quiz_list = []
+            for quiz in quizzes:
+                quiz_list.append({
+                    'quiz_id': quiz.quiz_id,
+                    'title': quiz.title,
+                    'category': quiz.category or quiz.topic,
+                    'level': quiz.level or quiz.difficulty_level,
+                    'num_questions': quiz.num_questions,
+                    'duration_seconds': quiz.duration_seconds or (quiz.duration_minutes * 60 if quiz.duration_minutes else 600),
+                })
+            
+            logger.info(f"Returning {len(quiz_list)} quizzes")
+            return Response({
+                'success': True,
+                'quizzes': quiz_list,
+                'count': len(quiz_list)
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error fetching quizzes: {str(e)}")
+            return Response(
+                {"error": "Failed to fetch quizzes", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
-class QuizHistoryView(generics.ListAPIView):
-    serializer_class = QuizHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+class QuizQuestionsView(APIView):
+    """
+    Get all questions for a specific quiz by quiz_id.
+    """
+    permission_classes = [permissions.AllowAny]
 
-    def get_queryset(self):
-        return QuizHistory.objects.filter(user=self.request.user)
+    def get(self, request, quiz_id):
+        try:
+            # Get quiz by quiz_id
+            quiz = Quiz.objects.filter(quiz_id=quiz_id).first()
+            
+            if not quiz:
+                return Response(
+                    {"error": "Quiz not found"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Get all questions for this quiz
+            questions = Question.objects.filter(quiz=quiz).order_by('order')
+            
+            questions_list = []
+            for q in questions:
+                questions_list.append({
+                    'id': q.id,
+                    'order': q.order,
+                    'text': q.text or q.question_text,
+                    'options': q.options,
+                    'correct_answer': q.correct_answer
+                })
+            
+            logger.info(f"Returning {len(questions_list)} questions for quiz {quiz_id}")
+            return Response({
+                'success': True,
+                'quiz_id': quiz.quiz_id,
+                'title': quiz.title,
+                'category': quiz.category or quiz.topic,
+                'level': quiz.level or quiz.difficulty_level,
+                'duration_seconds': quiz.duration_seconds or (quiz.duration_minutes * 60 if quiz.duration_minutes else 600),
+                'questions': questions_list,
+                'total_questions': len(questions_list)
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error fetching quiz questions: {str(e)}")
+            return Response(
+                {"error": "Failed to fetch quiz questions", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-class DeleteQuizHistoryView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
-        delete_all = request.data.get('delete_all', False)
-        ids = request.data.get('ids', [])
-
-        if delete_all:
-            QuizHistory.objects.filter(user=request.user).delete()
-            return Response({"message": "All history deleted successfully"}, status=status.HTTP_200_OK)
-        
-        if ids:
-            QuizHistory.objects.filter(user=request.user, id__in=ids).delete()
-            return Response({"message": "Selected history deleted successfully"}, status=status.HTTP_200_OK)
-
-        return Response({"error": "No action specified"}, status=status.HTTP_400_BAD_REQUEST)

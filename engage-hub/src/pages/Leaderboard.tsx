@@ -3,12 +3,12 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Trophy, 
-  Medal, 
-  Crown, 
-  TrendingUp, 
-  Users, 
+import {
+  Trophy,
+  Medal,
+  Crown,
+  TrendingUp,
+  Users,
   Flame,
   Star,
   ChevronUp,
@@ -71,13 +71,13 @@ const Leaderboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Header */}
-          <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="gradient-primary bg-clip-text text-transparent">Leaderboard</span>
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold mb-4">
+              Global <span className="text-foreground">Leaderboard</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               See how you stack up against the best quiz masters in the world
@@ -171,11 +171,10 @@ const Leaderboard = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {topPlayers.map((player, index) => (
-                      <div 
+                      <div
                         key={player.rank}
-                        className={`flex items-center gap-4 p-4 rounded-lg transition-all hover:bg-muted/50 ${
-                          player.rank <= 3 ? "bg-muted/30" : ""
-                        }`}
+                        className={`flex items-center gap-4 p-4 rounded-lg transition-all hover:bg-muted/50 ${player.rank <= 3 ? "bg-muted/30" : ""
+                          }`}
                       >
                         <div className="w-10 flex justify-center">
                           {getRankIcon(player.rank)}
@@ -214,7 +213,7 @@ const Leaderboard = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {topPlayers.slice(0, 5).map((player, index) => (
-                      <div 
+                      <div
                         key={player.rank}
                         className="flex items-center gap-4 p-4 rounded-lg hover:bg-muted/50 transition-all"
                       >
@@ -252,7 +251,7 @@ const Leaderboard = () => {
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {leaders.map((leader) => (
-                          <div 
+                          <div
                             key={leader.rank}
                             className={`p-4 rounded-lg ${getRankGradient(leader.rank)} text-white text-center`}
                           >

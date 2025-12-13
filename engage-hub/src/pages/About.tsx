@@ -68,7 +68,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-hero opacity-10" />
@@ -77,7 +77,7 @@ const About = () => {
             About QuizGen
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-            Revolutionizing learning through AI-powered quiz generation. Our mission is to make knowledge 
+            Revolutionizing learning through AI-powered quiz generation. Our mission is to make knowledge
             acquisition engaging, personalized, and accessible to everyone, everywhere.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
@@ -98,15 +98,15 @@ const About = () => {
       <section className="py-20 px-6 bg-card/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl font-bold mb-4 gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 text-foreground">
               Powered by Advanced AI
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our cutting-edge machine learning models analyze millions of data points to generate 
+              Our cutting-edge machine learning models analyze millions of data points to generate
               questions that are contextually relevant, appropriately challenging, and pedagogically sound.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 animate-fade-in-scale">
             <Card className="border-primary/20 card-shadow hover:card-shadow-hover transition-all duration-300 hover:scale-105">
               <CardContent className="p-8 text-center">
@@ -151,14 +151,14 @@ const About = () => {
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl font-bold mb-4 gradient-secondary bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 text-foreground">
               Why Choose QuizGen?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Experience the future of learning with features designed to maximize engagement and retention.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div
@@ -177,14 +177,14 @@ const About = () => {
       <section className="py-20 px-6 bg-card/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="text-4xl font-bold mb-4 gradient-accent bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 text-foreground">
               What Our Users Say
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Join thousands of satisfied learners who've transformed their knowledge journey with QuizGen.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
               <Card

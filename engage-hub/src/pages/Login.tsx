@@ -3,9 +3,50 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain, Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, FormEvent } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login, loading } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validateForm = () => {
+    const errors: { email?: string; password?: string } = {};
+
+    if (!email) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = "Email is invalid";
+    }
+
+    if (!password) {
+      errors.password = "Password is required";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      await login(email, password);
+      navigate("/dashboard");
+    } catch (error) {
+      // Error handling is done in the auth context
+      console.error("Login error:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 p-4">
       <div className="w-full max-w-md animate-fade-in-scale">
@@ -27,7 +68,7 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -37,8 +78,14 @@ const Login = () => {
                     type="email"
                     placeholder="you@example.com"
                     className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
                   />
                 </div>
+                {formErrors.email && (
+                  <p className="text-sm text-red-500">{formErrors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -49,8 +96,14 @@ const Login = () => {
                     type="password"
                     placeholder="••••••••"
                     className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
                   />
                 </div>
+                {formErrors.password && (
+                  <p className="text-sm text-red-500">{formErrors.password}</p>
+                )}
               </div>
               <div className="flex items-center justify-between text-sm">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -61,8 +114,22 @@ const Login = () => {
                   Forgot password?
                 </a>
               </div>
-              <Button type="submit" className="w-full gradient-primary text-white font-semibold py-6 text-lg">
-                Sign In
+              <Button
+                type="submit"
+                className="w-full gradient-primary text-white font-semibold py-6 text-lg"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Logging in...
+                  </>
+                ) : (
+                  "Login"
+                )}
               </Button>
             </form>
 

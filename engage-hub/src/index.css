@@ -170,4 +170,22 @@ All colors MUST be HSL.
   .hover-lift:hover {
     transform: translateY(-4px);
   }
+
+  /* Custom Scrollbar Styles */
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.2);
+    border-radius: 4px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
+  }
 }
