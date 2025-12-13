@@ -63,13 +63,27 @@ const Dashboard = () => {
     fetchQuizzes();
   }, []);
 
-  // Fetch recent quiz attempts
+  // Fetch recent quiz attempts with cache
   useEffect(() => {
     const fetchAttempts = async () => {
       try {
+        // Try to use cache first
+        const { default: cacheService } = await import('@/lib/cacheService');
+        const cachedData: any = cacheService.get('quiz_history');
+
+        if (cachedData) {
+          setRecentAttempts((cachedData.data?.attempts || []).slice(0, 2));
+          setLoadingAttempts(false);
+        }
+
+        // Fetch fresh data (will update if cache was stale)
         const response = await api.getQuizHistory();
         const data: any = response;
-        setRecentAttempts((data.data?.attempts || []).slice(0, 2)); // Access data.data.attempts
+        const attempts = (data.data?.attempts || []).slice(0, 2);
+        setRecentAttempts(attempts);
+
+        // Update cache
+        cacheService.set('quiz_history', response);
       } catch (error) {
         console.error('Failed to fetch quiz history:', error);
       } finally {
@@ -79,13 +93,22 @@ const Dashboard = () => {
     fetchAttempts();
   }, []);
 
-  // Fetch stats summary
+  // Fetch stats summary with cache
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        const { default: cacheService } = await import('@/lib/cacheService');
+        const cachedData: any = cacheService.get('stats_summary');
+
+        if (cachedData) {
+          setStatsSummary(cachedData.data || {});
+          setLoadingStats(false);
+        }
+
         const response = await api.getHistorySummary();
         const data: any = response;
         setStatsSummary(data.data || {});
+        cacheService.set('stats_summary', response);
       } catch (error) {
         console.error('Failed to fetch stats:', error);
       } finally {
@@ -119,13 +142,22 @@ const Dashboard = () => {
   const [streak, setStreak] = useState<any>(null);
   const [loadingStreak, setLoadingStreak] = useState(true);
 
-  // Fetch user streak
+  // Fetch user streak with cache
   useEffect(() => {
     const fetchStreak = async () => {
       try {
+        const { default: cacheService } = await import('@/lib/cacheService');
+        const cachedData: any = cacheService.get('user_streak');
+
+        if (cachedData) {
+          setStreak(cachedData.data || {});
+          setLoadingStreak(false);
+        }
+
         const response = await api.getUserStreak();
         const data: any = response;
         setStreak(data.data || {});
+        cacheService.set('user_streak', response);
       } catch (error) {
         console.error('Failed to fetch streak:', error);
       } finally {
@@ -504,7 +536,7 @@ const Dashboard = () => {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
+                  <Button
                     className="w-full gradient-primary text-white justify-start"
                     onClick={() => setShowCreateDialog(true)}
                   >

@@ -40,7 +40,7 @@ const Login = () => {
 
     try {
       await login(email, password);
-      // Navigation is handled automatically by PublicRoute
+      navigate("/dashboard");
     } catch (error) {
       // Error handling is done in the auth context
       console.error("Login error:", error);

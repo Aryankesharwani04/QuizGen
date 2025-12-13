@@ -31,6 +31,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import { calculateLevel } from "@/lib/levelUtils";
 import { useToast } from "@/hooks/use-toast";
+import { TOPICS } from "@/lib/topics";
 
 const Profile = () => {
   const { user, checkAuth } = useAuth();
@@ -57,22 +58,45 @@ const Profile = () => {
   // Calculate level from XP
   const levelInfo = calculateLevel(xp);
 
-  // Fetch stats on mount
+  // Fetch stats on mount with cache
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        const { default: cacheService } = await import('@/lib/cacheService');
+
+        // Load from cache first for instant display
+        const cachedSummary: any = cacheService.get('stats_summary');
+        const cachedStreak: any = cacheService.get('user_streak');
+        const cachedXP: any = cacheService.get('user_xp');
+
+        if (cachedSummary) setStatsSummary(cachedSummary.data || {});
+        if (cachedStreak) setStreak(cachedStreak.data || {});
+        if (cachedXP) setXP(cachedXP.data?.xp_score || 0);
+
+        if (cachedSummary && cachedStreak && cachedXP) {
+          setLoadingStats(false);
+        }
+
+        // Fetch fresh data in background
         const [summaryRes, streakRes, xpRes] = await Promise.all([
           api.getHistorySummary(),
           api.getUserStreak(),
           api.getUserXP()
         ]);
-        // Backend wraps in {success, message, data}, so access .data
+
         const summaryData: any = summaryRes;
         const streakData: any = streakRes;
         const xpData: any = xpRes;
+
         setStatsSummary(summaryData.data || {});
         setStreak(streakData.data || {});
         setXP(xpData.data?.xp_score || 0);
+
+        // Update cache
+        cacheService.set('stats_summary', summaryRes);
+        cacheService.set('user_streak', streakRes);
+        cacheService.set('user_xp', xpRes);
+
         console.log('Stats fetched:', {
           summary: summaryData.data,
           streak: streakData.data,
@@ -94,13 +118,8 @@ const Profile = () => {
     }
   });
 
-  // Predefined preference options
-  const availablePreferences = [
-    'Art', 'Entertainment', 'Study', 'Science', 'Music',
-    'Sports', 'Technology', 'History', 'Literature', 'Mathematics',
-    'Physics', 'Chemistry', 'Biology', 'Geography', 'Movies',
-    'Gaming', 'Cooking', 'Travel', 'Photography', 'Fashion'
-  ];
+  // Predefined preference options from topics
+  const availablePreferences = TOPICS;
 
   // Get user's initials for avatar
   const getInitials = (name: string) => {
