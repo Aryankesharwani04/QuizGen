@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+573915,Technology & Computing,DevOps,Hard,1200,Which of the following tools are commonly used for container orchestration in DevOps?,Docker,Kubernetes,Gradle,Jenkins,Kubernetes
+573915,Technology & Computing,DevOps,Hard,1200,"In DevOps, what does 'IaC' stand for?",Infrastructure as Code,Innovations and Configurations,Internet as a Commodity,Instance Automated Control,Infrastructure as Code
+573915,Technology & Computing,DevOps,Hard,1200,What Git command is used to create a copy of a repository to work on locally?,git fetch,git clone,git commit,git init,git clone
+573915,Technology & Computing,DevOps,Hard,1200,Which DevOps practice involves frequently integrating code into a shared repository?,Continuous Delivery,Version Control,Continuous Integration,Infrastructure Automation,Continuous Integration
+573915,Technology & Computing,DevOps,Hard,1200,What is the primary purpose of Ansible in a DevOps pipeline?,Containerization,Build Automation,Configuration Management,Source Control Management,Configuration Management
+573915,Technology & Computing,DevOps,Hard,1200,Which HTTP method is typically used to update an existing resource in RESTful APIs?,DELETE,POST,PUT,GET,PUT
+573915,Technology & Computing,DevOps,Hard,1200,Which type of testing is performed to validate the individual components or units of a software system?,User Acceptance Testing,Integration Testing,Unit Testing,Performance Testing,Unit Testing
+573915,Technology & Computing,DevOps,Hard,1200,Which tool is most suited for monitoring logs and metrics in real-time in a DevOps environment?,Terraform,Nagios,Prometheus,Chef,Prometheus
+573915,Technology & Computing,DevOps,Hard,1200,"In DevOps, what term refers to identifying and resolving issues in a continuous delivery pipeline before they affect production?",Contingency planning,Shift-left testing,Mean-time-to-recovery,Continuous Deployment,Shift-left testing
+573915,Technology & Computing,DevOps,Hard,1200,Which of the following tools is NOT typically used for containerization in DevOps?,Docker,Podman,Terraform,LXC,Terraform

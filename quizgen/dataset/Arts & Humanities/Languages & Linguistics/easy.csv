@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,What is the largest language family in the world?,Sino-Tibetan,Indo-European,Afro-Asiatic,Niger-Congo,OptionB
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,Which of the following languages is not a Romance language?,French,Italian,German,Spanish,OptionC
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,What is the term for the study of the structure of words and how they are formed?,Morphology,Syntax,Phonology,Semantics,OptionA
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,Which language is spoken by the most people as a native language?,English,Spanish,Mandarin Chinese,Arabic,OptionC
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,What is the term for a word that has the same spelling but different meanings?,Homophone,Homograph,Synonym,Antonym,OptionB
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,Which of the following languages is an agglutinative language?,English,Russian,Japanese,Turkish,OptionD
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,What is the term for the study of language in relation to its social context?,Sociolinguistics,Psycholinguistics,Anthropological linguistics,Historical linguistics,OptionA
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,Which language is known for its complex system of tones?,English,Spanish,Mandarin Chinese,Arabic,OptionC
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,What is the term for a word that has the same pronunciation but different meanings?,Homograph,Homophone,Synonym,Antonym,OptionB
+731023,Arts & Humanities,Languages & Linguistics,Easy,600,Which of the following languages is a polysynthetic language?,English,Inuktitut,Spanish,French,OptionB

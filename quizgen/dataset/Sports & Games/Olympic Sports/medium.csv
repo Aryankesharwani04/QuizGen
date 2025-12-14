@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+142360,Sports & Games,Olympic Sports,Medium,900,Which sport made its Olympic debut at the 2020 Tokyo Games?,Karate,Archery,Table Tennis,Gymnastics,Karate
+142360,Sports & Games,Olympic Sports,Medium,900,In which Olympic sport do athletes compete in events like slalom and giant slalom?,Snowboarding,Figure Skating,Alpine Skiing,Cross-Country Skiing,Alpine Skiing
+142360,Sports & Games,Olympic Sports,Medium,900,Which of these sports is NOT part of the modern Olympic pentathlon?,Swimming,Fencing,Cycling,Equestrian Show Jumping,Cycling
+142360,Sports & Games,Olympic Sports,Medium,900,How many players are on a team in Olympic field hockey?,9,11,7,13,11
+142360,Sports & Games,Olympic Sports,Medium,900,Which Olympic sport involves a combination of cross-country skiing and rifle shooting?,Nordic Combined,Biathlon,Skeleton,Bobsleigh,Biathlon
+142360,Sports & Games,Olympic Sports,Medium,900,"In Olympic judo, what is the highest score a player can achieve with a single move?",Waza-ari,Yuko,Koka,Ippon,Ippon
+142360,Sports & Games,Olympic Sports,Medium,900,Which of the following is a category in Olympic weightlifting?,Snatch,Squat,Bench Press,Deadlift,Snatch
+142360,Sports & Games,Olympic Sports,Medium,900,What is the maximum number of sets played in an Olympic beach volleyball match?,5,3,7,2,3
+142360,Sports & Games,Olympic Sports,Medium,900,Which sport was removed from the Olympics after 2008 but returned in 2016?,Golf,Rugby Sevens,Tennis,Badminton,Golf
+142360,Sports & Games,Olympic Sports,Medium,900,"In Olympic archery, what is the maximum distance for the target in the individual event?",50 meters,90 meters,70 meters,30 meters,70 meters

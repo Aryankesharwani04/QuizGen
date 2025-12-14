@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+773905,Fun & Casual,Brain Games,Medium,900,Which part of the brain is primarily responsible for processing visual information?,Cerebellum,Occipital lobe,Frontal lobe,Temporal lobe,Occipital lobe
+773905,Fun & Casual,Brain Games,Medium,900,What type of puzzle is a Sudoku?,Logic puzzle,Word puzzle,Jigsaw puzzle,Math puzzle,Logic puzzle
+773905,Fun & Casual,Brain Games,Medium,900,"Which classic brain game involves finding words hidden forwards, backwards, and diagonally?",Chess,Word Search,Scrabble,Crossword,Word Search
+773905,Fun & Casual,Brain Games,Medium,900,"In the game of Memory, what is the primary skill being tested?",Math skills,Language skills,Recall ability,Coordination,Recall ability
+773905,Fun & Casual,Brain Games,Medium,900,Which brain game uses colored beads and rods to improve arithmetic skills?,Sudoku,Abacus,Chess,Jigsaw,Abacus
+773905,Fun & Casual,Brain Games,Medium,900,Which of these is a strategy game that can stimulate the brain?,Checkers,Hangman,Snake,Bingo,Checkers
+773905,Fun & Casual,Brain Games,Medium,900,What is the minimum number of clues required for a valid Sudoku puzzle?,17,25,81,9,17
+773905,Fun & Casual,Brain Games,Medium,900,Which area of the brain is believed to play a major role in problem-solving and planning?,Temporal lobe,Frontal lobe,Parietal lobe,Occipital lobe,Frontal lobe
+773905,Fun & Casual,Brain Games,Medium,900,"Which famous brain game involves moving discs from one rod to another, following specific rules?",Tower of Hanoi,Rubik's Cube,Sudoku,Tangram,Tower of Hanoi
+773905,Fun & Casual,Brain Games,Medium,900,What brain game challenges players to remove blocks from a tower without causing it to fall?,Jenga,Chess,Scrabble,Boggle,Jenga

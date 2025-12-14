@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+982771,Sports & Games,Cricket,Hard,1200,Which player holds the record for the highest individual score in a Test match?,Don Bradman,Brian Lara,Sachin Tendulkar,Ricky Ponting,Brian Lara
+982771,Sports & Games,Cricket,Hard,1200,In which year was the first ever Cricket World Cup held?,1983,1979,1975,1967,1975
+982771,Sports & Games,Cricket,Hard,1200,Who was the first bowler to take 500 wickets in Test cricket?,Shane Warne,Muttiah Muralitharan,Courtney Walsh,Glenn McGrath,Courtney Walsh
+982771,Sports & Games,Cricket,Hard,1200,Which country has won the most ICC T20 World Cup titles as of 2023?,India,Australia,West Indies,England,West Indies
+982771,Sports & Games,Cricket,Hard,1200,What is the maximum number of overs a bowler can bowl in a single spell in Test cricket?,10 overs,No limit,5 overs,8 overs,No limit
+982771,Sports & Games,Cricket,Hard,1200,Who holds the record for the fastest century in One Day Internationals (ODIs)?,Shahid Afridi,AB de Villiers,Chris Gayle,Virat Kohli,AB de Villiers
+982771,Sports & Games,Cricket,Hard,1200,Which of these cricketers has taken a hat-trick in a World Cup final?,Wasim Akram,Lasith Malinga,Geoff Lawson,No one has achieved this,No one has achieved this
+982771,Sports & Games,Cricket,Hard,1200,What is the term used for a bowler delivering the ball with an illegal bowling action?,No-ball,Wide,Chuck,Dead ball,Chuck
+982771,Sports & Games,Cricket,Hard,1200,Which player has scored the most runs in a single ICC Cricket World Cup tournament?,Sachin Tendulkar,Ricky Ponting,Rohit Sharma,Virat Kohli,Sachin Tendulkar
+982771,Sports & Games,Cricket,Hard,1200,"Under the Duckworth-Lewis-Stern method, what is the primary factor used to adjust targets in rain-affected matches?",Run rate,Resources available,Wickets lost,Overs bowled,Resources available

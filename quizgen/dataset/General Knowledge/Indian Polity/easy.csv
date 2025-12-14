@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+284955,General Knowledge,Indian Polity,Easy,600,Who is the head of the Union Executive in India?,Prime Minister,President,Vice President,Chief Justice,OptionB
+284955,General Knowledge,Indian Polity,Easy,600,Which part of the Indian Constitution enshrines Fundamental Duties?,Part III,Part IV,Part IV-A,Part V,OptionC
+284955,General Knowledge,Indian Polity,Easy,600,What is the maximum gap allowed between two sessions of Parliament?,3 months,6 months,9 months,12 months,OptionB
+284955,General Knowledge,Indian Polity,Easy,600,How many schedules are there in the Indian Constitution?,10,12,15,18,OptionB
+284955,General Knowledge,Indian Polity,Easy,600,Who was the first woman President of India?,Indira Gandhi,Sonia Gandhi,Pratibha Patil,Sarojini Naidu,OptionC
+284955,General Knowledge,Indian Polity,Easy,600,Which article of the Constitution guarantees the Right to Education?,Article 21,Article 24,Article 21A,Article 29,OptionC
+284955,General Knowledge,Indian Polity,Easy,600,The Preamble of the Constitution includes which sequence?,"Liberty, Equality, Fraternity, Justice","Justice, Liberty, Equality, Fraternity","Equality, Justice, Liberty, Fraternity","Fraternity, Liberty, Justice, Equality",OptionB
+284955,General Knowledge,Indian Polity,Easy,600,Who chairs the Rajya Sabha?,Prime Minister,Speaker,Vice President,President,OptionC
+284955,General Knowledge,Indian Polity,Easy,600,Which amendment added the word 'Secular' to the Preamble?,42nd Amendment,44th Amendment,52nd Amendment,61st Amendment,OptionA
+284955,General Knowledge,Indian Polity,Easy,600,What is the tenure of a Rajya Sabha member?,4 years,5 years,6 years,7 years,OptionC

@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+658823,Health & Medicine,Diseases & Disorders,Medium,900,Which of the following is a primary risk factor for developing Type 2 Diabetes?,Regular physical activity,Obesity,Moderate alcohol consumption,High intake of fruits and vegetables,B
+658823,Health & Medicine,Diseases & Disorders,Medium,900,What lifestyle change is most effective in managing hypertension?,Increasing caffeine intake,Reducing potassium in diet,Engaging in regular physical activity,Consuming more processed foods,C
+658823,Health & Medicine,Diseases & Disorders,Medium,900,"In Alzheimer's disease, the accumulation of beta-amyloid plaques and tau tangles leads to:",Muscle degeneration,Sensory loss,Cardiovascular issues,Cognitive decline and memory loss,D
+658823,Health & Medicine,Diseases & Disorders,Medium,900,Which of the following is a common symptom of clinical depression?,Persistent sadness or low mood,Excessive energy and euphoria,Improved concentration and focus,Increased interest in activities,A
+658823,Health & Medicine,Diseases & Disorders,Medium,900,What is the primary goal of long-term asthma management?,Complete cure of the disease,Avoidance of all triggers,Control of symptoms and prevention of attacks,Enhancement of lung capacity,C
+658823,Health & Medicine,Diseases & Disorders,Medium,900,Which factor is a major risk factor for many types of cancer?,Regular medical check-ups,Tobacco use,Balanced diet,Physical activity,B
+658823,Health & Medicine,Diseases & Disorders,Medium,900,What is the best way to prevent influenza?,Taking antibiotics,Getting ample rest,Eating vitamin C-rich foods,Annual flu vaccination,D
+658823,Health & Medicine,Diseases & Disorders,Medium,900,What is a key symptom of COVID-19 that distinguishes it from a common cold?,Loss of taste or smell,Runny nose,Mild cough,Low-grade fever,A
+658823,Health & Medicine,Diseases & Disorders,Medium,900,Rheumatoid arthritis is primarily an:,Infectious disease,Degenerative joint disease,Autoimmune disorder,Metabolic disorder,C
+658823,Health & Medicine,Diseases & Disorders,Medium,900,Which of the following is a modifiable risk factor for coronary heart disease?,Age,High cholesterol levels,Family history,Gender,B

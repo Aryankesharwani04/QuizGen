@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+330757,Coding & Interview Prep,Data Structures,Hard,1200,What is the time complexity of the Floyd Warshall algorithm?,O(n log n),O(n^3),O(n^2),O(n),OptionB
+330757,Coding & Interview Prep,Data Structures,Hard,1200,Which data structure is suitable for finding the closest pair of points in n-dimensional space?,Heap,Stack,Queue,K-D Tree,OptionD
+330757,Coding & Interview Prep,Data Structures,Hard,1200,What is the average time complexity of a hash table search operation?,O(1),O(log n),O(n),O(n log n),OptionA
+330757,Coding & Interview Prep,Data Structures,Hard,1200,Which data structure is often used to implement a LIFO (Last In First Out) ordering?,Queue,Stack,Tree,Graph,OptionB
+330757,Coding & Interview Prep,Data Structures,Hard,1200,What is the space complexity of a binary search tree with n nodes?,O(1),O(log n),O(n),O(n log n),OptionC
+330757,Coding & Interview Prep,Data Structures,Hard,1200,Which data structure is suitable for finding the minimum spanning tree of a graph?,Heap,Stack,Queue,Disjoint Set,OptionD
+330757,Coding & Interview Prep,Data Structures,Hard,1200,What is the time complexity of the quicksort algorithm in the worst-case scenario?,O(n log n),O(n^2),O(n),O(n log log n),OptionB
+330757,Coding & Interview Prep,Data Structures,Hard,1200,Which data structure is often used to implement a priority queue?,Heap,Stack,Queue,Tree,OptionA
+330757,Coding & Interview Prep,Data Structures,Hard,1200,What is the space complexity of a Trie data structure with n nodes?,O(1),O(log n),O(n),O(n log n),OptionC
+330757,Coding & Interview Prep,Data Structures,Hard,1200,Which data structure is suitable for finding the shortest path between two nodes in a graph?,Dijkstra's algorithm,Bellman-Ford algorithm,Floyd Warshall algorithm,A* algorithm,OptionA

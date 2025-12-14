@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+618851,Languages,Foreign Languages,Hard,1200,What is the French translation for 'Where is the restroom?'?,Où est la bibliothèque?,Où est la salle de bain?,Où est la gare?,Où est le restaurant?,OptionB
+618851,Languages,Foreign Languages,Hard,1200,What is the meaning of the Spanish word 'mañana'?,Yesterday,Today,Tomorrow,Morning,OptionC
+618851,Languages,Foreign Languages,Hard,1200,Which of the following Italian words means 'goodbye'?,Ciao,Grazie,Per favore,Scusa,OptionA
+618851,Languages,Foreign Languages,Hard,1200,What is the German word for 'thank you'?,Hallo,Danke,Auf Wiedersehen,Entschuldigung,OptionB
+618851,Languages,Foreign Languages,Hard,1200,How do you say 'I love you' in Portuguese?,Eu odeio você,Eu amo você,Eu gosto de você,Eu sou você,OptionB
+618851,Languages,Foreign Languages,Hard,1200,What is the Chinese character for 'love'?,,,,,OptionA
+618851,Languages,Foreign Languages,Hard,1200,"In Japanese, what is the word for 'water'?",,,,,OptionB
+618851,Languages,Foreign Languages,Hard,1200,What is the Russian translation for 'hello'?,,,,,OptionC
+618851,Languages,Foreign Languages,Hard,1200,How do you say 'I am lost' in Korean?,,,,,OptionD
+618851,Languages,Foreign Languages,Hard,1200,What is the Arabic word for 'peace'?,,,,,OptionA

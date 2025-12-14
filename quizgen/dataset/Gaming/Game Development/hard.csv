@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+585210,Gaming,Game Development,Hard,1200,"Which of these characters in ""Undertale"" can the player NOT go on a date with?",Papyrus,Undyne,Toriel,Alphys,Toriel
+585210,Gaming,Game Development,Hard,1200,"Which game in the ""Monster Hunter"" series introduced the monster ""Gobul""?",Monster Hunter Frontier,Monster Hunter Freedom Unite,Monster Hunter Generations,Monster Hunter Tri,Monster Hunter Tri
+585210,Gaming,Game Development,Hard,1200,"What programming language was used to create the game ""Minecraft""?",Java,C++,HTML 5,Python,Java
+585210,Gaming,Game Development,Hard,1200,"In the Super Mario Bros. Series, what is Yoshi's scientific name?",T. Yoshisaur Munchakoopas,Yossy,T. Yoshisotop Munchakoopas,Yoshi,T. Yoshisaur Munchakoopas
+585210,Gaming,Game Development,Hard,1200,What was the name of the hero in the 80s animated video game 'Dragon's Lair'?,Guy of Gisbourne,Arthur,Dirk the Daring,Sir Toby Belch,Dirk the Daring
+585210,Gaming,Game Development,Hard,1200,"Which Kingdom Hearts game featured the cast of ""The World Ends With You""?",Birth By Sleep,Dream Drop Distance,365/2 Days,Re:Chain of Memories,Dream Drop Distance
+585210,Gaming,Game Development,Hard,1200,"In the title of the game ""Luigi's Mansion"", what is the only letter to not appear with a pair of eyes in it?",s,n,i,m,s
+585210,Gaming,Game Development,Hard,1200,"Which team won the ""Tom Clancy's Rainbow Six Siege"" Invitational Event February 2017 in the PC Category?",Continuum,eRa Eternity,GIFU,Santos Dexterity,Continuum
+585210,Gaming,Game Development,Hard,1200,What is the fastest speed possible in Trackmania²: Stadium?,500 km/h,1000  km/h,320 km/h,100 km/h,1000  km/h
+585210,Gaming,Game Development,Hard,1200,"How long was the World Record Speed Run of Valve Software's ""Half-Life"" that was done in 2014.","12 Minutes, 59 Seconds","5 Minutes, 50 Seconds","45 Minutes, 32 Seconds","20 Minutes, 41 Seconds","20 Minutes, 41 Seconds"

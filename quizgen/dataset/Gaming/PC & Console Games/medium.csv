@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+538052,Gaming,PC & Console Games,Medium,900,Which game series is set in the fictional world of Spira?,Final Fantasy,Kingdom Hearts,Tales of,Xenosaga,Final Fantasy
+538052,Gaming,PC & Console Games,Medium,900,"In 'The Elder Scrolls V: Skyrim', what is the name of the dragon that serves as the primary antagonist?",Paarthurnax,Alduin,Dovahkiin,Mirmulnir,Alduin
+538052,Gaming,PC & Console Games,Medium,900,Which popular game is set in the fictional world of Rapture?,Fallout,Bioshock,Dishonored,Deus Ex,Bioshock
+538052,Gaming,PC & Console Games,Medium,900,"In ' Portal', what is the name of the AI that guides the player?",SHODAN,GLaDOS,HAL 9000,KITT,GLaDOS
+538052,Gaming,PC & Console Games,Medium,900,Which game is known for its 'DayZ' mod that became a standalone game?,Arma 2,Minecraft,World of Warcraft,Counter-Strike,Arma 2
+538052,Gaming,PC & Console Games,Medium,900,What is the name of the protagonist in 'The Last of Us'?,Ellie,Joel,Tess,Marlene,Joel
+538052,Gaming,PC & Console Games,Medium,900,"Which game is set in the city of Los Santos, a parody of Los Angeles?",Grand Theft Auto V,Red Dead Redemption 2,Watch Dogs: Legion,Saints Row IV,Grand Theft Auto V
+538052,Gaming,PC & Console Games,Medium,900,"In 'Overwatch', which hero is a sniper from the Korean special forces?",Widowmaker,Hanzo,McCree,D.Va,D.Va
+538052,Gaming,PC & Console Games,Medium,900,What is the name of the fictional universe in which 'Halo' is set?,Star Wars Universe,Warhammer 40k Universe,Halo Universe,Mass Effect Universe,Halo Universe
+538052,Gaming,PC & Console Games,Medium,900,"Which game is known for its ' Nemesis' system, where enemies can remember the player's actions?",Resident Evil,The Last of Us,Middle-earth: Shadow of Mordor,Dying Light,Middle-earth: Shadow of Mordor

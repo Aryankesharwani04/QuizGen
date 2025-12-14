@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+817597,Science & Innovation,Physics,Medium,900,What is the process by which an object's velocity increases as it moves closer to a source of gravitational pull?,Redshift,Time dilation,Gravitational lensing,Gravitational acceleration,OptionD
+817597,Science & Innovation,Physics,Medium,900,What type of wave requires a physical medium to propagate?,Electromagnetic wave,Mechanical wave,Quantum wave,Transverse wave,OptionB
+817597,Science & Innovation,Physics,Medium,900,Which of the following types of energy is associated with the motion of an object?,Potential energy,Kinetic energy,Thermal energy,Electrical energy,OptionB
+817597,Science & Innovation,Physics,Medium,900,What is the term for the minimum amount of energy required for a particle to escape the gravitational pull of a celestial body?,Escape velocity,Orbital velocity,Gravitational potential,Binding energy,OptionA
+817597,Science & Innovation,Physics,Medium,900,What phenomenon occurs when the frequency of a wave changes due to the relative motion between the source and observer?,Diffraction,Interference,Doppler effect,Refraction,OptionC
+817597,Science & Innovation,Physics,Medium,900,Which of the following is a characteristic of a black hole?,It emits intense radiation,It has a negative mass,It has an event horizon,It is visible to the naked eye,OptionC
+817597,Science & Innovation,Physics,Medium,900,What is the term for the study of the relationship between the motion of objects and the forces acting upon them?,Thermodynamics,Electromagnetism,Mechanics,Optics,OptionC
+817597,Science & Innovation,Physics,Medium,900,What is the process by which a solid changes directly to a gas?,Melting,Boiling,Sublimation,Deposition,OptionC
+817597,Science & Innovation,Physics,Medium,900,What type of force is responsible for the attraction between two objects with mass?,Electromagnetic force,Gravitational force,Strong nuclear force,Weak nuclear force,OptionB
+817597,Science & Innovation,Physics,Medium,900,What is the term for the energy associated with the vibration and rotation of particles in a substance?,Kinetic energy,Potential energy,Thermal energy,Electrical energy,OptionC

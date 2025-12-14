@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+146080,"AI, Ethics & Future",Robotics,Easy,600,What is the primary goal of Artificial Intelligence in robotics?,To replace human workers,To assist and augment human capabilities,To entertain humans,To-destruct human-made objects,OptionB
+146080,"AI, Ethics & Future",Robotics,Easy,600,Which of the following is an ethical concern in robotics?,Job creation,Increased productivity,Bias in decision-making algorithms,Improved efficiency,OptionC
+146080,"AI, Ethics & Future",Robotics,Easy,600,What is the term for a robot that can learn from its environment and adapt to new situations?,Autonomous robot,Artificially intelligent robot,Machine learning robot,Humanoid robot,OptionC
+146080,"AI, Ethics & Future",Robotics,Easy,600,Who is credited with coining the term 'Robotics'?,Isaac Asimov,Marvin Minsky,Joseph Engelberger,Alan Turing,OptionC
+146080,"AI, Ethics & Future",Robotics,Easy,600,Which of the following is a potential future application of robotics?,Space exploration,Medical diagnosis,Environmental monitoring,All of the above,OptionD
+146080,"AI, Ethics & Future",Robotics,Easy,600,What is the primary challenge in developing robots that can interact with humans?,Technical difficulties,Financial constraints,Understanding human behavior,Regulatory issues,OptionC
+146080,"AI, Ethics & Future",Robotics,Easy,600,Which of the following is an example of a robot that uses Artificial Intelligence?,Industrial robot arm,Self-driving car,Drone,Roomba vacuum cleaner,OptionB
+146080,"AI, Ethics & Future",Robotics,Easy,600,What is the term for the study of the ethical implications of robotics?,Robot ethics,Artificial intelligence ethics,Machine morality,Cybernetic morality,OptionA
+146080,"AI, Ethics & Future",Robotics,Easy,600,Which of the following is a benefit of using robots in healthcare?,Reduced costs,Improved accuracy,Enhanced patient experience,All of the above,OptionD
+146080,"AI, Ethics & Future",Robotics,Easy,600,What is the term for the ability of a robot to understand and respond to human emotions?,Social intelligence,Emotional intelligence,Artificial empathy,Human-robot interaction,OptionB

@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+189869,Competitive Exams,Management Entrance Exams,Easy,600,"If the length of a rectangle is 10 cm and the width is 5 cm, what is its area?",50 cm²,25 cm²,100 cm²,30 cm²,50 cm²
+189869,Competitive Exams,Management Entrance Exams,Easy,600,How many letters are there in the word 'MANAGEMENT'?,9,10,8,11,10
+189869,Competitive Exams,Management Entrance Exams,Easy,600,"January, February, March: What month comes next in this sequence?",June,May,April,July,April
+189869,Competitive Exams,Management Entrance Exams,Easy,600,"Complete the sequence: 2, 4, 6, 8, ?",12,10,14,11,10
+189869,Competitive Exams,Management Entrance Exams,Easy,600,What is the value of 8 × 7?,64,54,56,48,56
+189869,Competitive Exams,Management Entrance Exams,Easy,600,"If 3 pens cost ₹45, what is the cost of 1 pen?",₹12,₹15,₹10,₹18,₹15
+189869,Competitive Exams,Management Entrance Exams,Easy,600,What word CANNOT be formed using the letters of the word 'ENTRANCE'?,CANTER,RECENT,TREATY,CENTRE,TREATY
+189869,Competitive Exams,Management Entrance Exams,Easy,600,"Tuesday, Wednesday, Thursday: What comes next?",Saturday,Sunday,Monday,Friday,Friday
+189869,Competitive Exams,Management Entrance Exams,Easy,600,What number is 20 more than 35?,50,45,55,65,55
+189869,Competitive Exams,Management Entrance Exams,Easy,600,A number is divisible by 3 if:,The last digit is 3,The number is odd,The sum of its digits is divisible by 3,The number is a perfect square,The sum of its digits is divisible by 3

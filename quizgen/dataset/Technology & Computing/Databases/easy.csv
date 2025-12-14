@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+386091,Technology & Computing,Databases,Easy,600,What is the purpose of a database?,To store and organize data,To create animations,To browse the internet,To design graphics,To store and organize data
+386091,Technology & Computing,Databases,Easy,600,Which of the following is an example of a database management system (DBMS)?,Adobe Photoshop,Oracle,Microsoft Excel,Unity,Oracle
+386091,Technology & Computing,Databases,Easy,600,What does SQL stand for in databases?,Simple Question Language,Structured Query Language,System Quality Language,Standard Query Level,Structured Query Language
+386091,Technology & Computing,Databases,Easy,600,Which of the following is a type of database model?,Hierarchical,Design,Procedural,Visual,Hierarchical
+386091,Technology & Computing,Databases,Easy,600,What kind of data is stored in a relational database?,Data in tables,Data in graphics,Data as images,Data as videos,Data in tables
+386091,Technology & Computing,Databases,Easy,600,Which term refers to a single entry in a database table?,Field,Key,Record,Grid,Record
+386091,Technology & Computing,Databases,Easy,600,What is a primary key in a database?,A column that uniquely identifies each row,The first record in the table,The largest value in the table,A backup of the database,A column that uniquely identifies each row
+386091,Technology & Computing,Databases,Easy,600,Which of the following is a NoSQL database?,MySQL,MongoDB,Oracle,MS Access,MongoDB
+386091,Technology & Computing,Databases,Easy,600,What is the term for data duplication in a database?,Overriding,Indexing,Redundancy,Normalizing,Redundancy
+386091,Technology & Computing,Databases,Easy,600,Which SQL command is used to retrieve data from a database?,SELECT,UPDATE,DELETE,INSERT,SELECT

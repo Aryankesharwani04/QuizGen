@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+960117,Technology & Computing,Data Science & Analytics,Medium,900,What is the primary goal of data normalization in databases?,To reduce redundancy and improve data integrity,To speed up data processing,To convert data into visual formats,To eliminate the need for primary keys,OptionA
+960117,Technology & Computing,Data Science & Analytics,Medium,900,Which library is predominantly used for data manipulation in Python?,TensorFlow,Pandas,Matplotlib,Seaborn,OptionB
+960117,Technology & Computing,Data Science & Analytics,Medium,900,What does the 'k' represent in k-means clustering?,Number of data points,Number of iterations,Number of clusters,Kernel function used,OptionC
+960117,Technology & Computing,Data Science & Analytics,Medium,900,Which characteristic defines Big Data?,Speed,Availability,Volume,Structure,OptionC
+960117,Technology & Computing,Data Science & Analytics,Medium,900,What does ETL stand for in data pipelines?,"Extract, Transform, Load","Encrypt, Test, Log","Estimate, Train, Learn","Enhance, Transfer, Launch",OptionA
+960117,Technology & Computing,Data Science & Analytics,Medium,900,"In supervised learning, what are labels?",The data columns you want to extract,Predicted outputs for the training data,The features used to predict outcomes,Categories used to group the data,OptionB
+960117,Technology & Computing,Data Science & Analytics,Medium,900,Which of the following is used to evaluate the performance of classification algorithms?,Mean Absolute Error,Confusion Matrix,R-Squared,A/B Testing,OptionB
+960117,Technology & Computing,Data Science & Analytics,Medium,900,What is Apache Hadoop used for?,Data visualization,Programming web applications,Distributed storage and processing of Big Data,Database management systems,OptionC
+960117,Technology & Computing,Data Science & Analytics,Medium,900,Which algorithm is commonly used for regression analysis?,Support Vector Machine,Random Forest,Linear Regression,Apriori,OptionC
+960117,Technology & Computing,Data Science & Analytics,Medium,900,What is the output of a Principal Component Analysis (PCA)?,A set of cluster labels,A confusion matrix,A new set of orthogonal features,A training dataset,OptionC

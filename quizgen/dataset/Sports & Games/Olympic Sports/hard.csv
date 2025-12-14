@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+476018,Sports & Games,Olympic Sports,Hard,1200,"Which Olympic sport requires athletes to perform a series of predetermined movements in a specific order, judged on execution and difficulty?",Figure Skating,Gymnastics,Synchronized Swimming,Diving,Gymnastics
+476018,Sports & Games,Olympic Sports,Hard,1200,In which Olympic sport is the 'Fosbury Flop' technique commonly used?,Pole Vault,Long Jump,High Jump,Triple Jump,High Jump
+476018,Sports & Games,Olympic Sports,Hard,1200,Which Olympic sport features a 10-meter platform event as part of its competition?,Water Polo,Swimming,Synchronized Swimming,Diving,Diving
+476018,Sports & Games,Olympic Sports,Hard,1200,Which of these Olympic sports involves a race over a distance of 42.195 kilometers?,Triathlon,Marathon,Race Walking,Cross Country Running,Marathon
+476018,Sports & Games,Olympic Sports,Hard,1200,"In Olympic archery, what is the maximum distance at which competitors shoot at the target in the individual event?",50 meters,60 meters,70 meters,80 meters,70 meters
+476018,Sports & Games,Olympic Sports,Hard,1200,Which Olympic sport combines cross-country skiing and rifle shooting?,Nordic Combined,Biathlon,Alpine Skiing,Freestyle Skiing,Biathlon
+476018,Sports & Games,Olympic Sports,Hard,1200,"In which Olympic sport would you compete using a foil, epee, or saber as a weapon?",Modern Pentathlon,Fencing,Judo,Taekwondo,Fencing
+476018,Sports & Games,Olympic Sports,Hard,1200,Which Olympic sport has events categorized by weight classes and includes both freestyle and Greco-Roman styles?,Boxing,Judo,Wrestling,Karate,Wrestling
+476018,Sports & Games,Olympic Sports,Hard,1200,"In Olympic rowing, how many rowers are in a 'coxed eight' boat, including the coxswain?",7,8,9,10,9
+476018,Sports & Games,Olympic Sports,Hard,1200,"Which Olympic sport, introduced in 2020, involves athletes performing tricks on a halfpipe, slopestyle, and big air events?",Snowboarding,Freestyle Skiing,Skateboarding,BMX Freestyle,Skateboarding

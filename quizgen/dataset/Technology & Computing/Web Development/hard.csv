@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+403018,Technology & Computing,Web Development,Hard,1200,Which HTTP status code indicates a permanent redirection?,302,403,301,500,301
+403018,Technology & Computing,Web Development,Hard,1200,Which JavaScript method is used to serialize an object into a JSON string?,JSON.encode,JSON.stringify,JSON.parse,Object.toJSON,JSON.stringify
+403018,Technology & Computing,Web Development,Hard,1200,What is the purpose of the 'strict' directive in JavaScript?,It improves performance significantly.,It enforces a stricter parsing and error handling on the code.,It allows restricted access to certain functions.,It is used only for compatibility with older browsers.,It enforces a stricter parsing and error handling on the code.
+403018,Technology & Computing,Web Development,Hard,1200,"In a CSS grid layout, what property defines the size of rows?",grid-template-rows,row-gap,grid-column-gap,auto-rows,grid-template-rows
+403018,Technology & Computing,Web Development,Hard,1200,Which of the following is NOT a valid HTML5 element?,picture,canvas,template,frame,frame
+403018,Technology & Computing,Web Development,Hard,1200,What is the purpose of WebAssembly (WASM) in web development?,To enhance browser animations.,To provide minimalistic runtime for Node.js.,To allow high-performance code to run on browsers.,To simplify the creation of REST APIs.,To allow high-performance code to run on browsers.
+403018,Technology & Computing,Web Development,Hard,1200,Which command is used to initialize a new npm project?,npm init,npm config,npm start,npm run,npm init
+403018,Technology & Computing,Web Development,Hard,1200,What does the 'Content-Security-Policy' header protect against?,SQL injection attacks.,Cross-Site Scripting (XSS) attacks.,Session hijacking.,Denial of Service (DoS) attacks.,Cross-Site Scripting (XSS) attacks.
+403018,Technology & Computing,Web Development,Hard,1200,"In React, which hook is used to handle component lifecycle events for functional components?",useRef,useState,useEffect,useMemo,useEffect
+403018,Technology & Computing,Web Development,Hard,1200,Which database system uses the BSON format for data storage?,MySQL,PostgreSQL,MongoDB,SQLite,MongoDB

@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+285321,Arts & Humanities,Literature,Medium,900,Which author wrote the classic novel 'To Kill a Mockingbird'?,F. Scott Fitzgerald,Harper Lee,Jane Austen,J.K. Rowling,Harper Lee
+285321,Arts & Humanities,Literature,Medium,900,Who is the main character in the novel 'The Catcher in the Rye'?,Sherlock Holmes, Holden Caulfield,Huckleberry Finn,Jay Gatsby,Holden Caulfield
+285321,Arts & Humanities,Literature,Medium,900,"Which novel begins with the line 'It was the best of times, it was the worst of times'?",Pride and Prejudice,War and Peace,Great Expectations,A Tale of Two Cities,A Tale of Two Cities
+285321,Arts & Humanities,Literature,Medium,900,Who wrote the poem 'The Road Not Taken'?,Robert Frost,Emily Dickinson,William Wordsworth,Edgar Allan Poe,Robert Frost
+285321,Arts & Humanities,Literature,Medium,900,In what novel does the character of Heathcliff appear?,Jane Eyre,Wuthering Heights,Great Expectations,Oliver Twist,Wuthering Heights
+285321,Arts & Humanities,Literature,Medium,900,Who is the author of the play 'Romeo and Juliet'?,Christopher Marlowe,Ben Jonson,William Shakespeare,John Webster,William Shakespeare
+285321,Arts & Humanities,Literature,Medium,900,"Which novel is set in the fictional town of Maycomb, Alabama?",The Great Gatsby,To Kill a Mockingbird,The Adventures of Huckleberry Finn,The Scarlet Letter,To Kill a Mockingbird
+285321,Arts & Humanities,Literature,Medium,900,Who wrote the novel 'Pride and Prejudice'?,Jane Eyre,Mary Shelley,Emily Bronte,Jane Austen,Jane Austen
+285321,Arts & Humanities,Literature,Medium,900,Which author wrote the dystopian novel '1984'?,Aldous Huxley,George Orwell,Ray Bradbury,Kurt Vonnegut,George Orwell
+285321,Arts & Humanities,Literature,Medium,900,Who is the protagonist of the novel 'The Adventures of Huckleberry Finn'?,Tom Sawyer,Huckleberry Finn,Jim,Mark Twain,Huckleberry Finn

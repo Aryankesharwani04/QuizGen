@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,What is the average speed of the car if it travels 250 miles in 4 hours and 30 minutes?,55 mph,60 mph,56.25 mph,50 mph,OptionC
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"If a bakery sells 250 loaves of bread at $2 each and 100 loaves at $3 each, what is the total revenue?",$700,$800,$750,$850,OptionA
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,A car travels from City A to City B at an average speed of 60 km/h and returns at an average speed of 40 km/h. What is the average speed for the entire trip?,48 km/h,50 km/h,55 km/h,52 km/h,OptionA
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"If a person invests $1000 at a 5% annual interest rate, how much will they have after 2 years?",$1050,$1102.50,$1100,$1150,OptionB
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"A survey found that 75% of respondents prefer coffee and 25% prefer tea. If 200 people were surveyed, how many prefer tea?",40,60,50,30,C
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"A water tank can hold 1000 liters of water. If 300 liters of water are already in the tank, what percentage of the tank is filled?",25%,30%,35%,40%,OptionB
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"A company has 500 employees and each employee produces 20 units of product per day. If the company operates 5 days a week, how many units of product are produced per week?",5000,10000,25000,50000,OptionC
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"A student scored 85, 90, and 78 on three tests. What is their average score?",84.33,85.33,86.33,87.33,OptionA
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"A car rental company charges $40 per day plus $0.25 per mile. If a customer rents a car for 3 days and drives 200 miles, what is the total cost?",$160,$180,$200,$220,OptionB
+693949,Logical & Aptitude Reasoning,Data Interpretation,Hard,1200,"A group of friends want to split a bill evenly. If the bill is $120 and there are 8 friends, how much will each friend pay?",$12,$15,$18,$20,OptionB

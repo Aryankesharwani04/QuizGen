@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+718884,Technology & Computing,Programming Languages,Medium,900,Which programming language is primarily used for web development and is known for being embedded in HTML?,Python,JavaScript,C++,Ruby,JavaScript
+718884,Technology & Computing,Programming Languages,Medium,900,Which keyword is used to declare a variable in Python?,let,dim,var,"None, Python doesn’t use a specific keyword for variable declaration.","None, Python doesn’t use a specific keyword for variable declaration."
+718884,Technology & Computing,Programming Languages,Medium,900,Which language is known for its use in scientific computing and data analysis?,C#,Java,R,Swift,R
+718884,Technology & Computing,Programming Languages,Medium,900,Which programming paradigm is emphasized in functional programming?,Object-oriented programming,Imperative programming,Declarative programming,Functional programming focuses on state transformation.,Declarative programming
+718884,Technology & Computing,Programming Languages,Medium,900,What is the file extension commonly used for Java source code files?,.py,.java,.cpp,.js,.java
+718884,Technology & Computing,Programming Languages,Medium,900,"Which programming language is renowned for its 'Write Once, Run Anywhere' capability?",Ruby,Java,Go,C,Java
+718884,Technology & Computing,Programming Languages,Medium,900,What does HTML stand for?,High-Level Text Markup,HyperText Markup Language,HyperLink and Text Machine Learning,Hyper Tool Language,HyperText Markup Language
+718884,Technology & Computing,Programming Languages,Medium,900,Which programming language is commonly used to build Android mobile applications?,Swift,C#,Java,PHP,Java
+718884,Technology & Computing,Programming Languages,Medium,900,What does SQL stand for in programming?,System Query Logic,Structured Query Language,Semantic Question Language,Sequential Query Listing,Structured Query Language
+718884,Technology & Computing,Programming Languages,Medium,900,Which programming language is primarily used for iOS and macOS native app development?,Objective-C,Swift,Kotlin,Java,Swift

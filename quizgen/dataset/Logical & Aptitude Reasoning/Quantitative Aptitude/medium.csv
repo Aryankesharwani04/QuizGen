@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"If all roses are flowers and some flowers fade quickly, which of the following is definitely true?",All flowers are roses.,Some roses fade quickly.,No rose fades quickly.,All flowers fade quickly.,Some roses fade quickly.
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"Find the odd one out: 3, 5, 11, 18, 29",5,18,11,29,18
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"A man walks 5 km North, then turns right and walks 3 km. Which direction is he facing now?",South,West,East,North,East
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"In a certain code, FIGHT is written as VSRUF. How is PEACE written?",KVZXR,KVXZV,KVZXV,KVYXV,KVZXV
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"Which number comes next in the series: 2, 6, 12, 20, 30, ?",40,42,36,44,42
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"If the day before yesterday was Monday, what day will it be 3 days from today?",Saturday,Thursday,Monday,Sunday,Saturday
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"If P is the father of Q, and Q is the sister of R, what is R to P?",Son or daughter,Uncle,Cousin,Mother,Son or daughter
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"Find the missing term: ACE, EGI, IKM, __",MOP,MOQ,MNP,MOR,MOQ
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"If all squares are rectangles and all rectangles are parallelograms, which statement is true?",All parallelograms are rectangles.,All rectangles are squares.,All squares are parallelograms.,Some squares are rectangles.,All squares are parallelograms.
+577426,Logical & Aptitude Reasoning,Quantitative Aptitude,Medium,900,"Five friends are sitting in a row. A is to the left of B, but right of C. D is at the right end. Who is in the middle?",B,C,A,D,A

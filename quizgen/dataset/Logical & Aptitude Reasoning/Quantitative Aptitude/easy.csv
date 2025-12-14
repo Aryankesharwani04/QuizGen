@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"Which number comes next in this sequence: 2, 4, 6, ?",7,8,10,12,8
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"If APPLE is coded as 1, 2, 2, 3, 4, what is the code for PLEA?","2, 2, 3, 1","1, 2, 3, 4","3, 2, 2, 1","2, 3, 1, 2","2, 2, 3, 1"
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"Which is the odd one out: 12, 14, 16, 18, 21?",14,16,18,21,21
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"Find the next term in the series: A, C, E, ?",D,F,G,H,F
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"Which shape is different from the others: Square, Rectangle, Triangle, Circle?",Square,Triangle,Rectangle,Circle,Circle
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"Select the next number: 3, 6, 9, ?",12,15,18,10,12
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"In the word 'TABLE', if T = 1, A = 2, B = 3, L = 4, E = 5, what is the sum of all the letters?",10,12,15,20,15
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"Fill in the blank: 4, 8, 12, __, 20",14,16,18,13,16
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,Which letter is two places before 'F' in the English alphabet?,D,G,C,E,D
+220226,Logical & Aptitude Reasoning,Quantitative Aptitude,Easy,600,"One morning, Arun saw the sunrise while facing east. Which direction is to his left?",South,North,West,East,North

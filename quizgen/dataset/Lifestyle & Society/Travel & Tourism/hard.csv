@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,"What is the name of the famous prehistoric monument located in Wiltshire, England?",Stonehenge,Avebury,Salisbury Cathedral,Bath Abbey,OptionA
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,Which city is known as the 'City of Canals'?,Rome,Amsterdam,Paris,Venice,OptionD
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,"What is the world's largest waterfall, by width?",Victoria Falls,Iguazu Falls,Niagara Falls,Angel Falls,OptionB
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,The Great Barrier Reef is located off the coast of which country?,Fiji,Australia,Papua New Guinea,Solomon Islands,OptionB
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,The ancient city of Petra is located in which modern-day country?,Egypt,Jordan,Israel,Turkey,OptionB
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,"The city of Kyoto is known for its temples and gardens, and is located on which Japanese island?",Hokkaido,Honshu,Kyushu,Shikoku,OptionB
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,The famous 'Taj Mahal' is located in which Indian city?,Mumbai,Delhi,Agra,Jaipur,OptionC
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,The famous 'Easter Island' is part of which country?,Chile,Peru,Ecuador,Argentina,OptionA
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,The ancient city of Angkor Wat is located in which country?,Thailand,Cambodia,Laos,Myanmar,OptionB
+582638,Lifestyle & Society,Travel & Tourism,Hard,1200,The famous ski resort town of Zermatt is located in which European country?,France,Switzerland,Austria,Italy,OptionB

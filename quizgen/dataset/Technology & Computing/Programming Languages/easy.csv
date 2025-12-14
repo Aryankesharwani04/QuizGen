@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+444499,Technology & Computing,Programming Languages,Easy,600,Which programming language is primarily used for web development?,Python,Java,JavaScript,C++,JavaScript
+444499,Technology & Computing,Programming Languages,Easy,600,What is the purpose of the Python 'print()' function?,To write data to a file,To display output,To perform calculations,To define a function,To display output
+444499,Technology & Computing,Programming Languages,Easy,600,Which language is often used for system programming?,Ruby,C,HTML,PHP,C
+444499,Technology & Computing,Programming Languages,Easy,600,What is the primary use of SQL?,To define classes and objects,To interact with databases,To create animations,To build operating systems,To interact with databases
+444499,Technology & Computing,Programming Languages,Easy,600,Which programming language is known for its simplicity and readability?,JavaScript,Python,Assembly,CSS,Python
+444499,Technology & Computing,Programming Languages,Easy,600,Which programming language is most commonly used for Android app development?,Java,Swift,PHP,Ruby,Java
+444499,Technology & Computing,Programming Languages,Easy,600,What does HTML stand for?,HyperText Machine Language,High Transfer Markup Language,HyperText Markup Language,HyperTransfer Machine Language,HyperText Markup Language
+444499,Technology & Computing,Programming Languages,Easy,600,Which programming language is primarily used for creating iOS applications?,Perl,Swift,Java,C#,Swift
+444499,Technology & Computing,Programming Languages,Easy,600,Which language is considered the backbone of web page design?,Python,HTML,C++,Ruby,HTML
+444499,Technology & Computing,Programming Languages,Easy,600,Which programming language is known for its use in data science and machine learning?,C#,Python,Java,Javascript,Python

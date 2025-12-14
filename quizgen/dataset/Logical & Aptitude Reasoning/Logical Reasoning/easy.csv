@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"If all roses are flowers and some flowers fade quickly, which of the following must be true?",All roses fade quickly.,Some roses are flowers.,Some flowers are roses.,No roses fade quickly.,Some flowers are roses.
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"Which number comes next in the pattern: 3, 6, 9, 12, ___?",18,16,15,13,15
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"Anna is taller than Mike, and Mike is taller than Sara. Who is the shortest?",Mike,Anna,Sara,Anna and Sara,Sara
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"If HOUSE is coded as HTRDF, how is MOUSE coded?",NTRDF,MTRDF,MQRST,MTUDF,MTRDF
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"Find the odd one out: Cat, Dog, Rabbit, Car",Rabbit,Cat,Car,Dog,Car
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,Which word does NOT belong with the others?,Apple,Banana,Carrot,Mango,Carrot
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"What is the missing number: 2, 4, 8, 16, ___",20,32,24,28,32
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"John is facing north. He turns 90 degrees right, then 180 degrees left. Which direction is he facing now?",South,West,East,North,West
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"Which of the following does not belong in the sequence: 5, 7, 9, 11, 14",9,7,14,11,14
+337628,Logical & Aptitude Reasoning,Logical Reasoning,Easy,600,"If a triangle has three sides, how many sides does a pentagon have?",Five,Six,Four,Three,Five

@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+848244,Competitive Exams,Banking Exams,Easy,600,What does RBI stand for in the Indian banking system?,Reserve Banking Institution,Royal Banking of India,Reserve Bank of India,Regional Bank of India,Reserve Bank of India
+848244,Competitive Exams,Banking Exams,Easy,600,Which instrument is used by banks for inter-bank lending?,Fixed Deposit,Repo Rate,Savings Account,Bank Draft,Repo Rate
+848244,Competitive Exams,Banking Exams,Easy,600,What is the full form of ATM in banking?,Account Transaction Method,Automated Teller Machine,All Time Money,Alternative Transaction Mode,Automated Teller Machine
+848244,Competitive Exams,Banking Exams,Easy,600,Who controls monetary policy in India?,Ministry of Finance,RBI,Central Bank of India,State Bank of India,RBI
+848244,Competitive Exams,Banking Exams,Easy,600,What does 'NEFT' stand for in banking?,National Enterprise Fund Transfer,Non-Electronic Fund Transaction,National Electronic Funds Transfer,Net Efficiency Fund Transfer,National Electronic Funds Transfer
+848244,Competitive Exams,Banking Exams,Easy,600,Which among the following is a type of savings account?,Current Account,Fixed Deposit Account,Regular Savings Account,Recurring Invoice Account,Regular Savings Account
+848244,Competitive Exams,Banking Exams,Easy,600,What does KYC stand for in the banking sector?,Know Your Customer,Keep Your Cash,Key Yield Certificate,Know Your Country,Know Your Customer
+848244,Competitive Exams,Banking Exams,Easy,600,Which bank is often referred to as the 'Bankers’ Bank' in India?,State Bank of India,Reserve Bank of India,Punjab National Bank,Central Cooperative Bank,Reserve Bank of India
+848244,Competitive Exams,Banking Exams,Easy,600,What does 'IFSC' stand for?,Indian Financial System Code,International Financial System Code,Indian Future Savings Code,Internal Financial Services Code,Indian Financial System Code
+848244,Competitive Exams,Banking Exams,Easy,600,Which of the following is not a type of cheque?,Bearer Cheque,Crossover Cheque,Order Cheque,Cancelled Cheque,Crossover Cheque

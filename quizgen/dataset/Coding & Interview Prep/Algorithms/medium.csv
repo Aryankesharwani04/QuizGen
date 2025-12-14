@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+278312,Coding & Interview Prep,Algorithms,Medium,900,What is the time complexity of the Bubble Sort algorithm?,O(n^2),O(n log n),O(n),O(n!),OptionA
+278312,Coding & Interview Prep,Algorithms,Medium,900,Which algorithm is used to find the shortest path between two nodes in a graph?,Dijkstra's algorithm,Floyd-Warshall algorithm,Bellman-Ford algorithm,Topological sort,OptionA
+278312,Coding & Interview Prep,Algorithms,Medium,900,What is the purpose of the 'pivot' element in the Quick Sort algorithm?,To partition the array around it,To swap the elements in the array,To sort the array recursively,To find the maximum element in the array,OptionA
+278312,Coding & Interview Prep,Algorithms,Medium,900,Which data structure is used to implement a stack?,Array,Linked List,Queue,Tree,OptionB
+278312,Coding & Interview Prep,Algorithms,Medium,900,What is the time complexity of the Binary Search algorithm?,O(n),O(log n),O(n log n),O(n^2),OptionB
+278312,Coding & Interview Prep,Algorithms,Medium,900,Which algorithm is used to find the maximum subarray sum in an array?,Kadane's algorithm,Greedy algorithm,Dynamic programming,Divide and Conquer,OptionA
+278312,Coding & Interview Prep,Algorithms,Medium,900,What is the purpose of the 'memoization' technique in dynamic programming?,To store the results of expensive function calls,To reduce the time complexity of the algorithm,To improve the space complexity of the algorithm,To make the code more readable,OptionA
+278312,Coding & Interview Prep,Algorithms,Medium,900,Which algorithm is used to find the minimum spanning tree of a graph?,Kruskal's algorithm,Prim's algorithm,Boruvka's algorithm,Floyd-Warshall algorithm,OptionA
+278312,Coding & Interview Prep,Algorithms,Medium,900,What is the time complexity of the Merge Sort algorithm?,O(n log n),O(n^2),O(n),O(n!),OptionA
+278312,Coding & Interview Prep,Algorithms,Medium,900,Which algorithm is used to find the maximum flow in a flow network?,Ford-Fulkerson algorithm,Edmonds-Karp algorithm,Dinic's algorithm,Bellman-Ford algorithm,OptionA

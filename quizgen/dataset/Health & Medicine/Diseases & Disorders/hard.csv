@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,What is the primary cause of Parkinson's disease?,Genetic mutation,Environmental toxins,Degeneration of dopamine-producing neurons,Infection,OptionC
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,Which of the following is a characteristic of Multiple Sclerosis?,Demyelination of peripheral nerves,Inflammation of the spinal cord,Destruction of oligodendrocytes,Demyelination of central nervous system,OptionD
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,What is the name of the disease caused by the abnormal formation of blood vessels in the brain?,Cavernous angioma,Arteriovenous malformation,Aneurysm,Stroke,OptionB
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,Which of the following is a symptom of Amyotrophic Lateral Sclerosis (ALS)?,Muscle stiffness,Blindness,Progressive muscle weakness and atrophy,Hearing loss,OptionC
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,What is the term for the recurring episodes of depression and mania?,Schizophrenia,Bipolar disorder,Major depressive disorder,Anxiety disorder,OptionB
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,Which of the following diseases is caused by the deposition of amyloid beta peptides in the brain?,Huntington's disease,Alzheimer's disease,Parkinson's disease,Frontotemporal dementia,OptionB
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,What is the name of the disease characterized by the accumulation of Huntington protein in the brain?,Spinocerebellar ataxia,Chorea,Huntington's disease,Parkinson's disease,OptionC
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,Which of the following is a complication of untreated sleep apnea?,Hypertension,Diabetes,Atrial fibrillation,All of the above,OptionD
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,What is the term for the condition characterized by an abnormal heart rhythm?,Arrhythmia,Tachycardia,Bradycardia,Cardiac arrest,OptionA
+734873,Health & Medicine,Diseases & Disorders,Hard,1200,Which of the following diseases is caused by a deficiency of dopamine and serotonin in the brain?,Parkinson's disease,Alzheimer's disease,Multiple sclerosis,Restless leg syndrome,OptionA

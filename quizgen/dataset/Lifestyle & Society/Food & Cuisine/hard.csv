@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,What is the main ingredient in the traditional French dish 'Bouillabaisse'?,Cod,Seafood,Chicken,Beef,B
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,Which popular Italian dessert translates to 'pick-me-up' or 'lift me up'?,Tiramisu,Cannoli,Panna cotta,Gelato,A
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,What is the name of the popular Korean fermented cabbage dish?,Kimchi,Bibimbap,Bulgogi,Jjajangmyeon,A
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,The popular Indian flatbread 'Naan' is typically baked in which type of oven?,Tandoor,Conventional oven,Microwave,Grill,A
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,Which type of coffee is made by forcing pressurized hot water through finely ground coffee beans?,Drip coffee,Espresso,French press,Cold brew,B
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,The traditional Japanese noodle dish 'Soba' is made from which main ingredient?,Rice,Buckwheat,Wheat,Mung bean,B
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,What is the name of the traditional Mexican sauce made from chocolate and chilies?,Salsa roja,Mole,Salsa verde,Guacamole,B
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,The French culinary term 'Mise en place' refers to what?,Cooking technique,Kitchen organization,Recipe development,Food presentation,B
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,"In Thai cuisine, 'Tom Yum' is a type of?",Curry,Soup,Salad,Stir-fry,B
+999465,Lifestyle & Society,Food & Cuisine,Hard,1200,The Spanish dish 'Paella' originated in which region?,Catalonia,Andalusia,Valenciana,Basque Country,C

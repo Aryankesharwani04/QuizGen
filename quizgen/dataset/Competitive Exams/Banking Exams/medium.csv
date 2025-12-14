@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+360917,Competitive Exams,Banking Exams,Medium,900,Which entity is responsible for the regulation of the banking system in India?,RBI,SBI,SEBI,IRDAI,OptionA
+360917,Competitive Exams,Banking Exams,Medium,900,The term 'Balance of Payment' is most closely associated with which of the following?,Budget Deficit,Value of Goods Exported,International Trade,Capital Formation,OptionC
+360917,Competitive Exams,Banking Exams,Medium,900,What is the minimum age required to open a bank account independently in India?,18 years,16 years,21 years,10 years,OptionD
+360917,Competitive Exams,Banking Exams,Medium,900,What does CRR stand for in the banking industry?,Cash Reserve Regulation,Current Reserve Ratio,Cash Reserve Ratio,Capital Retention Requirement,OptionC
+360917,Competitive Exams,Banking Exams,Medium,900,Which of the following banks merged with Punjab National Bank in 2020?,Canara Bank,United Bank of India,Bank of Baroda,Indian Bank,OptionB
+360917,Competitive Exams,Banking Exams,Medium,900,What is the full form of NEFT?,National Electronic Funds Transit,National Electronic Funds Transfer,Nominal Electronic Financial Transfer,Net Electronic Fund Transfer,OptionB
+360917,Competitive Exams,Banking Exams,Medium,900,Which of the following is NOT a monetary policy tool used by the Reserve Bank of India?,Open Market Operations,Sovereign Wealth Fund,Repo Rate,Bank Rate,OptionB
+360917,Competitive Exams,Banking Exams,Medium,900,What is the objective of the Pradhan Mantri Jan Dhan Yojana?,To promote cashless transactions,To provide banking access to all households,To reduce NPAs in banks,To encourage small-scale businesses,OptionB
+360917,Competitive Exams,Banking Exams,Medium,900,Which type of account is primarily used for instant access to funds without restrictions?,Fixed Deposit Account,Recurring Deposit Account,Savings Account,Current Account,OptionD
+360917,Competitive Exams,Banking Exams,Medium,900,Which of the following is the main reason for non-performing assets in banks?,Lack of banking staff,Loans defaulting,Excess liquidity,Poor marketing strategy,OptionB

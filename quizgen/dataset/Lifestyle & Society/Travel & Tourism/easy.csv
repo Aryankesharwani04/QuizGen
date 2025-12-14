@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,"What is the name of the famous hotel in Paris, France?",The Eiffel Tower Hotel,The Louvre Hotel,The Ritz Paris,The Disneyland Hotel,The Ritz Paris
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,Which city is known as the 'City of Canals'?,Amsterdam,Stockholm,Venice,Copenhagen,Venice
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,What is the world's largest desert?,Gobi Desert,Mojave Desert,Sahara Desert,Atacama Desert,Sahara Desert
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,Which river is the longest in South America?,Amazon River,Parana River,Sao Francisco River,Magdalena River,Amazon River
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,What is the name of the famous waterfall in New York?,Niagara Falls,Yellowstone Falls,Yosemite Falls,Zion Falls,Niagara Falls
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,Which mountain range runs along the border between France and Spain?,The Alps,The Pyrenees,The Carpathian Mountains,The Apennine Mountains,The Pyrenees
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,What is the name of the famous beach in Rio de Janeiro?,Copacabana Beach,Ipanema Beach,Lebanon Beach,Waikiki Beach,Copacabana Beach
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,Which city is the capital of Australia?,Melbourne,Sydney,Canberra,Perth,Canberra
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,"What is the name of the famous theme park in Orlando, Florida?",Disney World,Universal Studios,SeaWorld,Legoland,Disney World
+745507,Lifestyle & Society,Travel & Tourism,Easy,600,Which city is known as the 'City of Golden Gate'?,San Francisco,Los Angeles,New York,Chicago,San Francisco

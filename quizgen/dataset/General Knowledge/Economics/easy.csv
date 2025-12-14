@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+273838,General Knowledge,Economics,Easy,600,What is the primary purpose of a central bank in most countries?,Controlling inflation,Printing currency notes,Managing foreign trade,Regulating stock markets,OptionA
+273838,General Knowledge,Economics,Easy,600,What does GDP stand for in economics?,Gross Domestic Product,General Demand Policy,Global Development Plan,Government Debt Percentage,OptionA
+273838,General Knowledge,Economics,Easy,600,Which term describes the total value of all final goods and services produced within a country in a given year?,National Income,Gross Domestic Product (GDP),Consumer Price Index (CPI),Balance of Payments,OptionB
+273838,General Knowledge,Economics,Easy,600,What is inflation?,A decline in economic activity,A rise in the general price level over time,A decrease in population,An increase in exports,OptionB
+273838,General Knowledge,Economics,Easy,600,Which type of unemployment occurs due to economic downturns?,Structural unemployment,Frictional unemployment,Cyclical unemployment,Seasonal unemployment,OptionC
+273838,General Knowledge,Economics,Easy,600,What is a 'market economy' primarily based on?,Government planning,Supply and demand,Barter system,Non-profit organizations,OptionB
+273838,General Knowledge,Economics,Easy,600,What does 'opportunity cost' refer to?,The cost of producing goods,The next best alternative forgone when making a decision,The total expenses of a business,The price of raw materials,OptionB
+273838,General Knowledge,Economics,Easy,600,Which of these is an example of fiscal policy?,Adjusting interest rates,Changing tax rates,Controlling the money supply,Regulating banks,OptionB
+273838,General Knowledge,Economics,Easy,600,What happens to supply when the price of a product increases?,Supply decreases,Supply remains the same,Supply increases,Supply becomes unpredictable,OptionC
+273838,General Knowledge,Economics,Easy,600,What is 'capital' in economic terms?,Money used for daily expenses,Human skills and knowledge,Physical assets like machinery and tools,Natural resources,OptionC

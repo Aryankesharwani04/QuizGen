@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"In a certain code language, if CAT is coded as 312 and DOG is coded as 415, how will GOD be coded?",415,514,541,451,541
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,Point P is 6 km South of point Q. Point R is 8 km East of point P. Point S is 6 km North of point R. What is the distance between Q and S?,8 km,10 km,12 km,14 km,8 km
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"A sequence is given as 2, 6, 12, 20, __. What is the next number in the sequence?",30,24,28,38,30
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"If PEAR is coded as REAP, TEAR as RATE, how is NEAT coded in that code?",ANTE,EANT,ETNA,TANE,TANE
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"If 1 means addition, 2 means subtraction, 3 means multiplication, and 4 means division, then what is the value of 8 3 4 2 1 10?",32,25,34,30,34
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"In a row of children, Ravi is 15th from the left and 9th from the right. How many children are there in the row?",23,24,25,22,23
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"A man walks 4 km towards North, turns right and walks 6 km. Then he turns right and walks 4 km. How far is he from the starting point?",10 km,8 km,6 km,12 km,6 km
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"Find the odd one out: 121, 144, 169, 196, 225.",121,144,169,196,144
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"If today is Monday, what day will it be after 45 days?",Wednesday,Friday,Sunday,Saturday,Wednesday
+504498,Logical & Aptitude Reasoning,Quantitative Aptitude,Hard,1200,"If 'A' is coded as 2, 'B' as 4, and so on, what is the code for 'CAB'?",246,628,824,244,246

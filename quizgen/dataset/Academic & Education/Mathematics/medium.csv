@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+519258,Academic & Education,Mathematics,Medium,900,"To the nearest whole number, how many radians are in a whole circle?",6,3,4,5,6
+519258,Academic & Education,Mathematics,Medium,900,What is the alphanumeric representation of the imaginary number?,i,e,n,x,i
+519258,Academic & Education,Mathematics,Medium,900,What is the first Mersenne prime exponent over 1000?,1279,2203,1009,1069,1279
+519258,Academic & Education,Mathematics,Medium,900,What type of function is x²+2x+1?,Quadratic,Rational,Linear,Exponential,Quadratic
+519258,Academic & Education,Mathematics,Medium,900,Which mathematician refused the Fields Medal?,Grigori Perelman,Andrew Wiles,Terence Tao,Edward Witten,Grigori Perelman
+519258,Academic & Education,Mathematics,Medium,900,"In a normal distribution, 95% of the data lies within how many standard deviations of the mean?",2,1,3,4,2
+519258,Academic & Education,Mathematics,Medium,900,How many books are in Euclid's Elements of Geometry?,13,8,10,17,13
+519258,Academic & Education,Mathematics,Medium,900,What is the derivative of sin(x),cos(x),csc(x),-cos(x),-sin(x),cos(x)
+519258,Academic & Education,Mathematics,Medium,900,"In the complex plane, multiplying a given function by i rotates it anti-clockwise by how many degrees?",90,180,270,0,90
+519258,Academic & Education,Mathematics,Medium,900,At what temperature does temp in °C equal temp in °F?,-40,+40,0,+100,-40

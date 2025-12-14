@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+291408,Technology & Computing,Web Development,Medium,900,Which HTML tag is used to define a hyperlink?,<a>,<link>,<href>,<hyperlink>,<a>
+291408,Technology & Computing,Web Development,Medium,900,"In CSS, which property is used to change the text color of an element?",text-color,font-color,color,background-color,color
+291408,Technology & Computing,Web Development,Medium,900,What does the 'C' in CSS stand for?,Coding,Cascading,Content,Control,Cascading
+291408,Technology & Computing,Web Development,Medium,900,Which JavaScript method can be used to select an HTML element by its ID?,querySelectorAll,getElementByTagName,getElementById,getElementsByClassName,getElementById
+291408,Technology & Computing,Web Development,Medium,900,What is the purpose of the 'alt' attribute in an <img> HTML tag?,To display alternate text if the image fails to load,To specify the image dimensions,To control the image border,To link the image to a URL,To display alternate text if the image fails to load
+291408,Technology & Computing,Web Development,Medium,900,Which HTTP status code indicates 'Not Found'?,403,404,500,302,404
+291408,Technology & Computing,Web Development,Medium,900,"In JavaScript, what is the result of 'typeof null'?",object,,undefined,boolean,object
+291408,Technology & Computing,Web Development,Medium,900,Which protocol is generally used for secure communication over the web?,HTTP,FTP,HTTPS,TCP,HTTPS
+291408,Technology & Computing,Web Development,Medium,900,What is the main purpose of the <head> tag in HTML?,To define the main content of the webpage,To specify metadata and links to styles/scripts,To create navigation menus,To insert images into the webpage,To specify metadata and links to styles/scripts
+291408,Technology & Computing,Web Development,Medium,900,"In responsive web design, what is the main purpose of media queries?",To display different colors based on the browser,To change the content layout based on screen size,To enable animations on the webpage,To define database parameters,To change the content layout based on screen size

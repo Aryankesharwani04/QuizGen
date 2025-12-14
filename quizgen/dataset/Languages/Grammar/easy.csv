@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+806853,Languages,Grammar,Easy,600,Which word is a noun?,Quickly,Run,Happiness,Blue,Happiness
+806853,Languages,Grammar,Easy,600,What is the correct plural of 'child'?,Childs,Children,Childes,Childies,Children
+806853,Languages,Grammar,Easy,600,Choose the correct sentence.,He go to school every day.,He goes to school every day.,He going to school every day.,He going school every day.,He goes to school every day.
+806853,Languages,Grammar,Easy,600,Which word is an adjective?,Running,Beautiful,Yesterday,Smile,Beautiful
+806853,Languages,Grammar,Easy,600,Select the correct form: She _____ a book right now.,reads,read,is reading,reading,is reading
+806853,Languages,Grammar,Easy,600,Identify the pronoun in this sentence: 'Sarah lost her keys.',Sarah,lost,her,keys,her
+806853,Languages,Grammar,Easy,600,Which sentence uses correct punctuation?,Where is my book.,Where is my book?,Where is my book,"Where is, my book?",Where is my book?
+806853,Languages,Grammar,Easy,600,Which word is the verb in this sentence: 'Birds fly in the sky.',Birds,sky,fly,the,fly
+806853,Languages,Grammar,Easy,600,Choose the sentence with correct subject-verb agreement.,The dogs barks loudly.,The dog bark loudly.,The dogs bark loudly.,The dog barked loudly.,The dogs bark loudly.
+806853,Languages,Grammar,Easy,600,Which word completes the sentence: 'I _____ to music every evening.',listening,listen,listens,listened,listen

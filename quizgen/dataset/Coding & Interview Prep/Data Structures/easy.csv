@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+733846,Coding & Interview Prep,Data Structures,Easy,600,What is the primary purpose of a stack data structure?,To store data in a sorted order,"To provide fast search, insertion, and deletion operations",To implement recursive function calls,To store data in a First-In-First-Out (FIFO) order,OptionC
+733846,Coding & Interview Prep,Data Structures,Easy,600,Which data structure is typically used to implement a graph?,Queue,Stack,Linked List,Adjacency Matrix,OptionD
+733846,Coding & Interview Prep,Data Structures,Easy,600,What is the average time complexity of a binary search algorithm?,O(1),O(log n),O(n),O(n log n),OptionB
+733846,Coding & Interview Prep,Data Structures,Easy,600,Which data structure is commonly used to implement a priority queue?,Heap,Stack,Queue,Linked List,OptionA
+733846,Coding & Interview Prep,Data Structures,Easy,600,What is the primary difference between a set and a multiset?,"A set allows duplicate elements, while a multiset does not","A set does not allow duplicate elements, while a multiset does","A set is ordered, while a multiset is not","A set is unordered, while a multiset is ordered",OptionB
+733846,Coding & Interview Prep,Data Structures,Easy,600,Which data structure is often used to implement a LRU (Least Recently Used) cache?,Queue,Stack,Linked List,Hash Map,OptionC
+733846,Coding & Interview Prep,Data Structures,Easy,600,What is the average time complexity of a hashmap lookup operation?,O(1),O(log n),O(n),O(n log n),OptionA
+733846,Coding & Interview Prep,Data Structures,Easy,600,Which data structure is commonly used to implement a sparse matrix?,Adjacency Matrix,Linked List,Hash Map,Tuple,OptionC
+733846,Coding & Interview Prep,Data Structures,Easy,600,What is the primary purpose of a trie (prefix tree) data structure?,To store data in a sorted order,"To provide fast search, insertion, and deletion operations",To implement autocomplete or prefix matching,To store data in a First-In-First-Out (FIFO) order,OptionC
+733846,Coding & Interview Prep,Data Structures,Easy,600,Which data structure is commonly used to implement a depth-first search (DFS) algorithm?,Queue,Stack,Linked List,Adjacency Matrix,OptionB

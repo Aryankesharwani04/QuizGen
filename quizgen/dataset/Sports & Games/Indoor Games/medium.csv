@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+308248,Sports & Games,Indoor Games,Medium,900,"Which indoor game is played on a board with 64 squares and involves pieces like kings, queens, and knights?",Checkers,Chess,Backgammon,Ludo,Chess
+308248,Sports & Games,Indoor Games,Medium,900,In which indoor sport do players use a cue to strike balls into pockets on a rectangular table?,Table Tennis,Snooker,Air Hockey,Foosball,Snooker
+308248,Sports & Games,Indoor Games,Medium,900,What is the maximum number of players in a standard game of indoor table tennis doubles?,2,6,4,8,4
+308248,Sports & Games,Indoor Games,Medium,900,Which indoor game involves rolling dice and moving tokens around a board to buy properties and build houses?,Scrabble,Cluedo,Monopoly,Risk,Monopoly
+308248,Sports & Games,Indoor Games,Medium,900,"In darts, what is the highest score a player can achieve with a single throw?",50,60,100,20,60
+308248,Sports & Games,Indoor Games,Medium,900,Which indoor game is also known as 'ping pong'?,Badminton,Table Tennis,Squash,Racquetball,Table Tennis
+308248,Sports & Games,Indoor Games,Medium,900,What is the primary objective in the indoor game of carrom?,To score goals with a ball,To pocket coins using a striker,To build structures with tiles,To solve a puzzle on a board,To pocket coins using a striker
+308248,Sports & Games,Indoor Games,Medium,900,"In indoor bowling, how many pins are typically set up for a standard game?",5,8,10,12,10
+308248,Sports & Games,Indoor Games,Medium,900,Which indoor game involves forming words on a board using lettered tiles?,Chess,Scrabble,Checkers,Dominoes,Scrabble
+308248,Sports & Games,Indoor Games,Medium,900,What is the standard size of a regulation foosball table for competitive play?,3 feet long,4.5 feet long,5 feet long,6 feet long,5 feet long

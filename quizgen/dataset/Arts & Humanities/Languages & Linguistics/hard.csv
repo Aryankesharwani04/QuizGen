@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,What is the term for the study of the sound system of languages?,Phonetics,Syntax,Morphology,Semantics,OptionA
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,Which linguistic theory proposes that language is innate to humans?,Behaviorism,Structuralism,Generative Grammar,Functionalism,OptionC
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,What is the term for the process of assigning meaning to words and phrases?,Semantic bleaching,Semantic broadening,Semantic narrowing,Semanticization,OptionD
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,Who is the author of the book 'Language: An Introduction to the Study of Speech'?,Ferdinand de Saussure,Leonard Bloomfield,Edward Sapir,Noam Chomsky,OptionC
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,What is the term for the study of language in its social context?,Sociolinguistics,Psycholinguistics,Anthropological linguistics,Historical linguistics,OptionA
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,"Which language family includes languages such as Spanish, French, and Italian?",Germanic,Slavic,Romance,Indo-Aryan,OptionC
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,What is the term for the process of language change over time?,Language contact,Language convergence,Language divergence,Language evolution,OptionD
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,Who is the author of the book 'Syntactic Structures'?,Noam Chomsky,Ferdinand de Saussure,Leonard Bloomfield,Edward Sapir,OptionA
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,What is the term for the study of the relationship between language and culture?,Linguistic anthropology,Sociolinguistics,Psycholinguistics,Historical linguistics,OptionA
+508243,Arts & Humanities,Languages & Linguistics,Hard,1200,Which linguistic concept refers to the idea that words can have multiple meanings?,Polysemy,Homophony,Homography,Hyponymy,OptionA

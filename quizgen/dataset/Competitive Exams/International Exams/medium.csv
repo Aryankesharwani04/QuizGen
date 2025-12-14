@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+210204,Competitive Exams,International Exams,Medium,900,Which international examination is widely accepted for business school admissions?,IELTS,GRE,GMAT,SAT,GMAT
+210204,Competitive Exams,International Exams,Medium,900,What does the TOEFL primarily assess?,Mathematical skills,English writing and speaking ability,Science reasoning,Management aptitude,English writing and speaking ability
+210204,Competitive Exams,International Exams,Medium,900,Which international exam is required for admissions to undergraduate courses in the USA?,IB Diploma,ACT,PISA,IELTS,ACT
+210204,Competitive Exams,International Exams,Medium,900,The GRE primarily tests candidates on which of the following areas?,Critical thinking and analytical writing,Business acumen,Language proficiency,Engineering concepts,Critical thinking and analytical writing
+210204,Competitive Exams,International Exams,Medium,900,What is the IELTS band score system range?,0-9,1-100,1-10,0-50,0-9
+210204,Competitive Exams,International Exams,Medium,900,The SAT exam includes which of the following sections?,Mathematics and Evidence-Based Reading and Writing,Verbal Ability and English Essays,Physics and Chemistry,Biology and Economics,Mathematics and Evidence-Based Reading and Writing
+210204,Competitive Exams,International Exams,Medium,900,Which of the following exams is required primarily for non-native English speakers to study abroad?,TOEFL,ACT,LSAT,GMAT,TOEFL
+210204,Competitive Exams,International Exams,Medium,900,The LSAT focuses on testing skills for which type of program?,Medical School,Law School,Business Administration,Engineering School,Law School
+210204,Competitive Exams,International Exams,Medium,900,Which international exam is commonly taken by medical school aspirants?,MCAT,SAT,GRE,PISA,MCAT
+210204,Competitive Exams,International Exams,Medium,900,Which of the following exams is designed for students aspiring to study in English-language institutions abroad?,TOEFL,GMAT,CSAT,MCAT,TOEFL

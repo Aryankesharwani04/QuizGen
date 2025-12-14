@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+141328,Technology & Computing,DevOps,Easy,600,What does 'DevOps' stand for?,Developers Operations,Development and Operations,Device Optimization Systems,Development Oriented Processes,Development and Operations
+141328,Technology & Computing,DevOps,Easy,600,Which tool is commonly used for continuous integration in DevOps?,Docker,Jenkins,Git,Kubernetes,Jenkins
+141328,Technology & Computing,DevOps,Easy,600,What is the primary goal of DevOps?,Ensuring security of applications,Improving communication between teams,Achieving faster and more reliable software delivery,Reducing project costs,Achieving faster and more reliable software delivery
+141328,Technology & Computing,DevOps,Easy,600,Which tool is used to manage containerized applications in a DevOps environment?,Kubernetes,Ansible,Terraform,Jenkins,Kubernetes
+141328,Technology & Computing,DevOps,Easy,600,What is a 'pipeline' in DevOps?,"A process for building, testing, and deploying software",A tool for managing source code,A communication strategy between teams,A framework for database management,"A process for building, testing, and deploying software"
+141328,Technology & Computing,DevOps,Easy,600,Which of the following is a version control tool used in DevOps?,Slack,Git,Nagios,Docker,Git
+141328,Technology & Computing,DevOps,Easy,600,What is Docker used for in DevOps?,Writing code,Managing virtual machines,Creating and managing containers,Automating deployments,Creating and managing containers
+141328,Technology & Computing,DevOps,Easy,600,Which term refers to infrastructure being managed as code in DevOps?,Continuous integration,Infrastructure as Code (IaC),Source code automation,Refactoring,Infrastructure as Code (IaC)
+141328,Technology & Computing,DevOps,Easy,600,What is the purpose of a configuration management tool in DevOps?,To monitor application performance,To handle network security,To automate the deployment of applications,To ensure consistency across environments,To ensure consistency across environments
+141328,Technology & Computing,DevOps,Easy,600,Which DevOps practice focuses on merging code changes frequently and testing them automatically?,Continuous delivery,Continuous integration,Agile development,Release management,Continuous integration

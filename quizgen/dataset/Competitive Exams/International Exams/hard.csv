@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+230878,Competitive Exams,International Exams,Hard,1200,Which international exam is widely accepted for graduate-level studies in English-speaking countries?,IELTS,TOEFL,GRE,SAT,GRE
+230878,Competitive Exams,International Exams,Hard,1200,What is the primary focus of the GMAT exam?,Language proficiency,Business and management skills,Undergraduate admissions,Medical school admissions,Business and management skills
+230878,Competitive Exams,International Exams,Hard,1200,Which competitive international exam is mandatory for most law school admissions in the United States?,MCAT,LSAT,GRE,SAT,LSAT
+230878,Competitive Exams,International Exams,Hard,1200,The SAT primarily assesses a student's proficiency in which areas?,Verbal reasoning and logical skills,Mathematics and evidence-based reading and writing,Physics and environmental sciences,Business administration and finance,Mathematics and evidence-based reading and writing
+230878,Competitive Exams,International Exams,Hard,1200,Which international exam is commonly required for medical school applicants in the United States?,ACT,LSAT,MCAT,SAT,MCAT
+230878,Competitive Exams,International Exams,Hard,1200,The TOEFL exam is primarily designed to assess proficiency in what language?,German,Spanish,English,French,English
+230878,Competitive Exams,International Exams,Hard,1200,What is the purpose of the PTE Academic exam?,To assess English skills for academic applications,To measure aptitude for MBA programs,To evaluate knowledge in the medical field,To test proficiency in programming and coding,To assess English skills for academic applications
+230878,Competitive Exams,International Exams,Hard,1200,Which international exam is a standardized test used for college admissions in the United States?,GRE,ACT,TOEFL,GMAT,ACT
+230878,Competitive Exams,International Exams,Hard,1200,The CPE (Cambridge English Proficiency) exam is a test for proficiency in English at which level?,Intermediate (B1),Advanced (C1),Proficient (C2),Elementary (A2),Proficient (C2)
+230878,Competitive Exams,International Exams,Hard,1200,The CEFR (Common European Framework of Reference) is used for assessing language proficiency at international levels. How many levels does the CEFR include?,Five,Six,Four,Eight,Six

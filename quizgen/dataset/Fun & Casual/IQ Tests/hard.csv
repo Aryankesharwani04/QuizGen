@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+869938,Fun & Casual,IQ Tests,Hard,1200,"Which number should come next in the sequence: 2, 6, 12, 20, ?",30,28,32,24,30
+869938,Fun & Casual,IQ Tests,Hard,1200,"Find the odd one out: Square, Triangle, Circle, Rectangle",Circle,Square,Rectangle,Triangle,Circle
+869938,Fun & Casual,IQ Tests,Hard,1200,"If all zibs are blobs and no blobs are flobs, which of the following is true?",Some flobs are zibs,All zibs are flobs,Zibs cannot be flobs,All blobs are flobs,Zibs cannot be flobs
+869938,Fun & Casual,IQ Tests,Hard,1200,"If CAT is coded as 3120, and DOG is coded as 4157, what is the code for GOD?",7514,4571,5714,4157,7514
+869938,Fun & Casual,IQ Tests,Hard,1200,"What comes next in the pattern: J, F, M, A, M, J, J, ?",S,A,O,D,A
+869938,Fun & Casual,IQ Tests,Hard,1200,Jane is 25 years old. Her brother is half her age. How old will her brother be when Jane is 40?,27.5,35,32.5,20,32.5
+869938,Fun & Casual,IQ Tests,Hard,1200,"Which one of these does not belong in the group: 3, 7, 11, 15",11,7,3,15,15
+869938,Fun & Casual,IQ Tests,Hard,1200,"Which is the missing letter in the sequence: A, C, F, J, O, ?",U,S,V,T,U
+869938,Fun & Casual,IQ Tests,Hard,1200,Which is the next shape in: ▲ ▼ ▲ ▼ ?,▲,▼,■,◆,▲
+869938,Fun & Casual,IQ Tests,Hard,1200,"If Apple is to Fruit, then Carrot is to:",Vegetable,Root,Orange,Plant,Vegetable

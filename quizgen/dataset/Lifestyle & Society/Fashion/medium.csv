@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+633721,Lifestyle & Society,Fashion,Medium,900,Which fashion brand is known for its iconic trench coats?,Gucci,Burberry,Prada,Chanel,OptionB
+633721,Lifestyle & Society,Fashion,Medium,900,What is the term for the style of fashion that emerged in the 1970s characterized by flared pants and flowy tops?,Punk Rock,Bohemian,Disco,Retro,OptionB
+633721,Lifestyle & Society,Fashion,Medium,900,Who is the founder of the luxury brand Versace?,Gianni Versace,Donatella Versace,Alessandro Versace,Mario Versace,OptionA
+633721,Lifestyle & Society,Fashion,Medium,900,What is the name of the famous French fashion magazine founded in 1946?,Vogue,Elle,Harper's Bazaar,Marie Claire,OptionB
+633721,Lifestyle & Society,Fashion,Medium,900,Which style of shoe is characterized by a flat heel and a strap that wraps around the ankle?,Loafers,Mules,Sandals,Gladiators,OptionD
+633721,Lifestyle & Society,Fashion,Medium,900,Who is known for popularizing the 'Little Black Dress'?,Coco Chanel,Yves Saint Laurent,Christian Dior,Hubert de Givenchy,OptionA
+633721,Lifestyle & Society,Fashion,Medium,900,What is the term for the process of creating clothing on a large scale using standardized sizes?,Haute Couture,Mass Production,Sustainable Fashion,Fast Fashion,OptionB
+633721,Lifestyle & Society,Fashion,Medium,900,Which fashion designer is known for his avant-garde and provocative designs?,Alexander McQueen,Vivienne Westwood,Jean Paul Gaultier,Thierry Mugler,OptionA
+633721,Lifestyle & Society,Fashion,Medium,900,What is the name of the Italian fashion brand known for its bold and colorful designs?,Gucci,Prada,Versace,Moschino,OptionD
+633721,Lifestyle & Society,Fashion,Medium,900,Which fashion week is considered one of the most prestigious in the world?,London Fashion Week,Paris Fashion Week,Milan Fashion Week,New York Fashion Week,OptionB

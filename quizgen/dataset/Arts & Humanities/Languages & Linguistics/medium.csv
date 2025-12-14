@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,What is the term for the study of the sound system of languages?,Phonetics,Morphology,Syntax,Semantics,OptionA
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,Which of the following languages is an example of a Romance language?,German,French,Chinese,Arabic,OptionB
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,What is the term for the process of assigning meaning to words and phrases in a language?,Pragmatics,Semantics,Syntax,Morphology,OptionB
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,Who is credited with developing the theory of generative grammar?,Ferdinand de Saussure,Leonard Bloomfield,Noam Chomsky,William Dwight Whitney,OptionC
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,What is the term for the study of the structure of words and how they are formed from smaller units?,Syntax,Semantics,Phonology,Morphology,OptionD
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,Which of the following languages is an example of a Slavic language?,Spanish,Russian,Greek,Turkish,OptionB
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,What is the term for the study of language in its social context?,Sociolinguistics,Psycholinguistics,Anthropological Linguistics,Historical Linguistics,OptionA
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,Who is credited with developing the concept of signs and signifiers in language?,Ferdinand de Saussure,Leonard Bloomfield,Noam Chomsky,William Dwight Whitney,OptionA
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,What is the term for the study of the history and development of languages?,Historical Linguistics,Comparative Linguistics,Etymology,Typology,OptionA
+520604,Arts & Humanities,Languages & Linguistics,Medium,900,Which of the following languages is an example of a Germanic language?,French,Spanish,English,Italian,OptionC

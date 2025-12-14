@@ -1,0 +1,11 @@
+QuizID,Category,Subtopic,Level,DurationSeconds,QuestionText,OptionA,OptionB,OptionC,OptionD,CorrectAnswer
+731008,Technology & Computing,Mobile Development,Easy,600,What is the primary programming language used for Android app development?,C++,Java,Python,Ruby,Java
+731008,Technology & Computing,Mobile Development,Easy,600,Which platform is used for iOS app development?,Android Studio,Xcode,Eclipse,Visual Studio,Xcode
+731008,Technology & Computing,Mobile Development,Easy,600,What is React Native primarily used for?,Web Development,Mobile App Development,Database Management,Cloud Computing,Mobile App Development
+731008,Technology & Computing,Mobile Development,Easy,600,Which programming language is commonly used for iOS app development?,Swift,Kotlin,JavaScript,PHP,Swift
+731008,Technology & Computing,Mobile Development,Easy,600,Flutter is a mobile app development framework created by which company?,Facebook,Microsoft,Google,Apple,Google
+731008,Technology & Computing,Mobile Development,Easy,600,What does APK stand for in Android development?,Automatic Program Kit,Android Programming Key,Android Package Kit,Application Programming Kit,Android Package Kit
+731008,Technology & Computing,Mobile Development,Easy,600,What is the base language used for Flutter framework development?,Kotlin,Dart,Swift,Java,Dart
+731008,Technology & Computing,Mobile Development,Easy,600,What is the primary function of the Android Emulator?,Testing Android apps on a virtual device,Converting code to APK,Debugging hardware issues,Creating app templates,Testing Android apps on a virtual device
+731008,Technology & Computing,Mobile Development,Easy,600,"In mobile development, what does the term 'cross-platform' mean?",Apps that work on multiple operating systems,Apps designed for desktop and mobile,Apps with cloud-based storage,Apps with offline functionality,Apps that work on multiple operating systems
+731008,Technology & Computing,Mobile Development,Easy,600,Which technology enables apps to run natively on both Android and iOS?,Flutter,React Native,Xamarin,All of the above,All of the above
