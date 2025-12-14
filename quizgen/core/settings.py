@@ -151,6 +151,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'http://localhost:5173',
     'http://localhost:8081',
+    'http://localhost:8080'
 ]
 
 SESSION_COOKIE_AGE = 1209600
