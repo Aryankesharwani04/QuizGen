@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trophy, Target, Clock, TrendingUp, PlayCircle, CheckCircle2, Plus } from "lucide-react";
+import { Trophy, Clock, PlayCircle, Plus, Target } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { RecentlyCompleted } from "@/components/RecentlyCompleted";
+import { StatsOverview } from "@/components/StatsOverview";
+import { MyCreatedQuizzes } from "@/components/MyCreatedQuizzes";
 
 
 const Dashboard = () => {
@@ -33,10 +36,7 @@ const Dashboard = () => {
   // Quiz list state
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [loadingQuizzes, setLoadingQuizzes] = useState(true);
-
-  // Recent attempts state
-  const [recentAttempts, setRecentAttempts] = useState<any[]>([]);
-  const [loadingAttempts, setLoadingAttempts] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Stats summary state
   const [statsSummary, setStatsSummary] = useState<any>(null);
@@ -63,61 +63,6 @@ const Dashboard = () => {
     fetchQuizzes();
   }, []);
 
-  // Fetch recent quiz attempts with cache
-  useEffect(() => {
-    const fetchAttempts = async () => {
-      try {
-        // Try to use cache first
-        const { default: cacheService } = await import('@/lib/cacheService');
-        const cachedData: any = cacheService.get('quiz_history');
-
-        if (cachedData) {
-          setRecentAttempts((cachedData.data?.attempts || []).slice(0, 2));
-          setLoadingAttempts(false);
-        }
-
-        // Fetch fresh data (will update if cache was stale)
-        const response = await api.getQuizHistory();
-        const data: any = response;
-        const attempts = (data.data?.attempts || []).slice(0, 2);
-        setRecentAttempts(attempts);
-
-        // Update cache
-        cacheService.set('quiz_history', response);
-      } catch (error) {
-        console.error('Failed to fetch quiz history:', error);
-      } finally {
-        setLoadingAttempts(false);
-      }
-    };
-    fetchAttempts();
-  }, []);
-
-  // Fetch stats summary with cache
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { default: cacheService } = await import('@/lib/cacheService');
-        const cachedData: any = cacheService.get('stats_summary');
-
-        if (cachedData) {
-          setStatsSummary(cachedData.data || {});
-          setLoadingStats(false);
-        }
-
-        const response = await api.getHistorySummary();
-        const data: any = response;
-        setStatsSummary(data.data || {});
-        cacheService.set('stats_summary', response);
-      } catch (error) {
-        console.error('Failed to fetch stats:', error);
-      } finally {
-        setLoadingStats(false);
-      }
-    };
-    fetchStats();
-  }, []);
-
   // Category performance state
   const [categoryPerformance, setCategoryPerformance] = useState<any[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -138,34 +83,7 @@ const Dashboard = () => {
     fetchCategoryPerformance();
   }, []);
 
-  // Streak state
-  const [streak, setStreak] = useState<any>(null);
-  const [loadingStreak, setLoadingStreak] = useState(true);
 
-  // Fetch user streak with cache
-  useEffect(() => {
-    const fetchStreak = async () => {
-      try {
-        const { default: cacheService } = await import('@/lib/cacheService');
-        const cachedData: any = cacheService.get('user_streak');
-
-        if (cachedData) {
-          setStreak(cachedData.data || {});
-          setLoadingStreak(false);
-        }
-
-        const response = await api.getUserStreak();
-        const data: any = response;
-        setStreak(data.data || {});
-        cacheService.set('user_streak', response);
-      } catch (error) {
-        console.error('Failed to fetch streak:', error);
-      } finally {
-        setLoadingStreak(false);
-      }
-    };
-    fetchStreak();
-  }, []);
 
   const handleCreateQuiz = async () => {
     if (!quizForm.category || !quizForm.title) {
@@ -185,6 +103,8 @@ const Dashboard = () => {
         description: `Quiz ID: ${response.data.quiz_id} with ${response.data.num_questions} questions`
       });
       setShowCreateDialog(false);
+      // Refresh the created quizzes list
+      setRefreshKey(prev => prev + 1);
       // Reset form
       setQuizForm({
         category: '',
@@ -346,72 +266,17 @@ const Dashboard = () => {
             </DialogContent>
           </Dialog>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Total Quizzes</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStats ? '...' : (statsSummary?.total_quizzes_attempted || 0)}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* My Created Quizzes */}
+          <MyCreatedQuizzes
+            onCreateClick={() => setShowCreateDialog(true)}
+            refreshTrigger={refreshKey}
+            className="mb-8"
+            limit={1}
+            showSeeMore={true}
+          />
 
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Average Score</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStats ? '...' : `${statsSummary?.average_score_percentage || 0}%`}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl gradient-secondary flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Time Spent</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStats ? '...' : `${((statsSummary?.total_time_spent || 0) / 3600).toFixed(1)}h`}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl gradient-accent flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Current Streak</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStreak ? '...' : `${streak?.current_streak || 0} 🔥`}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-success" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Stats Overview */}
+          <StatsOverview className="mb-8" />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* In Progress Section */}
@@ -458,50 +323,7 @@ const Dashboard = () => {
               </Card>
 
               {/* Recent Activity */}
-              <Card className="border-border/50 card-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-success" />
-                    Recently Completed
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {loadingAttempts ? (
-                      <div className="text-center py-8 text-muted-foreground">Loading history...</div>
-                    ) : recentAttempts.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">No quizzes completed yet. Start your first quiz!</div>
-                    ) : (
-                      recentAttempts.map((attempt) => (
-                        <div key={attempt.attempt_id} className="p-4 rounded-lg bg-muted/30">
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <h4 className="font-medium text-foreground">{attempt.title}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                Quiz ID: {attempt.quiz_id} • Score: {attempt.score}/{attempt.total_questions}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-success">{attempt.percentage}%</p>
-                            </div>
-                          </div>
-                          {/* Progress bar for score */}
-                          <Progress value={attempt.percentage} className="h-2 mb-2" />
-                          {/* Review button */}
-                          <div className="flex justify-end">
-                            <Link
-                              to={`/quiz/review/${attempt.attempt_id}`}
-                              className="text-sm text-primary hover:underline cursor-pointer"
-                            >
-                              Review
-                            </Link>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <RecentlyCompleted limit={2} />
             </div>
 
             {/* Sidebar */}
@@ -543,10 +365,12 @@ const Dashboard = () => {
                     <PlayCircle className="w-5 h-5 mr-2" />
                     Create New Quiz
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Trophy className="w-5 h-5 mr-2" />
-                    View Achievements
-                  </Button>
+                  <Link to="/profile#achievements" className="mt-12">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Trophy className="w-5 h-5 mr-2" />
+                      View Achievements
+                    </Button>
+                  </Link>
                   <Link
                     to="/categories"
                     className="w-full justify-start flex items-center border rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"

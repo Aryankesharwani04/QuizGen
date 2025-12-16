@@ -289,7 +289,7 @@ class Quiz(models.Model):
         ('mixed', 'Mixed'),
     ]
 
-    quiz_id = models.CharField(max_length=5, unique=True, db_index=True, help_text="5-digit unique quiz ID")
+    quiz_id = models.CharField(max_length=20, unique=True, db_index=True, help_text="Unique quiz ID")
     category = models.CharField(max_length=255, help_text="Quiz category (e.g., Mathematics, Science)", db_index=True, blank=True, null=True)
     title = models.CharField(max_length=255)
     topic = models.CharField(max_length=255, help_text="Interest or topic of the quiz")

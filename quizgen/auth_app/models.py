@@ -29,6 +29,9 @@ class UserProfile(models.Model):
     # XP System
     xp_score = models.IntegerField(default=0, help_text="Total experience points earned")
     
+    # Quiz Creation Tracking
+    created_quiz_ids = models.JSONField(default=list, blank=True, help_text="List of quiz IDs created by this user")
+    
     # Account security
     is_active = models.BooleanField(default=True, help_text="Whether account is active")
     session_timeout_minutes = models.IntegerField(default=30, help_text="Session timeout in minutes")

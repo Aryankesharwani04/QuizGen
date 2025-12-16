@@ -675,6 +675,8 @@ class SaveQuizAttemptView(APIView):
     def post(self, request):
         from quiz_app.utils import generate_unique_quiz_id
         from django.utils import timezone
+        import csv
+        import os
         
         quiz_id = request.data.get('quiz_id')
         selected_answers = request.data.get('selected_answers', {})
@@ -684,31 +686,118 @@ class SaveQuizAttemptView(APIView):
             return ResponseFormatter.error("quiz_id is required", status_code=400)
         
         try:
+            # First, try to find quiz in database
             quiz = Quiz.objects.filter(quiz_id=quiz_id).first()
-            if not quiz:
-                return ResponseFormatter.error("Quiz not found", status_code=404)
             
-            questions = list(Question.objects.filter(quiz=quiz).order_by('order').values(
-                'id', 'order', 'text', 'question_text', 'options', 'correct_answer'
-            ))
-            
-            score = 0
-            user_answers_list = []
-            for q in questions:
-                q_id = str(q['order'] - 1)
-                user_answer = selected_answers.get(q_id, '')
-                is_correct = user_answer == q['correct_answer']
-                if is_correct:
-                    score += 1
+            if quiz:
+                # Database quiz - use existing logic
+                questions = list(Question.objects.filter(quiz=quiz).order_by('order').values(
+                    'id', 'order', 'text', 'question_text', 'options', 'correct_answer'
+                ))
                 
-                user_answers_list.append({
-                    'question_id': q['id'],
-                    'question_text': q['text'] or q['question_text'],
-                    'user_answer': user_answer,
-                    'correct_answer': q['correct_answer'],
-                    'is_correct': is_correct
-                })
+                score = 0
+                user_answers_list = []
+                for q in questions:
+                    q_id = str(q['order'] - 1)
+                    user_answer = selected_answers.get(q_id, '')
+                    is_correct = user_answer == q['correct_answer']
+                    if is_correct:
+                        score += 1
+                    
+                    user_answers_list.append({
+                        'question_id': q['id'],
+                        'question_text': q['text'] or q['question_text'],
+                        'user_answer': user_answer,
+                        'correct_answer': q['correct_answer'],
+                        'is_correct': is_correct
+                    })
+            else:
+                # Quiz not in database - try to fetch from CSV
+                csv_path = os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    'dataset',
+                    'categoryQuizzes.csv'
+                )
+                
+                if not os.path.exists(csv_path):
+                    return ResponseFormatter.error("Quiz not found in database or CSV", status_code=404)
+                
+                # Fetch quiz data from CSV
+                questions_from_csv = []
+                quiz_info = None
+                
+                with open(csv_path, 'r', encoding='utf-8') as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        if row['QuizID'] == str(quiz_id):
+                            if not quiz_info:
+                                quiz_info = {
+                                    'quiz_id': row['QuizID'],
+                                    'category': row['Category'],
+                                    'subtopic': row['Subtopic'],
+                                    'title': row['Title'],
+                                    'level': row['Level'],
+                                    'duration_seconds': row['DurationSeconds']
+                                }
+                            
+                            questions_from_csv.append({
+                                'question_text': row['QuestionText'],
+                                'options': {
+                                    'A': row['OptionA'],
+                                    'B': row['OptionB'],
+                                    'C': row['OptionC'],
+                                    'D': row['OptionD']
+                                },
+                                'correct_answer': row['CorrectAnswer']
+                            })
+                
+                if not quiz_info:
+                    return ResponseFormatter.error("Quiz not found", status_code=404)
+                
+                # Create a temporary Quiz object for history (not saved to DB)
+                quiz = Quiz(
+                    quiz_id=quiz_info['quiz_id'],
+                    title=quiz_info['title'],
+                    category=quiz_info['category'],
+                    topic=quiz_info['subtopic'],
+                    level=quiz_info['level'],
+                    difficulty_level=quiz_info['level'],
+                    num_questions=len(questions_from_csv),
+                    duration_seconds=int(quiz_info['duration_seconds']) if quiz_info['duration_seconds'] else 600
+                )
+                # Save the temp quiz to DB so it can be referenced in history
+                quiz.save()
+                
+                # Calculate score for CSV quiz
+                score = 0
+                user_answers_list = []
+                questions = []
+                
+                for idx, q in enumerate(questions_from_csv):
+                    q_id = str(idx)
+                    user_answer = selected_answers.get(q_id, '')
+                    is_correct = user_answer == q['correct_answer']
+                    if is_correct:
+                        score += 1
+                    
+                    user_answers_list.append({
+                        'question_id': idx,
+                        'question_text': q['question_text'],
+                        'user_answer': user_answer,
+                        'correct_answer': q['correct_answer'],
+                        'is_correct': is_correct
+                    })
+                    
+                    questions.append({
+                        'id': idx,
+                        'order': idx + 1,
+                        'text': q['question_text'],
+                        'question_text': q['question_text'],
+                        'options': list(q['options'].values()),
+                        'correct_answer': q['correct_answer']
+                    })
             
+            # Create quiz history
             history = QuizHistory.objects.create(
                 user=request.user,
                 quiz=quiz,
@@ -723,6 +812,10 @@ class SaveQuizAttemptView(APIView):
             from auth_app.streak_utils import update_user_streak
             update_user_streak(request.user, history.completed_at)
             
+            # Update XP for the user based on difficulty
+            from auth_app.xp_utils import update_user_xp
+            update_user_xp(request.user, quiz.level or quiz.difficulty_level or 'Easy', score)
+            
             percentage = round((score / len(questions)) * 100) if questions else 0
             
             return ResponseFormatter.success({
@@ -734,6 +827,8 @@ class SaveQuizAttemptView(APIView):
             }, status_code=201)
             
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return ResponseFormatter.error(f"Failed to save: {str(e)}", status_code=500)
 
 
@@ -924,17 +1019,219 @@ class GetUserStreakView(APIView):
 
 class GetUserXPView(APIView):
     """
-    Get user's total XP score.
+    Get user's total XP score calculated from quiz history.
+    XP is awarded based on correct answers and quiz difficulty:
+    - Easy: 5 XP per correct answer
+    - Medium: 10 XP per correct answer  
+    - Hard: 15 XP per correct answer
+    Only first attempts of each quiz count towards XP.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
+            from quiz_app.models import QuizHistory
+            
+            # XP rates per correct answer by difficulty
+            xp_rates = {
+                'easy': 5,
+                'medium': 10,
+                'hard': 15
+            }
+            
+            total_xp = 0
+            quizzes_counted = set()  # Track which quizzes we've counted (for first attempt only)
+            
+            # Get all completed quiz attempts, ordered by completion time
+            history = QuizHistory.objects.filter(
+                user=request.user,
+                completed_at__isnull=False
+            ).select_related('quiz').order_by('completed_at')
+            
+            for attempt in history:
+                quiz_id = attempt.quiz.quiz_id
+                
+                # Only count XP for first attempt of each quiz
+                if quiz_id not in quizzes_counted:
+                    quizzes_counted.add(quiz_id)
+                    
+                    # Get quiz difficulty level
+                    difficulty = (attempt.quiz.level or attempt.quiz.difficulty_level or 'medium').lower()
+                    xp_per_question = xp_rates.get(difficulty, 10)
+                    
+                    # Calculate XP from correct answers
+                    score = attempt.score or 0
+                    xp_earned = score * xp_per_question
+                    total_xp += xp_earned
+            
+            # Update the stored XP score for consistency
             profile = request.user.profile
+            if profile.xp_score != total_xp:
+                profile.xp_score = total_xp
+                profile.save()
             
             return ResponseFormatter.success({
-                'xp_score': profile.xp_score
+                'xp_score': total_xp
             })
             
         except Exception as e:
             return ResponseFormatter.error(f"Failed to fetch XP: {str(e)}", status_code=500)
+
+
+class CreateUserQuizView(APIView):
+    """
+    Create a new quiz with AI-generated questions.
+    Requires authentication and associates quiz with the user.
+    Saves to database and CSV file.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from quiz_app.models import Quiz, Question
+        from quiz_app.utils import generate_unique_quiz_id, append_quiz_to_csv
+        from quiz_app.gemini_utils import generate_quiz_questions
+        from django.db import transaction
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        # Get quiz details from request
+        category = request.data.get('category')
+        title = request.data.get('title')
+        level = request.data.get('level', 'easy')
+        num_questions = request.data.get('num_questions', 10)
+        duration_seconds = request.data.get('duration_seconds', 600)
+        additional_instructions = request.data.get('additional_instructions', '')
+        
+        # Validate required fields
+        if not category or not title:
+            return ResponseFormatter.error("Category and title are required", status_code=400)
+        
+        try:
+            # Step 1: Generate unique quiz_id
+            logger.info(f"Generating quiz: {title} - {category} for user {request.user.email}")
+            quiz_id = generate_unique_quiz_id()
+            logger.info(f"Generated quiz_id: {quiz_id}")
+            
+            # Step 2: Generate questions using Gemini
+            logger.info(f"Calling Gemini API for {num_questions} questions")
+            questions_data, error_msg = generate_quiz_questions(
+                category=category,
+                title=title,
+                level=level,
+                num_questions=num_questions,
+                additional_instructions=additional_instructions
+            )
+            
+            if not questions_data:
+                logger.error(f"Gemini API failed: {error_msg}")
+                return ResponseFormatter.error("Failed to generate questions", status_code=502)
+            
+            logger.info(f"Successfully generated {len(questions_data)} questions")
+            
+            # Step 3: Create Quiz and Question objects
+            with transaction.atomic():
+                # Create quiz
+                quiz = Quiz.objects.create(
+                    quiz_id=quiz_id,
+                    category=category,
+                    title=title,
+                    topic=category,
+                    level=level,
+                    difficulty_level=level,
+                    num_questions=num_questions,
+                    duration_seconds=duration_seconds,
+                    duration_minutes=duration_seconds // 60,
+                    created_by=request.user,
+                    is_mock=False
+                )
+                
+                # Create question objects
+                question_objects = []
+                for idx, q_data in enumerate(questions_data, start=1):
+                    question = Question(
+                        quiz=quiz,
+                        order=idx,
+                        text=q_data['text'],
+                        question_text=q_data['text'],
+                        options=q_data['options'],
+                        correct_answer=q_data['correct_answer'],
+                        metadata={}
+                    )
+                    question_objects.append(question)
+                
+                # Save to database
+                Question.objects.bulk_create(question_objects)
+                
+                # Step 4: Add quiz_id to user's created_quiz_ids
+                profile = request.user.profile
+                created_quizzes = profile.created_quiz_ids or []
+                if quiz_id not in created_quizzes:
+                    created_quizzes.append(quiz_id)
+                    profile.created_quiz_ids = created_quizzes
+                    profile.save()
+                
+                # Step 5: Append to CSV file
+                csv_success = append_quiz_to_csv(quiz, question_objects)
+                if not csv_success:
+                    logger.warning(f"CSV append failed for quiz {quiz_id}")
+                else:
+                    logger.info(f"Successfully saved quiz {quiz_id} to CSV")
+            
+            # Step 6: Return success response
+            return ResponseFormatter.success({
+                'quiz_id': quiz.quiz_id,
+                'num_questions': len(question_objects),
+                'category': quiz.category,
+                'title': quiz.title,
+                'level': quiz.level,
+                'created_by': request.user.email
+            })
+            
+        except Exception as e:
+            logger.error(f"Error creating quiz: {str(e)}")
+            return ResponseFormatter.error(f"Failed to create quiz: {str(e)}", status_code=500)
+
+
+class GetUserCreatedQuizzesView(APIView):
+    """
+    Get list of quizzes created by the authenticated user.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            from quiz_app.models import Quiz
+            
+            # Get user's created quiz IDs
+            profile = request.user.profile
+            created_quiz_ids = profile.created_quiz_ids or []
+            
+            if not created_quiz_ids:
+                return ResponseFormatter.success({
+                    'quizzes': [],
+                    'total_count': 0
+                })
+            
+            # Fetch quiz details
+            quizzes = Quiz.objects.filter(quiz_id__in=created_quiz_ids).order_by('-created_at')
+            
+            quiz_list = []
+            for quiz in quizzes:
+                quiz_list.append({
+                    'quiz_id': quiz.quiz_id,
+                    'title': quiz.title,
+                    'category': quiz.category,
+                    'level': quiz.level,
+                    'num_questions': quiz.num_questions,
+                    'duration_seconds': quiz.duration_seconds,
+                    'created_at': quiz.created_at.isoformat() if quiz.created_at else None
+                })
+            
+            return ResponseFormatter.success({
+                'quizzes': quiz_list,
+                'total_count': len(quiz_list)
+            })
+            
+        except Exception as e:
+            return ResponseFormatter.error(f"Failed to fetch created quizzes: {str(e)}", status_code=500)

@@ -32,6 +32,10 @@ import { api } from "@/lib/api";
 import { calculateLevel } from "@/lib/levelUtils";
 import { useToast } from "@/hooks/use-toast";
 import { TOPICS } from "@/lib/topics";
+import { RecentlyCompleted } from "@/components/RecentlyCompleted";
+import { StatsOverview } from "@/components/StatsOverview";
+import { Achievements } from "@/components/Achievements";
+import { MyCreatedQuizzes } from "@/components/MyCreatedQuizzes";
 
 const Profile = () => {
   const { user, checkAuth } = useAuth();
@@ -49,67 +53,50 @@ const Profile = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Stats summary state
-  const [statsSummary, setStatsSummary] = useState<any>(null);
-  const [streak, setStreak] = useState<any>(null);
+  // XP state for Level Progress card
   const [xp, setXP] = useState<number>(0);
   const [loadingStats, setLoadingStats] = useState(true);
 
-  // Calculate level from XP
-  const levelInfo = calculateLevel(xp);
-
-  // Fetch stats on mount with cache
+  // Fetch XP with cache
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchXP = async () => {
       try {
         const { default: cacheService } = await import('@/lib/cacheService');
-
-        // Load from cache first for instant display
-        const cachedSummary: any = cacheService.get('stats_summary');
-        const cachedStreak: any = cacheService.get('user_streak');
         const cachedXP: any = cacheService.get('user_xp');
 
-        if (cachedSummary) setStatsSummary(cachedSummary.data || {});
-        if (cachedStreak) setStreak(cachedStreak.data || {});
-        if (cachedXP) setXP(cachedXP.data?.xp_score || 0);
-
-        if (cachedSummary && cachedStreak && cachedXP) {
+        if (cachedXP) {
+          setXP(cachedXP.data?.xp_score || 0);
           setLoadingStats(false);
         }
 
-        // Fetch fresh data in background
-        const [summaryRes, streakRes, xpRes] = await Promise.all([
-          api.getHistorySummary(),
-          api.getUserStreak(),
-          api.getUserXP()
-        ]);
-
-        const summaryData: any = summaryRes;
-        const streakData: any = streakRes;
+        const xpRes = await api.getUserXP();
         const xpData: any = xpRes;
-
-        setStatsSummary(summaryData.data || {});
-        setStreak(streakData.data || {});
         setXP(xpData.data?.xp_score || 0);
-
-        // Update cache
-        cacheService.set('stats_summary', summaryRes);
-        cacheService.set('user_streak', streakRes);
         cacheService.set('user_xp', xpRes);
-
-        console.log('Stats fetched:', {
-          summary: summaryData.data,
-          streak: streakData.data,
-          xp: xpData.data
-        });
       } catch (error) {
-        console.error('Failed to fetch stats:', error);
+        console.error('Failed to fetch XP:', error);
       } finally {
         setLoadingStats(false);
       }
     };
-    fetchStats();
+    fetchXP();
   }, []);
+
+  // Auto-scroll to section when hash is present
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === '#activity' || hash === '#achievements' || hash === '#MyQuizzes') {
+      setTimeout(() => {
+        const element = document.getElementById('activity-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
+
+  // Calculate level from XP
+  const levelInfo = calculateLevel(xp);
   const [editFormData, setEditFormData] = useState({
     full_name: user?.full_name || '',
     bio: '',
@@ -237,25 +224,6 @@ const Profile = () => {
     rank: 247,
   };
 
-  const achievements = [
-    { icon: "ðŸ†", name: "Quiz Master", description: "Complete 100 quizzes", earned: true },
-    { icon: "âš¡", name: "Speed Demon", description: "Finish a quiz in under 2 minutes", earned: true },
-    { icon: "ðŸ”¥", name: "On Fire", description: "7-day streak", earned: true },
-    { icon: "ðŸŽ¯", name: "Perfect Score", description: "Get 100% on any quiz", earned: true },
-    { icon: "ðŸ“š", name: "Knowledge Seeker", description: "Try all categories", earned: true },
-    { icon: "ðŸ’Ž", name: "Diamond Rank", description: "Reach top 100 globally", earned: false },
-    { icon: "ðŸŒŸ", name: "Superstar", description: "Earn 10,000 XP", earned: false },
-    { icon: "ðŸ‘‘", name: "Legend", description: "30-day streak", earned: false },
-  ];
-
-  const recentActivity = [
-    { quiz: "Physics: Quantum Mechanics", score: 95, date: "2 hours ago", xp: 150 },
-    { quiz: "Movie Trivia: 90s Classics", score: 88, date: "Yesterday", xp: 120 },
-    { quiz: "World Geography", score: 92, date: "2 days ago", xp: 135 },
-    { quiz: "Chemistry: Organic Compounds", score: 85, date: "3 days ago", xp: 110 },
-    { quiz: "Sports History", score: 78, date: "4 days ago", xp: 95 },
-  ];
-
   const categoryStats = [
     { name: "Academic", quizzes: 65, avgScore: 89, color: "gradient-primary" },
     { name: "Entertainment", quizzes: 48, avgScore: 84, color: "gradient-secondary" },
@@ -373,219 +341,36 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Total Quizzes</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStats ? '...' : (statsSummary?.total_quizzes_attempted || 0)}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Average Score</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStats ? '...' : `${statsSummary?.average_score_percentage || 0}%`}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl gradient-secondary flex items-center justify-center">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Time Spent</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStats ? '...' : `${((statsSummary?.total_time_spent || 0) / 3600).toFixed(1)}h`}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl gradient-accent flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Current Streak</p>
-                    <p className="text-3xl font-bold text-foreground">
-                      {loadingStats ? '...' : `${streak?.current_streak || 0} 🔥`}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-success" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Stats Overview */}
+          <StatsOverview className="mb-8" />
 
           {/* Tabs */}
-          <Tabs defaultValue="activity" className="space-y-6">
+          <Tabs
+            id="activity-section"
+            defaultValue={
+              window.location.hash === '#achievements' ? 'achievements' :
+                window.location.hash === '#MyQuizzes' ? 'myquizzes' :
+                  'activity'
+            }
+            className="space-y-6"
+          >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="achievements">Achievements</TabsTrigger>
-              <TabsTrigger value="stats">Statistics</TabsTrigger>
+              <TabsTrigger value="myquizzes">My Quizzes</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
             <TabsContent value="activity">
-              <Card className="border-border/50 card-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-primary" />
-                    Recent Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                      >
-                        <div>
-                          <p className="font-semibold text-foreground">{activity.quiz}</p>
-                          <p className="text-sm text-muted-foreground">{activity.date}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-success">{activity.score}%</p>
-                          <p className="text-sm text-muted-foreground">+{activity.xp} XP</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <RecentlyCompleted limit={999999} />
             </TabsContent>
 
             <TabsContent value="achievements">
-              <Card className="border-border/50 card-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-warning" />
-                    Achievements ({achievements.filter(a => a.earned).length}/{achievements.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {achievements.map((achievement, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg border ${achievement.earned
-                          ? "border-warning/30 bg-warning/5"
-                          : "border-border/50 bg-muted/20 opacity-50"
-                          }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl ${achievement.earned ? "bg-warning/20" : "bg-muted"
-                            }`}>
-                            {achievement.icon}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{achievement.name}</p>
-                            <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                          </div>
-                          {achievement.earned && (
-                            <Star className="w-5 h-5 text-warning ml-auto" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <Achievements />
             </TabsContent>
 
-            <TabsContent value="stats">
-              <div className="grid gap-6">
-                <Card className="border-border/50 card-shadow">
-                  <CardHeader>
-                    <CardTitle>Category Performance</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {categoryStats.map((category, index) => (
-                      <div key={index}>
-                        <div className="flex justify-between mb-2">
-                          <span className="font-medium text-foreground">{category.name}</span>
-                          <span className="text-muted-foreground">{category.quizzes} quizzes â€¢ {category.avgScore}% avg</span>
-                        </div>
-                        <Progress value={category.avgScore} className="h-3" />
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="border-border/50 card-shadow">
-                    <CardHeader>
-                      <CardTitle>Best Performance</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Best Category</span>
-                        <span className="font-semibold">{userProfile.bestCategory}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Highest Score</span>
-                        <span className="font-semibold text-success">98%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Longest Streak</span>
-                        <span className="font-semibold">{userProfile.longestStreak} days</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Best Rank</span>
-                        <span className="font-semibold">#124</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-border/50 card-shadow">
-                    <CardHeader>
-                      <CardTitle>Time Stats</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Total Time</span>
-                        <span className="font-semibold">48h 32m</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Avg per Quiz</span>
-                        <span className="font-semibold">12m 15s</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Fastest Quiz</span>
-                        <span className="font-semibold">1m 45s</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Member Since</span>
-                        <span className="font-semibold">{userProfile.joinDate}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
+            <TabsContent value="myquizzes">
+              <MyCreatedQuizzes onCreateClick={() => {/* Can add create dialog here if needed */ }} />
             </TabsContent>
 
             <TabsContent value="settings">

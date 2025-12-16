@@ -26,24 +26,78 @@ const QuizAttempt = () => {
     useEffect(() => {
         const fetchQuiz = async () => {
             try {
-                const response = await api.getQuizQuestions(quizId!);
-                const data: any = response;
-                setQuiz(data);
-                setQuestions(data.questions || []);
-                setTimeRemaining(data.duration_seconds || 600);
+                let response;
+                let isFromCSV = false;
+
+                // Try database endpoint first (for user-created quizzes)
+                try {
+                    response = await api.getQuizQuestions(quizId!);
+                    console.log('Database response:', JSON.stringify(response, null, 2));
+                } catch (dbError) {
+                    // If database fetch fails, try CSV endpoint (for category quizzes)
+                    console.log('Database fetch failed, trying CSV...', dbError);
+                    response = await api.getQuizQuestionsFromCSV(quizId!);
+                    isFromCSV = true;
+                    console.log('CSV response:', JSON.stringify(response, null, 2));
+                }
+
+                // Handle response format based on source
+                let quizData;
+
+                if (isFromCSV && response.success && response.quiz_info) {
+                    // CSV format
+                    console.log('Processing CSV format');
+                    quizData = {
+                        quiz_id: response.quiz_info.quiz_id,
+                        title: response.quiz_info.title,
+                        category: response.quiz_info.category,
+                        level: response.quiz_info.level,
+                        duration_seconds: parseInt(response.quiz_info.duration_seconds) || 600,
+                        questions: response.questions.map((q: any) => ({
+                            text: q.question_text,
+                            options: Object.values(q.options),
+                            correct_answer: q.correct_answer
+                        }))
+                    };
+                } else if (response.success && (response.data || response.quiz_id)) {
+                    // Database format - data can be at root or under 'data' key
+                    console.log('Processing database format');
+                    const quizInfo = response.data || response;
+                    quizData = {
+                        quiz_id: quizInfo.quiz_id,
+                        title: quizInfo.title,
+                        category: quizInfo.category,
+                        level: quizInfo.level || quizInfo.difficulty_level,
+                        duration_seconds: quizInfo.duration_seconds,
+                        questions: quizInfo.questions.map((q: any) => ({
+                            text: q.text || q.question_text,
+                            options: Array.isArray(q.options) ? q.options : Object.values(q.options),
+                            correct_answer: q.correct_answer
+                        }))
+                    };
+                } else {
+                    console.error('Unknown response format:', response);
+                    throw new Error('Invalid response format');
+                }
+
+                setQuiz(quizData);
+                setQuestions(quizData.questions || []);
+                setTimeRemaining(quizData.duration_seconds);
             } catch (error) {
+                console.error('Failed to fetch quiz:', error);
                 toast({
-                    variant: "destructive",
-                    title: "Failed to load quiz",
-                    description: "Could not fetch quiz questions"
+                    variant: 'destructive',
+                    title: 'Failed to load quiz',
+                    description: 'Could not load quiz questions. Please try again.'
                 });
-                navigate("/dashboard");
+                navigate("/dashboard"); // Navigate away if quiz fails to load
             } finally {
                 setLoading(false);
             }
         };
+
         fetchQuiz();
-    }, [quizId]);
+    }, [quizId, toast, navigate]);
 
     // Timer countdown
     useEffect(() => {
@@ -95,8 +149,15 @@ const QuizAttempt = () => {
         // Save attempt to backend
         try {
             await api.saveQuizAttempt(quizId!, selectedAnswers, timeTaken);
-        } catch (error) {
+            console.log('Quiz attempt saved successfully');
+        } catch (error: any) {
             console.error('Failed to save quiz attempt:', error);
+            // Show error to user so we can debug
+            toast({
+                variant: "destructive",
+                title: "Failed to save quiz attempt",
+                description: error.message || "Your attempt couldn't be saved. Your score is still displayed below."
+            });
             // Continue showing results even if save fails
         }
 

@@ -169,9 +169,10 @@ class ApiService {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/quiz/create/`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/quiz/create/`, {
       method: "POST",
       headers,
+      credentials: "include",
       body: JSON.stringify(data),
     });
 
@@ -308,6 +309,48 @@ class ApiService {
   async getUserXP(): Promise<ApiResponse<any>> {
     return this.request("/xp/", {
       method: "GET",
+    });
+  }
+
+  // New CSV-based quiz APIs
+  async getQuizzesByCategory(
+    category: string,
+    subtopic: string
+  ): Promise<any> {
+    const params = new URLSearchParams({ category, subtopic });
+    const response = await fetch(
+      `${API_BASE_URL}/api/quiz/by-category/?${params}`
+    );
+    if (!response.ok) throw new Error("Failed to fetch quizzes by category");
+    return response.json();
+  }
+
+  async countQuizzesByCategory(
+    category: string,
+    subtopic: string
+  ): Promise<any> {
+    const params = new URLSearchParams({ category, subtopic });
+    const response = await fetch(
+      `${API_BASE_URL}/api/quiz/count-by-category/?${params}`
+    );
+    if (!response.ok)
+      throw new Error("Failed to count quizzes by category");
+    return response.json();
+  }
+
+  async getQuizQuestionsFromCSV(quizId: string): Promise<any> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/quiz/csv/${quizId}/questions/`
+    );
+    if (!response.ok)
+      throw new Error("Failed to fetch quiz questions from CSV");
+    return response.json();
+  }
+
+  // Get quizzes created by the authenticated user
+  async getMyCreatedQuizzes() {
+    return this.request('/quiz/my-quizzes/', {
+      method: 'GET',
     });
   }
 }
