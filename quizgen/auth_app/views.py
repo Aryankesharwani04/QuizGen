@@ -812,24 +812,40 @@ class SaveQuizAttemptView(APIView):
             from auth_app.streak_utils import update_user_streak
             update_user_streak(request.user, history.completed_at)
             
-            # Update XP for the user based on difficulty
-            from auth_app.xp_utils import update_user_xp
-            update_user_xp(request.user, quiz.level or quiz.difficulty_level or 'Easy', score)
+            # Update XP based on score and quiz difficulty
+            from .xp_utils import update_user_xp
+            total_questions = len(questions) # Ensure total_questions is defined for percentage calculation
+            update_user_xp(request.user, quiz, score)
             
-            percentage = round((score / len(questions)) * 100) if questions else 0
+            # Calculate percentage score
+            percentage_score = (score / total_questions * 100) if total_questions > 0 else 0
+            
+            # Update comprehensive user stats
+            from .stats_utils import update_user_stats
+            quiz_result = {
+                'quiz': quiz,
+                'score': score,
+                'total_questions': total_questions,
+                'time_taken': time_taken,
+                'percentage_score': percentage_score
+            }
+            updated_stats = update_user_stats(request.user, quiz_result)
             
             return ResponseFormatter.success({
-                'attempt_id': history.id,
+                'message': 'Quiz attempt saved successfully',
+                'quiz_id': quiz_id,
                 'score': score,
-                'total_questions': len(questions),
-                'percentage': percentage,
-                'time_taken': time_taken
-            }, status_code=201)
+                'total_questions': total_questions,
+                'percentage': percentage_score,
+                'time_taken': time_taken,
+                'stats_updated': updated_stats  # Include updated stats in response
+            })
             
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return ResponseFormatter.error(f"Failed to save: {str(e)}", status_code=500)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error saving quiz attempt: {str(e)}")
+            return ResponseFormatter.error(f"Failed to save quiz attempt: {str(e)}", status_code=500)
 
 
 class GetHistoryView(APIView):
@@ -1235,3 +1251,165 @@ class GetUserCreatedQuizzesView(APIView):
             
         except Exception as e:
             return ResponseFormatter.error(f"Failed to fetch created quizzes: {str(e)}", status_code=500)
+
+
+class GetUserAchievementsView(APIView):
+    """
+    Get user's achievements with unlock status.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            profile = request.user.profile
+            current_xp = profile.xp_score or 0
+            current_level = calculate_level(current_xp)
+            
+            # Define achievement milestones (same as frontend)
+            achievement_milestones = [
+                {'level': 2, 'name': 'Level Up!', 'description': 'Reached Level 2', 'xp_reward': 100},
+                {'level': 5, 'name': 'Rising Star', 'description': 'Reached Level 5', 'xp_reward': 250},
+                {'level': 10, 'name': 'Knowledge Seeker', 'description': 'Reached Level 10', 'xp_reward': 500},
+                {'level': 20, 'name': 'Quiz Master', 'description': 'Reached Level 20', 'xp_reward': 1000},
+                {'level': 30, 'name': 'Legendary Scholar', 'description': 'Reached Level 30', 'xp_reward': 2000},
+                {'level': 50, 'name': 'Ultimate Champion', 'description': 'Reached Level 50', 'xp_reward': 5000},
+            ]
+            
+            achievements = []
+            total_unlocked = 0
+            
+            for milestone in achievement_milestones:
+                is_unlocked = current_level >= milestone['level']
+                if is_unlocked:
+                    total_unlocked += 1
+                
+                # Calculate progress toward this achievement
+                if current_level >= milestone['level']:
+                    progress = 100
+                else:
+                    # Progress based on current level vs required level
+                    prev_level = achievement_milestones[achievement_milestones.index(milestone) - 1]['level'] if achievement_milestones.index(milestone) > 0 else 0
+                    level_range = milestone['level'] - prev_level
+                    current_progress = current_level - prev_level
+                    progress = min(100, int((current_progress / level_range) * 100))
+                
+                achievements.append({
+                    'id': f"level_{milestone['level']}",
+                    'name': milestone['name'],
+                    'description': milestone['description'],
+                    'required_level': milestone['level'],
+                    'xp_reward': milestone['xp_reward'],
+                    'unlocked': is_unlocked,
+                    'progress': progress
+                })
+            
+            return ResponseFormatter.success({
+                'achievements': achievements,
+                'total_unlocked': total_unlocked,
+                'total_achievements': len(achievements),
+                'current_level': current_level,
+                'current_xp': current_xp
+            })
+            
+        except Exception as e:
+            logger.error(f"Error fetching achievements: {str(e)}")
+            return ResponseFormatter.error(f"Failed to fetch achievements: {str(e)}", status_code=500)
+
+
+class GetUserStatsView(APIView):
+    """
+    Get comprehensive user statistics in a single API call.
+    Returns all stats including XP, level, quizzes, scores, time, streaks, achievements, and rank.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            from .stats_utils import format_time_spent, get_user_accuracy
+            from .xp_utils import calculate_level
+            from django.contrib.auth.models import User
+            
+            profile = request.user.profile
+            
+            # Calculate derived values
+            current_level = calculate_level(profile.xp_score)
+            accuracy_percentage = get_user_accuracy(request.user)
+            time_formatted = format_time_spent(profile.total_time_spent_seconds)
+            
+            # Get global rank
+            all_users = User.objects.select_related('profile').all()
+            users_with_xp = []
+            for user in all_users:
+                try:
+                    users_with_xp.append({
+                        'user_id': user.id,
+                        'xp_score': user.profile.xp_score or 0
+                    })
+                except:
+                    continue
+            
+            users_with_xp.sort(key=lambda x: x['xp_score'], reverse=True)
+            
+            global_rank = None
+            for idx, user_data in enumerate(users_with_xp, start=1):
+                if user_data['user_id'] == request.user.id:
+                    global_rank = idx
+                    break
+            
+            # Get achievements (reuse logic from GetUserAchievementsView)
+            achievement_milestones = [
+                {'level': 2, 'name': 'Level Up!'},
+                {'level': 5, 'name': 'Rising Star'},
+                {'level': 10, 'name': 'Knowledge Seeker'},
+                {'level': 20, 'name': 'Quiz Master'},
+                {'level': 30, 'name': 'Legendary Scholar'},
+                {'level': 50, 'name': 'Ultimate Champion'},
+            ]
+            
+            total_achievements_unlocked = sum(
+                1 for milestone in achievement_milestones 
+                if current_level >= milestone['level']
+            )
+            
+            recent_achievements = [
+                milestone for milestone in achievement_milestones
+                if current_level >= milestone['level']
+            ][-3:]  # Last 3 unlocked
+            
+            return ResponseFormatter.success({
+                # Core stats
+                'xp_score': profile.xp_score,
+                'level': current_level,
+                'total_quizzes_attended': profile.total_quizzes_attended,
+                'average_score': round(profile.average_score, 2),
+                
+                # Time tracking
+                'total_time_spent_seconds': profile.total_time_spent_seconds,
+                'total_time_spent_formatted': time_formatted,
+                
+                # Streaks
+                'current_streak': profile.current_streak,
+                'longest_streak': profile.longest_streak,
+                
+                # Question stats
+                'total_questions_answered': profile.total_questions_answered,
+                'total_correct_answers': profile.total_correct_answers,
+                'accuracy_percentage': round(accuracy_percentage, 2),
+                
+                # Achievements
+                'achievements': {
+                    'total_unlocked': total_achievements_unlocked,
+                    'total_available': len(achievement_milestones),
+                    'recent': recent_achievements
+                },
+                
+                # Ranking
+                'rank': {
+                    'global_rank': global_rank,
+                    'total_users': len(users_with_xp)
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Error fetching comprehensive stats: {str(e)}")
+            return ResponseFormatter.error(f"Failed to fetch stats: {str(e)}", status_code=500)

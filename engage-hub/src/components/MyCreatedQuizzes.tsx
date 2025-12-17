@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, PlayCircle, Plus, BookOpen } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
 import { api } from "@/lib/api";
 import { Link } from "react-router-dom";
+import { QuizCard } from "@/components/QuizCard"; // Adjust path if necessary
 
+// Updated Interface to match QuizCard needs
 interface Quiz {
     quiz_id: string;
     title: string;
-    category: string;
+    category?: string;    // API might return this
+    topic?: string;       // API might return this
+    quiz_type?: string;   // API might return this
     level: string;
     num_questions: number;
     duration_seconds: number;
@@ -23,7 +27,13 @@ interface MyCreatedQuizzesProps {
     showSeeMore?: boolean;
 }
 
-export const MyCreatedQuizzes = ({ onCreateClick, refreshTrigger, className = "", limit = 3, showSeeMore = false }: MyCreatedQuizzesProps) => {
+export const MyCreatedQuizzes = ({ 
+    onCreateClick, 
+    refreshTrigger, 
+    className = "", 
+    limit = 3, 
+    showSeeMore = false 
+}: MyCreatedQuizzesProps) => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -35,7 +45,6 @@ export const MyCreatedQuizzes = ({ onCreateClick, refreshTrigger, className = ""
                 const cacheKey = 'my_created_quizzes';
                 const cachedData: any = cacheService.get(cacheKey);
 
-                // If cached data exists, show it immediately
                 if (cachedData && cachedData.data?.quizzes) {
                     const sortedCached = cachedData.data.quizzes.sort((a: Quiz, b: Quiz) => {
                         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -44,19 +53,15 @@ export const MyCreatedQuizzes = ({ onCreateClick, refreshTrigger, className = ""
                     setLoading(false);
                 }
 
-                // Fetch fresh data from API
+                // Fetch fresh data
                 const response = await api.getMyCreatedQuizzes();
                 const data: any = response;
 
-                // Sort by created_at descending (most recent first)
                 const sortedQuizzes = (data.data?.quizzes || []).sort((a: Quiz, b: Quiz) => {
                     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
                 });
 
-                // Update state with fresh data
                 setQuizzes(sortedQuizzes);
-
-                // Update cache
                 cacheService.set(cacheKey, response);
             } catch (error) {
                 console.error('Failed to fetch created quizzes:', error);
@@ -68,44 +73,23 @@ export const MyCreatedQuizzes = ({ onCreateClick, refreshTrigger, className = ""
         fetchMyQuizzes();
     }, [refreshTrigger]);
 
-    // Format duration
-    const formatDuration = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        return `${minutes} min`;
-    };
-
-    // Format date
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-
-        if (diffMins < 60) return `${diffMins} minutes ago`;
-        if (diffHours < 24) return `${diffHours} hours ago`;
-        if (diffDays < 7) return `${diffDays} days ago`;
-        return date.toLocaleDateString();
-    };
-
-    // Get level badge color
-    const getLevelColor = (level: string) => {
-        const colors: Record<string, string> = {
-            easy: "bg-success/10 text-success border-success/30",
-            medium: "bg-warning/10 text-warning border-warning/30",
-            hard: "bg-destructive/10 text-destructive border-destructive/30"
-        };
-        return colors[level.toLowerCase()] || colors.medium;
-    };
-
     return (
         <Card className={`border-border/50 card-shadow ${className}`}>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    My Created Quizzes ({quizzes.length})
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        My Created Quizzes ({quizzes.length})
+                    </CardTitle>
+                    <Button 
+                        onClick={onCreateClick}
+                        size="sm"
+                        className="gradient-primary text-white"
+                    >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Create More Quiz
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 {loading ? (
@@ -125,38 +109,19 @@ export const MyCreatedQuizzes = ({ onCreateClick, refreshTrigger, className = ""
                 ) : (
                     <div className="space-y-4">
                         {quizzes.slice(0, limit).map((quiz) => (
-                            <div
+                            <QuizCard
                                 key={quiz.quiz_id}
-                                className="p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-semibold text-foreground">{quiz.title}</h3>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full border ${getLevelColor(quiz.level)}`}>
-                                                {quiz.level}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                            {quiz.category} • {quiz.num_questions} questions
-                                        </p>
-                                    </div>
-                                    <Link to={`/quiz/${quiz.quiz_id}`}>
-                                        <Button size="sm" className="gradient-primary text-white">
-                                            <PlayCircle className="w-4 h-4 mr-1" />
-                                            Start
-                                        </Button>
-                                    </Link>
-                                </div>
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="w-4 h-4" />
-                                        {formatDuration(quiz.duration_seconds)}
-                                    </div>
-                                    <span>•</span>
-                                    <span>Created {formatDate(quiz.created_at)}</span>
-                                </div>
-                            </div>
+                                quiz_id={quiz.quiz_id}
+                                title={quiz.title}
+                                // Fallback: Use topic if available, else category, else 'General'
+                                topic={quiz.topic || quiz.category || 'General'}
+                                // Fallback: Use quiz_type if available, else let QuizCard default (or pass 'time-based')
+                                quiz_type={quiz.quiz_type || 'time-based'}
+                                level={quiz.level}
+                                num_questions={quiz.num_questions}
+                                duration_seconds={quiz.duration_seconds}
+                                created_at={quiz.created_at}
+                            />
                         ))}
 
                         {showSeeMore && quizzes.length > limit && (

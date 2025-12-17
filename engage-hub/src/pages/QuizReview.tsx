@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -52,9 +50,7 @@ const QuizReview = () => {
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
-            <main className="pt-24 pb-16">
+        <div className="min-h-screen bg-background">            <main className="pt-24 pb-16">
                 <div className="container mx-auto px-4">
                     <Card className="max-w-2xl mx-auto border-border/50 card-shadow">
                         <CardHeader className="text-center">
@@ -89,9 +85,7 @@ const QuizReview = () => {
                         </CardContent>
                     </Card>
                 </div>
-            </main>
-            <Footer />
-        </div>
+            </main>        </div>
     );
 };
 

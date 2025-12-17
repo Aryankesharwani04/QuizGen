@@ -1,57 +1,63 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
+import { useQuizNavigation } from "@/contexts/QuizNavigationContext";
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, RefreshCcw } from "lucide-react";
+
+// Helper to manage local storage keys
+const getStorageKey = (quizId: string, key: string) => `quiz_${quizId}_${key}`;
 
 const QuizAttempt = () => {
     const { quizId } = useParams();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { setQuizActive, setQuizSubmitHandler } = useQuizNavigation();
 
     const [quiz, setQuiz] = useState<any>(null);
     const [questions, setQuestions] = useState<any[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({});
     const [loading, setLoading] = useState(true);
-    const [timeRemaining, setTimeRemaining] = useState(0);
+    const [timeRemaining, setTimeRemaining] = useState<number | null>(null); // Null initially to avoid hydration mismatch
     const [quizCompleted, setQuizCompleted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-    // Fetch quiz questions
+
+    // --- 1. DATA FETCHING & STATE RESTORATION ---
     useEffect(() => {
         const fetchQuiz = async () => {
             try {
                 let response;
                 let isFromCSV = false;
-
-                // Try database endpoint first (for user-created quizzes)
                 try {
                     response = await api.getQuizQuestions(quizId!);
-                    console.log('Database response:', JSON.stringify(response, null, 2));
                 } catch (dbError) {
-                    // If database fetch fails, try CSV endpoint (for category quizzes)
-                    console.log('Database fetch failed, trying CSV...', dbError);
                     response = await api.getQuizQuestionsFromCSV(quizId!);
                     isFromCSV = true;
-                    console.log('CSV response:', JSON.stringify(response, null, 2));
                 }
 
-                // Handle response format based on source
                 let quizData;
-
+                // ... (Parsing logic remains the same) ...
                 if (isFromCSV && response.success && response.quiz_info) {
-                    // CSV format
-                    console.log('Processing CSV format');
                     quizData = {
                         quiz_id: response.quiz_info.quiz_id,
                         title: response.quiz_info.title,
                         category: response.quiz_info.category,
                         level: response.quiz_info.level,
+                        quiz_type: response.quiz_info.quiz_type, // Fetch Type
                         duration_seconds: parseInt(response.quiz_info.duration_seconds) || 600,
                         questions: response.questions.map((q: any) => ({
                             text: q.question_text,
@@ -60,14 +66,13 @@ const QuizAttempt = () => {
                         }))
                     };
                 } else if (response.success && (response.data || response.quiz_id)) {
-                    // Database format - data can be at root or under 'data' key
-                    console.log('Processing database format');
                     const quizInfo = response.data || response;
                     quizData = {
                         quiz_id: quizInfo.quiz_id,
                         title: quizInfo.title,
                         category: quizInfo.category,
                         level: quizInfo.level || quizInfo.difficulty_level,
+                        quiz_type: quizInfo.quiz_type, // Fetch Type
                         duration_seconds: quizInfo.duration_seconds,
                         questions: quizInfo.questions.map((q: any) => ({
                             text: q.text || q.question_text,
@@ -76,51 +81,136 @@ const QuizAttempt = () => {
                         }))
                     };
                 } else {
-                    console.error('Unknown response format:', response);
                     throw new Error('Invalid response format');
                 }
 
                 setQuiz(quizData);
                 setQuestions(quizData.questions || []);
-                setTimeRemaining(quizData.duration_seconds);
+
+                // --- RESTORE ANSWERS ---
+                const savedAnswers = localStorage.getItem(getStorageKey(quizId!, 'answers'));
+                if (savedAnswers) {
+                    setSelectedAnswers(JSON.parse(savedAnswers));
+                }
+
+                // --- TIMER SETUP (Persistence) ---
+                const quizType = quizData.quiz_type || 'time-based';
+
+                if (quizType !== 'learning-based') {
+                    const savedEndTime = localStorage.getItem(getStorageKey(quizId!, 'endTime'));
+                    const now = Date.now();
+
+                    if (savedEndTime) {
+                        // Calculate remaining time based on stored target time
+                        const remaining = Math.floor((parseInt(savedEndTime) - now) / 1000);
+                        if (remaining <= 0) {
+                            setTimeRemaining(0);
+                            // If time expired while away, we might want to auto-submit here
+                            // But for now we just set it to 0 and let the useEffect handle it
+                        } else {
+                            setTimeRemaining(remaining);
+                        }
+                    } else {
+                        // First start: Set target time
+                        const duration = quizData.duration_seconds || 600;
+                        const targetTime = now + (duration * 1000);
+                        localStorage.setItem(getStorageKey(quizId!, 'endTime'), targetTime.toString());
+                        setTimeRemaining(duration);
+                    }
+                }
+
             } catch (error) {
                 console.error('Failed to fetch quiz:', error);
-                toast({
-                    variant: 'destructive',
-                    title: 'Failed to load quiz',
-                    description: 'Could not load quiz questions. Please try again.'
-                });
-                navigate("/dashboard"); // Navigate away if quiz fails to load
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to load quiz.' });
+                navigate("/dashboard");
             } finally {
                 setLoading(false);
             }
         };
-
         fetchQuiz();
     }, [quizId, toast, navigate]);
 
-    // Timer countdown
+    // --- 1.5. REGISTER QUIZ AS ACTIVE & SETUP NAVIGATION BLOCKING ---
     useEffect(() => {
-        if (timeRemaining <= 0 || quizCompleted) return;
+        if (!loading && !quizCompleted) {
+            // Register quiz as active
+            setQuizActive(true);
+
+            // Register submit handler that context can call
+            const submitHandler = async () => { await handleSubmitQuiz(); };
+            setQuizSubmitHandler(submitHandler);
+
+            // Prevent accidental browser navigation/refresh
+            const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+                e.preventDefault();
+                e.returnValue = ''; // Chrome requires returnValue to be set
+            };
+
+            window.addEventListener('beforeunload', handleBeforeUnload);
+
+            // Cleanup
+            return () => {
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+                setQuizActive(false);
+            };
+        }
+    }, [loading, quizCompleted]); // Removed setQuizActive and setQuizSubmitHandler to prevent re-renders
+
+    // --- 2. TIMER TICK LOGIC ---
+    useEffect(() => {
+        if (loading || quizCompleted) return;
+
+        const quizType = quiz?.quiz_type || 'time-based';
+        if (quizType === 'learning-based') return; // No timer for learning mode
+
+        // If timeRemaining is null, wait for initialization
+        if (timeRemaining === null) return;
+
+        if (timeRemaining <= 0) {
+            handleSubmitQuiz();
+            return;
+        }
 
         const timer = setInterval(() => {
-            setTimeRemaining(prev => {
-                if (prev <= 1) {
+            // Re-calculate based on Date.now() to prevent drift and handle tab switching
+            const savedEndTime = localStorage.getItem(getStorageKey(quizId!, 'endTime'));
+            if (savedEndTime) {
+                const now = Date.now();
+                const remaining = Math.ceil((parseInt(savedEndTime) - now) / 1000);
+
+                if (remaining <= 0) {
+                    setTimeRemaining(0);
+                    clearInterval(timer);
                     handleSubmitQuiz();
-                    return 0;
+                } else {
+                    setTimeRemaining(remaining);
                 }
-                return prev - 1;
-            });
+            }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeRemaining, quizCompleted]);
+    }, [timeRemaining, quizCompleted, loading, quiz, quizId]);
+
+    // --- 3. HANDLERS ---
+
+    // Determine Logic based on Type
+    const getQuizType = () => quiz?.quiz_type || 'time-based';
+    const isFastPaced = getQuizType() === 'fast-paced';
+    const isLearning = getQuizType() === 'learning-based';
+
 
     const handleAnswerSelect = (answer: string) => {
-        setSelectedAnswers({
-            ...selectedAnswers,
-            [currentQuestionIndex]: answer
-        });
+        // Prevent changing answers during submission
+        if (isSubmitting) return;
+
+        // Fast-paced: Prevent changing answer once selected
+        if (isFastPaced && selectedAnswers[currentQuestionIndex]) return;
+
+        const newAnswers = { ...selectedAnswers, [currentQuestionIndex]: answer };
+        setSelectedAnswers(newAnswers);
+
+        // Save to local storage immediately
+        localStorage.setItem(getStorageKey(quizId!, 'answers'), JSON.stringify(newAnswers));
     };
 
     const handleNext = () => {
@@ -135,99 +225,129 @@ const QuizAttempt = () => {
         }
     };
 
-    const handleSubmitQuiz = async () => {
-        const score = questions.reduce((acc, q, idx) => {
-            return selectedAnswers[idx] === q.correct_answer ? acc + 1 : acc;
-        }, 0);
-
-        const percentage = Math.round((score / questions.length) * 100);
-
-        // Calculate time taken (initial time - remaining time)
-        const initialTime = quiz?.duration_seconds || 600;
-        const timeTaken = initialTime - timeRemaining;
-
-        // Save attempt to backend
-        try {
-            await api.saveQuizAttempt(quizId!, selectedAnswers, timeTaken);
-            console.log('Quiz attempt saved successfully');
-        } catch (error: any) {
-            console.error('Failed to save quiz attempt:', error);
-            // Show error to user so we can debug
-            toast({
-                variant: "destructive",
-                title: "Failed to save quiz attempt",
-                description: error.message || "Your attempt couldn't be saved. Your score is still displayed below."
-            });
-            // Continue showing results even if save fails
-        }
-
-        toast({
-            title: "Quiz Completed! 🎉",
-            description: `You scored ${score}/${questions.length} (${percentage}%)`
-        });
-
-        setQuizCompleted(true);
+    const clearQuizData = () => {
+        localStorage.removeItem(getStorageKey(quizId!, 'endTime'));
+        localStorage.removeItem(getStorageKey(quizId!, 'answers'));
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading quiz...</p>
-                </div>
-            </div>
-        );
-    }
+    const confirmSubmit = () => {
+        setShowConfirmDialog(true);
+    };
 
+    const handleSubmitQuiz = async () => {
+        if (quizCompleted || isSubmitting) return; // Prevent double submit
+
+        setShowConfirmDialog(false); // Close dialog
+        setIsSubmitting(true); // Start loading state
+
+        // Calculate final stats
+        const score = questions.reduce((acc, q, idx) => selectedAnswers[idx] === q.correct_answer ? acc + 1 : acc, 0);
+        const totalQuestions = questions.length;
+        const scorePercentage = Math.round((score / totalQuestions) * 100);
+
+        // Calculate time taken
+        let timeTaken = 0;
+        if (!isLearning) {
+            const duration = quiz?.duration_seconds || 600;
+            const currentRemaining = timeRemaining || 0;
+            timeTaken = duration - currentRemaining;
+        }
+
+        // Calculate XP based on difficulty: easy=5, medium=10, hard=15 per correct answer
+        const difficulty = quiz?.difficulty?.toLowerCase() || 'medium';
+        const xpPerQuestion = difficulty === 'easy' ? 5 : difficulty === 'hard' ? 15 : 10;
+        const xpEarned = score * xpPerQuestion;
+
+        try {
+            await api.saveQuizAttempt(quizId!, selectedAnswers, timeTaken);
+        } catch (error) {
+            console.error(error);
+            setIsSubmitting(false); // Reset on error
+            return;
+        }
+
+        // Clear persistence
+        clearQuizData();
+        setQuizCompleted(true);
+        setIsSubmitting(false); // Reset loading state
+
+        // Deactivate quiz in context (allows navigation)
+        setQuizActive(false);
+
+        // Format time taken for display
+        const minutes = Math.floor(timeTaken / 60);
+        const seconds = timeTaken % 60;
+        const timeFormatted = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        // Navigate to results page with quiz data
+        navigate('/results', {
+            state: {
+                quizTitle: quiz?.title || 'Quiz',
+                category: quiz?.category || 'General',
+                score: scorePercentage,
+                correctAnswers: score,
+                totalQuestions: totalQuestions,
+                timeTaken: timeFormatted,
+                timeInSeconds: timeTaken,
+                difficulty: quiz?.difficulty || 'Medium',
+                xpEarned: xpEarned,
+                questions: questions.map((q, idx) => ({
+                    id: q.id,
+                    question: q.question,
+                    correct: selectedAnswers[idx] === q.correct_answer,
+                    yourAnswer: selectedAnswers[idx] || 'Not answered',
+                    correctAnswer: q.correct_answer,
+                })),
+            },
+        });
+    };
+
+    const handleRetake = () => {
+        clearQuizData();
+        window.location.reload();
+    };
+
+    const formatTime = (seconds: number | null) => {
+        if (seconds === null) return "--:--";
+        const mins = Math.floor(seconds / 60);
+        const secs = String(seconds % 60).padStart(2, '0');
+        return `${mins}:${secs}`;
+    };
+
+    if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+
+    // --- COMPLETED VIEW ---
     if (quizCompleted) {
-        const score = questions.reduce((acc, q, idx) => {
-            return selectedAnswers[idx] === q.correct_answer ? acc + 1 : acc;
-        }, 0);
+        const score = questions.reduce((acc, q, idx) => selectedAnswers[idx] === q.correct_answer ? acc + 1 : acc, 0);
         const percentage = Math.round((score / questions.length) * 100);
 
         return (
-            <div className="min-h-screen bg-background">
-                <Navbar />
-                <main className="pt-24 pb-16">
-                    <div className="container mx-auto px-4">
-                        <Card className="max-w-2xl mx-auto border-border/50 card-shadow">
-                            <CardHeader className="text-center">
-                                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                                <CardTitle className="text-3xl">Quiz Completed!</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="text-center">
-                                    <p className="text-5xl font-bold text-primary mb-2">{percentage}%</p>
-                                    <p className="text-muted-foreground">You scored {score} out of {questions.length}</p>
+            <div className="h-screen w-screen bg-background flex flex-col overflow-hidden">
+                <main className="flex-1 flex items-center justify-center p-4 pt-24 md:pt-28 relative overflow-hidden">
+                    <div className="absolute w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] top-10 -left-20 pointer-events-none" />
+                    <div className="w-full max-w-3xl bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 shadow-2xl max-h-full flex flex-col">
+                        <div className="text-center mb-4 shrink-0">
+                            <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
+                            <h2 className="text-2xl font-bold text-foreground">Quiz Completed</h2>
+                            <p className="text-muted-foreground">Score: {percentage}%</p>
+                        </div>
+                        <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+                            {questions.map((q, idx) => (
+                                <div key={idx} className={`p-3 rounded-lg border text-sm ${selectedAnswers[idx] === q.correct_answer ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                                    <p className="font-medium truncate">{q.text}</p>
+                                    <div className="flex justify-between text-xs mt-1">
+                                        <span>You: {selectedAnswers[idx] || '-'}</span>
+                                        {selectedAnswers[idx] !== q.correct_answer && <span className="text-green-500">Ans: {q.correct_answer}</span>}
+                                    </div>
                                 </div>
-
-                                <div className="space-y-3">
-                                    <h3 className="font-semibold text-lg">Review Answers:</h3>
-                                    {questions.map((q, idx) => (
-                                        <div key={idx} className={`p-4 rounded-lg ${selectedAnswers[idx] === q.correct_answer ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
-                                            <p className="font-medium mb-2">Q{idx + 1}: {q.text}</p>
-                                            <p className="text-sm text-muted-foreground">Your answer: {selectedAnswers[idx] || 'Not answered'}</p>
-                                            {selectedAnswers[idx] !== q.correct_answer && (
-                                                <p className="text-sm text-green-600">Correct answer: {q.correct_answer}</p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="flex gap-4">
-                                    <Button onClick={() => navigate("/dashboard")} variant="outline" className="flex-1">
-                                        Back to Dashboard
-                                    </Button>
-                                    <Button onClick={() => window.location.reload()} className="flex-1 gradient-primary text-white">
-                                        Retake Quiz
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                            ))}
+                        </div>
+                        <div className="flex gap-4 mt-4 shrink-0">
+                            <Button onClick={() => navigate("/dashboard")} variant="outline" className="flex-1 h-10">Back</Button>
+                            <Button onClick={handleRetake} className="flex-1 h-10 gradient-primary text-white">Retake</Button>
+                        </div>
                     </div>
                 </main>
-                <Footer />
             </div>
         );
     }
@@ -235,96 +355,203 @@ const QuizAttempt = () => {
     const currentQuestion = questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
+    // --- ACTIVE QUIZ VIEW ---
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
+        <div className="h-screen w-screen bg-background flex flex-col overflow-hidden font-sans">
+            <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 pt-20 md:pt-20 overflow-hidden relative">
 
-            <main className="pt-24 pb-16">
-                <div className="container mx-auto px-4">
-                    {/* Quiz Header */}
-                    <div className="max-w-4xl mx-auto mb-8">
-                        <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <h1 className="text-3xl font-bold">{quiz?.title}</h1>
-                                <p className="text-muted-foreground">{quiz?.category} • Level: {quiz?.level}</p>
+                <div className="absolute w-[400px] h-[400px] bg-primary/10 rounded-full blur-[100px] top-0 -left-20 pointer-events-none" />
+                <div className="absolute w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[80px] bottom-0 -right-20 pointer-events-none" />
+
+                <div className="w-full max-w-5xl h-full flex flex-col bg-card/30 backdrop-blur-2xl border border-white/10 dark:border-white/5 rounded-2xl shadow-xl relative overflow-hidden">
+
+                    {/* Header */}
+                    <div className="shrink-0 px-6 py-4 border-b border-white/5 bg-white/5">
+                        <div className="flex justify-between items-center mb-2">
+                            <div className="flex flex-col">
+                                <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">
+                                    Question {String(currentQuestionIndex + 1).padStart(2, '0')}/{questions.length}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground uppercase">{getQuizType().replace('-', ' ')}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-primary">
-                                <Clock className="w-5 h-5" />
-                                <span className="text-2xl font-bold">{Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}</span>
-                            </div>
+
+                            {/* Timer Visibility */}
+                            {!isLearning && (
+                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${timeRemaining && timeRemaining < 60 ? 'bg-red-500/10 border-red-500 text-red-500 animate-pulse' : 'bg-background/40 border-white/10 text-foreground'}`}>
+                                    <Clock className="w-3.5 h-3.5" />
+                                    <span className="font-mono font-bold">{formatTime(timeRemaining)}</span>
+                                </div>
+                            )}
+                            {isLearning && (
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm bg-blue-500/10 border-blue-500/30 text-blue-400">
+                                    <RefreshCcw className="w-3.5 h-3.5" />
+                                    <span>Practice</span>
+                                </div>
+                            )}
                         </div>
-                        <Progress value={progress} className="h-2" />
-                        <p className="text-sm text-muted-foreground mt-2">Question {currentQuestionIndex + 1} of {questions.length}</p>
+                        <div className="h-1 w-full bg-background/50 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-500 to-primary transition-all duration-500" style={{ width: `${progress}%` }} />
+                        </div>
                     </div>
 
-                    {/* Question Card */}
-                    <Card className="max-w-4xl mx-auto border-border/50 card-shadow">
-                        <CardHeader>
-                            <CardTitle className="text-xl">Question {currentQuestionIndex + 1}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <p className="text-lg">{currentQuestion?.text}</p>
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar flex flex-col justify-center">
+                        <div className="w-full max-w-4xl mx-auto">
+                            <h2 className="text-lg md:text-xl font-medium leading-relaxed text-foreground mb-6 text-center">
+                                {currentQuestion?.text}
+                            </h2>
 
-                            <div className="space-y-3">
-                                {currentQuestion?.options.map((option: string, idx: number) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => handleAnswerSelect(option)}
-                                        className={`w-full p-4 rounded-lg border-2 text-left transition-all ${selectedAnswers[currentQuestionIndex] === option
-                                            ? 'border-primary bg-primary/10'
-                                            : 'border-border hover:border-primary/50'
-                                            }`}
-                                    >
-                                        <span className="font-semibold mr-3">{String.fromCharCode(65 + idx)}.</span>
-                                        {option}
-                                    </button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {currentQuestion?.options.map((option: string, idx: number) => {
+                                    const isSelected = selectedAnswers[currentQuestionIndex] === option;
+                                    const isCorrect = option === currentQuestion.correct_answer;
+
+                                    // Determines if we show the result immediately (Green/Red)
+                                    // Only true if "Fast Paced" AND an answer has been selected for this index
+                                    const showImmediateResult = isFastPaced && !!selectedAnswers[currentQuestionIndex];
+
+                                    // Base styles
+                                    let baseStyle = "border-white/10 hover:border-primary/50 hover:bg-white/5";
+                                    let badgeStyle = "bg-white/5 text-muted-foreground";
+                                    let icon = null;
+
+                                    if (showImmediateResult) {
+                                        // --- FAST PACED LOGIC (Show Right/Wrong) ---
+                                        if (isSelected && isCorrect) {
+                                            baseStyle = "border-green-500 bg-green-500/10";
+                                            badgeStyle = "bg-green-500 text-white";
+                                            icon = <CheckCircle className="absolute right-3 w-4 h-4 text-green-500" />;
+                                        } else if (isSelected && !isCorrect) {
+                                            baseStyle = "border-red-500 bg-red-500/10";
+                                            badgeStyle = "bg-red-500 text-white";
+                                            icon = <AlertCircle className="absolute right-3 w-4 h-4 text-red-500" />;
+                                        } else if (!isSelected && isCorrect) {
+                                            baseStyle = "border-green-500/40 bg-green-500/5 border-dashed";
+                                            badgeStyle = "text-green-500 border-green-500/30";
+                                        } else {
+                                            baseStyle = "opacity-40 border-transparent";
+                                        }
+                                    } else {
+                                        // --- TIME BASED / LEARNING LOGIC (Standard Select) ---
+                                        // Just show selection, don't reveal answer
+                                        if (isSelected) {
+                                            baseStyle = "border-primary bg-primary/10 shadow-[0_0_15px_rgba(var(--primary),0.1)]";
+                                            badgeStyle = "bg-primary text-primary-foreground";
+                                            icon = <div className="absolute right-3 w-3 h-3 rounded-full bg-primary" />;
+                                        }
+                                    }
+
+                                    return (
+                                        <button
+                                            key={idx}
+                                            // Disable clicking if fast-paced and already answered
+                                            disabled={isFastPaced && !!selectedAnswers[currentQuestionIndex]}
+                                            onClick={() => handleAnswerSelect(option)}
+                                            className={`
+                                                group relative px-4 py-3 rounded-xl border transition-all duration-200
+                                                flex items-center gap-3 w-full text-left
+                                                ${baseStyle}
+                                            `}
+                                        >
+                                            <div className={`
+                                                w-7 h-7 shrink-0 rounded-md flex items-center justify-center text-xs font-bold border transition-colors
+                                                ${badgeStyle}
+                                            `}>
+                                                {String.fromCharCode(65 + idx)}
+                                            </div>
+                                            <span className={`text-sm md:text-base font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                                {option}
+                                            </span>
+                                            {icon}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="shrink-0 px-6 py-4 border-t border-white/5 bg-white/5 backdrop-blur-sm flex justify-between items-center">
+                        <Button
+                            onClick={handlePrevious}
+                            disabled={currentQuestionIndex === 0}
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground h-9"
+                        >
+                            <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                        </Button>
+
+                        <div className="flex gap-2">
+                            <div className="hidden lg:flex items-center gap-1 mr-6">
+                                {questions.map((_, i) => (
+                                    <div key={i} className={`w-1 h-1 rounded-full transition-all ${i === currentQuestionIndex ? 'bg-primary scale-125' : selectedAnswers[i] ? 'bg-primary/60' : 'bg-white/10'}`} />
                                 ))}
                             </div>
 
-                            <div className="flex items-center justify-between pt-4">
+                            {currentQuestionIndex === questions.length - 1 ? (
                                 <Button
-                                    onClick={handlePrevious}
-                                    disabled={currentQuestionIndex === 0}
-                                    variant="outline"
+                                    onClick={confirmSubmit}
+                                    disabled={isSubmitting}
+                                    size="sm"
+                                    className="gradient-primary text-white h-9 px-6 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <ChevronLeft className="w-4 h-4 mr-2" />
-                                    Previous
+                                    {isSubmitting ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        "Finish"
+                                    )}
                                 </Button>
-
-                                <div className="flex gap-2">
-                                    {questions.map((_, idx) => (
-                                        <div
-                                            key={idx}
-                                            className={`w-2 h-2 rounded-full ${selectedAnswers[idx] ? 'bg-primary' : 'bg-muted'
-                                                }`}
-                                        />
-                                    ))}
-                                </div>
-
-                                {currentQuestionIndex === questions.length - 1 ? (
-                                    <Button
-                                        onClick={handleSubmitQuiz}
-                                        className="gradient-primary text-white"
-                                    >
-                                        Submit Quiz
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        onClick={handleNext}
-                                        className="gradient-primary text-white"
-                                    >
-                                        Next
-                                        <ChevronRight className="w-4 h-4 ml-2" />
-                                    </Button>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
+                            ) : (
+                                <Button
+                                    onClick={handleNext}
+                                    size="sm"
+                                    className={`h-9 px-6 transition-all ${selectedAnswers[currentQuestionIndex] ? 'gradient-primary text-white shadow-md' : 'bg-secondary text-secondary-foreground'}`}
+                                >
+                                    Next <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </main >
+            </main>
 
-            <Footer />
-        </div >
+            {/* Confirmation Dialog */}
+            <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-white/10">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-bold text-foreground">
+                            Submit Quiz?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-muted-foreground text-base">
+                            Are you sure you want to submit your quiz? This action cannot be undone.
+                            {Object.keys(selectedAnswers).length < questions.length && (
+                                <span className="block mt-2 text-yellow-500 font-medium">
+                                    ⚠️ You have {questions.length - Object.keys(selectedAnswers).length} unanswered question(s).
+                                </span>
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="border-white/10 hover:bg-white/5">
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleSubmitQuiz}
+                            className="gradient-primary text-white shadow-lg shadow-primary/20"
+                        >
+                            Yes, Submit
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
     );
 };
 

@@ -13,7 +13,7 @@ interface CategoryCardProps {
 
 export const CategoryCard = ({ title, description, icon, gradient, quizCount, link }: CategoryCardProps) => {
   return (
-    <Link to={link} className="block group">
+    <Link to={link} className="block group ">
       <Card className={`overflow-hidden border-0 card-shadow hover:card-shadow-hover transform hover:scale-105 transition-all duration-300 cursor-pointer ${gradient}`}>
         <CardContent className="p-6 md:p-8">
           <div className="flex flex-col items-center text-center space-y-4">

@@ -1,45 +1,50 @@
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Trophy, 
-  Target, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
-  RotateCcw, 
-  Home, 
+import {
+  Trophy,
+  Target,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  Home,
   Share2,
   Star,
   Zap
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Results = () => {
-  // Mock data - would come from quiz state in real app
+  const location = useLocation();
+  const navigate = useNavigate();
+  const resultsData = location.state;
+
+  // Redirect to dashboard if no results data
+  useEffect(() => {
+    if (!resultsData) {
+      navigate('/dashboard');
+    }
+  }, [resultsData, navigate]);
+
+  if (!resultsData) {
+    return null; // Will redirect
+  }
+
+  // Use passed data from QuizAttempt
   const results = {
-    quizTitle: "Physics: Quantum Mechanics",
-    category: "Academic",
-    score: 85,
-    correctAnswers: 17,
-    totalQuestions: 20,
-    timeTaken: "12:45",
-    averageTime: "38s",
-    rank: 24,
-    totalParticipants: 1250,
-    xpEarned: 150,
-    badgeEarned: "Speed Demon",
+    quizTitle: resultsData.quizTitle,
+    category: resultsData.category,
+    score: resultsData.score,
+    correctAnswers: resultsData.correctAnswers,
+    totalQuestions: resultsData.totalQuestions,
+    timeTaken: resultsData.timeTaken,
+    difficulty: resultsData.difficulty,
+    xpEarned: resultsData.xpEarned,
   };
 
-  const questions = [
-    { id: 1, question: "What is the Heisenberg Uncertainty Principle?", correct: true, yourAnswer: "A", correctAnswer: "A" },
-    { id: 2, question: "Who proposed the wave-particle duality theory?", correct: true, yourAnswer: "B", correctAnswer: "B" },
-    { id: 3, question: "What is quantum entanglement?", correct: false, yourAnswer: "C", correctAnswer: "A" },
-    { id: 4, question: "What is the Schrödinger equation used for?", correct: true, yourAnswer: "D", correctAnswer: "D" },
-    { id: 5, question: "What is a quantum superposition?", correct: true, yourAnswer: "A", correctAnswer: "A" },
-  ];
+  const questions = resultsData.questions || [];
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-success";
@@ -56,15 +61,13 @@ const Results = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Score Header */}
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Quiz Complete!</h1>
             <p className="text-xl text-muted-foreground mb-8">{results.quizTitle}</p>
-            
+
             <div className="relative inline-block">
               <div className="w-48 h-48 rounded-full gradient-primary p-1 mx-auto animate-glow">
                 <div className="w-full h-full rounded-full bg-background flex flex-col items-center justify-center">
@@ -77,14 +80,14 @@ const Results = () => {
                 </div>
               </div>
             </div>
-            
+
             <p className="text-2xl font-semibold mt-6 animate-slide-up">
               {getScoreMessage(results.score)}
             </p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-3xl mx-auto">
             <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.1s" }}>
               <CardContent className="p-6">
                 <Clock className="w-8 h-8 text-primary mx-auto mb-2" />
@@ -95,9 +98,9 @@ const Results = () => {
 
             <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.2s" }}>
               <CardContent className="p-6">
-                <Trophy className="w-8 h-8 text-warning mx-auto mb-2" />
-                <p className="text-2xl font-bold">#{results.rank}</p>
-                <p className="text-sm text-muted-foreground">Global Rank</p>
+                <Target className="w-8 h-8 text-warning mx-auto mb-2" />
+                <p className="text-2xl font-bold">{results.difficulty}</p>
+                <p className="text-sm text-muted-foreground">Difficulty</p>
               </CardContent>
             </Card>
 
@@ -106,14 +109,6 @@ const Results = () => {
                 <Zap className="w-8 h-8 text-secondary mx-auto mb-2" />
                 <p className="text-2xl font-bold">+{results.xpEarned}</p>
                 <p className="text-sm text-muted-foreground">XP Earned</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.4s" }}>
-              <CardContent className="p-6">
-                <Star className="w-8 h-8 text-accent mx-auto mb-2" />
-                <p className="text-2xl font-bold">{results.badgeEarned}</p>
-                <p className="text-sm text-muted-foreground">Badge Earned</p>
               </CardContent>
             </Card>
           </div>
@@ -126,7 +121,7 @@ const Results = () => {
                 Try Another Quiz
               </Button>
             </Link>
-            <Link to="/home">
+            <Link to="/dashboard">
               <Button variant="outline" className="px-8 py-6 text-lg">
                 <Home className="w-5 h-5 mr-2" />
                 Go Home
@@ -148,18 +143,16 @@ const Results = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {questions.map((q, index) => (
-                <div 
-                  key={q.id} 
-                  className={`p-4 rounded-lg border ${
-                    q.correct 
-                      ? "border-success/30 bg-success/5" 
-                      : "border-destructive/30 bg-destructive/5"
-                  }`}
+                <div
+                  key={q.id}
+                  className={`p-4 rounded-lg border ${q.correct
+                    ? "border-success/30 bg-success/5"
+                    : "border-destructive/30 bg-destructive/5"
+                    }`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                      q.correct ? "bg-success text-white" : "bg-destructive text-white"
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${q.correct ? "bg-success text-white" : "bg-destructive text-white"
+                      }`}>
                       {q.correct ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
                     </div>
                     <div className="flex-1">
@@ -200,25 +193,15 @@ const Results = () => {
               </div>
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Speed</span>
-                  <span className="text-sm font-semibold">75%</span>
+                  <span className="text-sm text-muted-foreground">Speed (based on time)</span>
+                  <span className="text-sm font-semibold">Good</span>
                 </div>
                 <Progress value={75} className="h-3" />
-              </div>
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Consistency</span>
-                  <span className="text-sm font-semibold">88%</span>
-                </div>
-                <Progress value={88} className="h-3" />
               </div>
             </CardContent>
           </Card>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </main>    </div>
   );
 };
 

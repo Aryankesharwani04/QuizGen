@@ -16,6 +16,8 @@ from auth_app.views import (
     GetUserXPView,
     CreateUserQuizView,
     GetUserCreatedQuizzesView,
+    GetUserAchievementsView,
+    GetUserStatsView,
 )
 
 urlpatterns = [
@@ -35,4 +37,6 @@ urlpatterns = [
     path('xp/', GetUserXPView.as_view(), name='user-xp'),
     path('quiz/create/', CreateUserQuizView.as_view(), name='create-user-quiz'),
     path('quiz/my-quizzes/', GetUserCreatedQuizzesView.as_view(), name='my-created-quizzes'),
+    path('achievements/', GetUserAchievementsView.as_view(), name='user-achievements'),
+    path('stats/comprehensive/', GetUserStatsView.as_view(), name='comprehensive-stats'),
 ]

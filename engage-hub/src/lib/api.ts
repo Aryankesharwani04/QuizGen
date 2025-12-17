@@ -353,6 +353,29 @@ class ApiService {
       method: 'GET',
     });
   }
+
+  // Get global leaderboard
+  async getLeaderboard(limit: number = 10): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/leaderboard/?limit=${limit}`, {
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch leaderboard');
+    return response.json();
+  }
+
+  // Get user achievements
+  async getUserAchievements(): Promise<ApiResponse<any>> {
+    return this.request('/achievements/', {
+      method: 'GET',
+    });
+  }
+
+  // Get comprehensive user stats (all stats in one call)
+  async getComprehensiveStats(): Promise<ApiResponse<any>> {
+    return this.request('/stats/comprehensive/', {
+      method: 'GET',
+    });
+  }
 }
 
 export const api = new ApiService();

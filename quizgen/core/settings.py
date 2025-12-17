@@ -60,50 +60,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# ============================================================================
-# DATABASE CONFIGURATION
-# ============================================================================
-# Supports both SQLite (development) and PostgreSQL (production)
-# Set DATABASE_URL environment variable to use PostgreSQL
-# For Render deployment: DATABASE_URL is automatically provided
-# ============================================================================
-
 import dj_database_url
 
-# Default to SQLite for local development
+DATABASE_URL = config('DATABASE_URL')
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# Override with PostgreSQL if DATABASE_URL is set
-DATABASE_URL = config('DATABASE_URL', default=None)
-
-if DATABASE_URL:
-    """
-    PostgreSQL Configuration for Production
-    
-    Environment Variable Required:
-    - DATABASE_URL: Full PostgreSQL connection string
-      Format: postgresql://user:password@host:port/database
-      
-    Example:
-      DATABASE_URL=postgresql://quizgen_user:password@localhost:5432/quizgen_prod
-    
-    For Render deployment:
-      DATABASE_URL is automatically set from the linked PostgreSQL database.
-      Use the "External Database URL" from Render PostgreSQL dashboard.
-    
-    Connection pooling is configured for production stability.
-    CONN_MAX_AGE=600 keeps connections alive for 10 minutes to reduce overhead.
-    """
-    DATABASES['default'] = dj_database_url.parse(
+    'default': dj_database_url.parse(
         DATABASE_URL,
         conn_max_age=600,
         conn_health_checks=True,
     )
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -188,40 +155,9 @@ if USE_EMAIL_SMTP:
     EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
     EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 else:
-    # Development: Console backend (emails print to terminal)
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@quizgen.local')
 
-# ============================================================================
-# PRODUCTION SECURITY SETTINGS
-# ============================================================================
-# These settings are recommended for production use:
-#
-# For PostgreSQL Production Deployment (Render):
-# 1. Set DEBUG = False
-# 2. Set SESSION_COOKIE_SECURE = True (requires HTTPS)
-# 3. Set CSRF_COOKIE_SECURE = True (requires HTTPS)
-# 4. Set SECURE_SSL_REDIRECT = True (requires HTTPS setup)
-# 5. Set ALLOWED_HOSTS to specific domain(s)
-# 6. Set SECRET_KEY to a strong random value
-# 7. Set DATABASE_URL from Render PostgreSQL (automatically provided)
-# 8. Add your Render deployment URL to CORS_ALLOWED_ORIGINS and CSRF_TRUSTED_ORIGINS
-#
-# For immediate testing with PostgreSQL locally:
-# 1. Install PostgreSQL locally
-# 2. Create a database: createdb quizgen_dev
-# 3. Set DATABASE_URL in .env:
-#    DATABASE_URL=postgresql://username:password@localhost:5432/quizgen_dev
-# 4. Run: python manage.py migrate
-# 5. Run: python manage.py loaddata backups/data.json
-# ============================================================================
-
 if not DEBUG:
-    # Production-only settings (uncomment when deploying)
-    # SESSION_COOKIE_SECURE = True
-    # CSRF_COOKIE_SECURE = True
-    # SECURE_SSL_REDIRECT = True
-    # SECURE_HSTS_SECONDS = 31536000
-    # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     pass

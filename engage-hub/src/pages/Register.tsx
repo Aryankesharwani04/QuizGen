@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, Mail, Lock, User } from "lucide-react";
+import { Brain, Mail, Lock, User, Github } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, FormEvent } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,10 +31,7 @@ const Register = () => {
       terms?: string;
     } = {};
 
-    if (!fullName) {
-      errors.fullName = "Full name is required";
-    }
-
+    if (!fullName) errors.fullName = "Full name is required";
     if (!email) {
       errors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -45,18 +41,16 @@ const Register = () => {
     if (!password) {
       errors.password = "Password is required";
     } else if (password.length < 8) {
-      errors.password = "Password must be at least 8 characters";
+      errors.password = "Min 8 characters";
     }
 
     if (!confirmPassword) {
-      errors.confirmPassword = "Please confirm your password";
+      errors.confirmPassword = "Required";
     } else if (password !== confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
+      errors.confirmPassword = "No match";
     }
 
-    if (!termsAccepted) {
-      errors.terms = "You must accept the Terms and Conditions";
-    }
+    if (!termsAccepted) errors.terms = "Accept terms required";
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -64,160 +58,188 @@ const Register = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       await register(fullName, email, password, confirmPassword);
       navigate("/dashboard");
     } catch (error) {
-      // Error handling is done in the auth context
       console.error("Registration error:", error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 p-4">
-      <div className="w-full max-w-md animate-fade-in-scale">
-        {/* Logo */}
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8 hover:opacity-80 transition-opacity">
-          <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-            <Brain className="w-7 h-7 text-white" />
+    <div className="h-screen w-full flex bg-background overflow-hidden">
+      
+      {/* LEFT SIDE - Visual & Branding */}
+      <div className="hidden lg:flex w-1/2 relative bg-zinc-900 flex-col justify-between p-12 text-white h-full">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/10 opacity-70" />
+        <div className="absolute -right-20 -top-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -left-20 bottom-0 h-96 w-96 rounded-full bg-secondary/20 blur-3xl" />
+
+        {/* Logo Area - Clickable */}
+        <Link 
+          to="/" 
+          className="relative z-10 flex items-center gap-3 w-fit hover:opacity-80 transition-opacity cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/25">
+            <Brain className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            QuizGen
-          </span>
+          <span className="text-2xl font-bold tracking-tight">QuizGen</span>
         </Link>
 
-        <Card className="border-border/50 card-shadow">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold text-center">Create Account</CardTitle>
-            <CardDescription className="text-center">
-              Start your learning journey today
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="John Doe"
-                    className="pl-10"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                {formErrors.fullName && (
-                  <p className="text-sm text-red-500">{formErrors.fullName}</p>
-                )}
+        {/* Hero Content */}
+        <div className="relative z-10 space-y-6 max-w-lg">
+          <h1 className="text-5xl font-extrabold leading-tight tracking-tight">
+            Unlock your <br />
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Potential
+            </span>
+          </h1>
+          <p className="text-lg text-zinc-400">
+            Join thousands of learners creating, sharing, and mastering quizzes with the power of AI.
+          </p>
+        </div>
+
+        {/* Quote/Footer */}
+        <div className="relative z-10 p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+          <p className="italic text-zinc-300">"The best way to predict the future is to create it."</p>
+        </div>
+      </div>
+
+      {/* RIGHT SIDE - Form */}
+      {/* Fixed Layout: 
+          1. h-full ensures it takes full height.
+          2. justify-center forces vertical centering regardless of padding.
+          3. p-8 provides a safety zone, but Flexbox does the positioning.
+      */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center h-full p-8 relative">
+        <div className="w-full max-w-md flex flex-col justify-center space-y-5 animate-fade-in-scale">
+          
+          <div className="text-center space-y-1 lg:text-left">
+            <h2 className="text-2xl lg:text-3xl font-bold tracking-tight">Create Account</h2>
+            <p className="text-sm text-muted-foreground">Enter your details below to get started.</p>
+          </div>
+
+          <form className="space-y-3" onSubmit={handleSubmit}>
+            
+            {/* Full Name */}
+            <div className="space-y-1">
+              <Label htmlFor="name" className="text-xs lg:text-sm">Full Name</Label>
+              <div className="relative group">
+                <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  id="name"
+                  placeholder="John Doe"
+                  className="pl-9 h-9 lg:h-10 transition-all focus:ring-2 focus:ring-primary/20"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={loading}
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    className="pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                {formErrors.email && (
-                  <p className="text-sm text-red-500">{formErrors.email}</p>
-                )}
+              {formErrors.fullName && <p className="text-xs text-red-500">{formErrors.fullName}</p>}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-xs lg:text-sm">Email Address</Label>
+              <div className="relative group">
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="pl-9 h-9 lg:h-10 transition-all focus:ring-2 focus:ring-primary/20"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+              {formErrors.email && <p className="text-xs text-red-500">{formErrors.email}</p>}
+            </div>
+
+            {/* Grid for Passwords */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="password" className="text-xs lg:text-sm">Password</Label>
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-10"
+                    className="pl-9 h-9 lg:h-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
                   />
                 </div>
-                {formErrors.password && (
-                  <p className="text-sm text-red-500">{formErrors.password}</p>
-                )}
+                {formErrors.password && <p className="text-xs text-red-500">{formErrors.password}</p>}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+
+              <div className="space-y-1">
+                <Label htmlFor="confirm-password" className="text-xs lg:text-sm">Confirm</Label>
+                <div className="relative group">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input
                     id="confirm-password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-10"
+                    className="pl-9 h-9 lg:h-10"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     disabled={loading}
                   />
                 </div>
-                {formErrors.confirmPassword && (
-                  <p className="text-sm text-red-500">{formErrors.confirmPassword}</p>
-                )}
+                {formErrors.confirmPassword && <p className="text-xs text-red-500">{formErrors.confirmPassword}</p>}
               </div>
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <input
-                    type="checkbox"
-                    className="mt-1 rounded"
-                    id="terms"
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                    disabled={loading}
-                  />
-                  <label htmlFor="terms" className="text-sm text-muted-foreground">
-                    I agree to the{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      Terms of Service
-                    </a>{" "}
-                    and{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      Privacy Policy
-                    </a>
-                  </label>
-                </div>
-                {formErrors.terms && (
-                  <p className="text-sm text-red-500">{formErrors.terms}</p>
-                )}
-              </div>
-              <Button
-                type="submit"
-                className="w-full gradient-primary text-white font-semibold py-6 text-lg"
-                disabled={loading}
-              >
-                {loading ? "Creating Account..." : "Create Account"}
-              </Button>
-            </form>
+            </div>
 
+            {/* Terms */}
+            <div className="flex items-start space-x-2 pt-1">
+              <input
+                type="checkbox"
+                id="terms"
+                className="mt-1 rounded border-gray-300 text-primary focus:ring-primary"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                disabled={loading}
+              />
+              <div className="grid gap-1 leading-none">
+                <label
+                  htmlFor="terms"
+                  className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
+                >
+                  Agree to <a href="#" className="text-primary hover:underline">Terms</a> & <a href="#" className="text-primary hover:underline">Privacy</a>
+                </label>
+                {formErrors.terms && <p className="text-[10px] text-red-500">{formErrors.terms}</p>}
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full gradient-primary text-white font-semibold h-10 lg:h-11 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all mt-2"
+              disabled={loading}
+            >
+              {loading ? "Creating Account..." : "Create Account"}
+            </Button>
+          </form>
+
+          {/* Social & Login - Compacted */}
+          <div className="space-y-3 pt-1">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full">
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="w-full h-9 lg:h-10 text-xs lg:text-sm">
+                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -237,22 +259,20 @@ const Register = () => {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
-                </svg>
+              <Button variant="outline" className="w-full h-9 lg:h-10 text-xs lg:text-sm">
+                <Github className="w-4 h-4 mr-2" />
                 GitHub
               </Button>
             </div>
 
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-xs lg:text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link to="/login" className="text-primary hover:underline font-semibold">
                 Sign in
               </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

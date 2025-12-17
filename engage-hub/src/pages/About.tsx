@@ -1,5 +1,3 @@
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { FeatureCard } from "@/components/FeatureCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, Zap, Target, Users, Sparkles, TrendingUp } from "lucide-react";
@@ -67,8 +65,6 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
         <div className="absolute inset-0 gradient-hero opacity-10" />
@@ -234,10 +230,7 @@ const About = () => {
             </a>
           </div>
         </div>
-      </section>
-
-      <Footer />
-    </div>
+      </section>    </div>
   );
 };
 

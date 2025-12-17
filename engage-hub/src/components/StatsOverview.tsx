@@ -8,62 +8,39 @@ interface StatsOverviewProps {
 }
 
 export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
-    // Stats summary state
-    const [statsSummary, setStatsSummary] = useState<any>(null);
-    const [loadingStats, setLoadingStats] = useState(true);
+    const [stats, setStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    // Streak state
-    const [streak, setStreak] = useState<any>(null);
-    const [loadingStreak, setLoadingStreak] = useState(true);
-
-    // Fetch stats summary with cache
+    // Fetch comprehensive stats with cache - single API call
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchComprehensiveStats = async () => {
             try {
                 const { default: cacheService } = await import('@/lib/cacheService');
-                const cachedData: any = cacheService.get('stats_summary');
+                const cachedData: any = cacheService.get('comprehensive_stats');
 
-                if (cachedData) {
-                    setStatsSummary(cachedData.data || {});
-                    setLoadingStats(false);
+                // Show cached data immediately
+                if (cachedData && cachedData.data) {
+                    setStats(cachedData.data);
+                    setLoading(false);
                 }
 
-                const response = await api.getHistorySummary();
+                // Fetch fresh data
+                const response = await api.getComprehensiveStats();
                 const data: any = response;
-                setStatsSummary(data.data || {});
-                cacheService.set('stats_summary', response);
-            } catch (error) {
-                console.error('Failed to fetch stats:', error);
-            } finally {
-                setLoadingStats(false);
-            }
-        };
-        fetchStats();
-    }, []);
 
-    // Fetch user streak with cache
-    useEffect(() => {
-        const fetchStreak = async () => {
-            try {
-                const { default: cacheService } = await import('@/lib/cacheService');
-                const cachedData: any = cacheService.get('user_streak');
-
-                if (cachedData) {
-                    setStreak(cachedData.data || {});
-                    setLoadingStreak(false);
+                if (data.success && data.data) {
+                    setStats(data.data);
+                    // Update cache
+                    cacheService.set('comprehensive_stats', response);
                 }
-
-                const response = await api.getUserStreak();
-                const data: any = response;
-                setStreak(data.data || {});
-                cacheService.set('user_streak', response);
             } catch (error) {
-                console.error('Failed to fetch streak:', error);
+                console.error('Failed to fetch comprehensive stats:', error);
             } finally {
-                setLoadingStreak(false);
+                setLoading(false);
             }
         };
-        fetchStreak();
+
+        fetchComprehensiveStats();
     }, []);
 
     return (
@@ -75,7 +52,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
                         <div>
                             <p className="text-sm text-muted-foreground mb-1">Total Quizzes</p>
                             <p className="text-3xl font-bold text-foreground">
-                                {loadingStats ? '...' : (statsSummary?.total_quizzes_attempted || 0)}
+                                {loading ? '...' : (stats?.total_quizzes_attended || 0)}
                             </p>
                         </div>
                         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
@@ -92,7 +69,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
                         <div>
                             <p className="text-sm text-muted-foreground mb-1">Average Score</p>
                             <p className="text-3xl font-bold text-foreground">
-                                {loadingStats ? '...' : `${statsSummary?.average_score_percentage || 0}%`}
+                                {loading ? '...' : `${stats?.average_score || 0}%`}
                             </p>
                         </div>
                         <div className="w-12 h-12 rounded-xl gradient-secondary flex items-center justify-center">
@@ -109,7 +86,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
                         <div>
                             <p className="text-sm text-muted-foreground mb-1">Time Spent</p>
                             <p className="text-3xl font-bold text-foreground">
-                                {loadingStats ? '...' : `${((statsSummary?.total_time_spent || 0) / 3600).toFixed(1)}h`}
+                                {loading ? '...' : (stats?.total_time_spent_formatted || '0h')}
                             </p>
                         </div>
                         <div className="w-12 h-12 rounded-xl gradient-accent flex items-center justify-center">
@@ -126,7 +103,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
                         <div>
                             <p className="text-sm text-muted-foreground mb-1">Current Streak</p>
                             <p className="text-3xl font-bold text-foreground">
-                                {loadingStreak ? '...' : `${streak?.current_streak || 0} 🔥`}
+                                {loading ? '...' : `${stats?.current_streak || 0} 🔥`}
                             </p>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">

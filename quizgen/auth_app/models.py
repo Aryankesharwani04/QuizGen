@@ -21,13 +21,20 @@ class UserProfile(models.Model):
     email_verification_token = models.CharField(max_length=255, blank=True, null=True)
     email_verification_sent_at = models.DateTimeField(blank=True, null=True)
     
-    # Daily Streak Tracking
+    # Streak tracking
     current_streak = models.IntegerField(default=0, help_text="Current consecutive days streak")
     longest_streak = models.IntegerField(default=0, help_text="Longest streak ever achieved")
-    last_activity_date = models.DateField(blank=True, null=True, help_text="Last quiz activity date (4am cutoff)")
+    last_activity_date = models.DateField(null=True, blank=True, help_text="Last quiz activity date (4am cutoff)")
     
-    # XP System
+    # XP and Level
     xp_score = models.IntegerField(default=0, help_text="Total experience points earned")
+    
+    # Comprehensive Stats Tracking
+    total_quizzes_attended = models.IntegerField(default=0, help_text="Total number of quizzes attended")
+    total_time_spent_seconds = models.IntegerField(default=0, help_text="Total time spent in quizzes in seconds")  # Total time in seconds
+    average_score = models.FloatField(default=0.0, help_text="Average score across all quizzes (percentage 0-100)")  # Percentage 0-100
+    total_questions_answered = models.IntegerField(default=0, help_text="Total number of questions answered in quizzes")
+    total_correct_answers = models.IntegerField(default=0, help_text="Total number of questions answered correctly")
     
     # Quiz Creation Tracking
     created_quiz_ids = models.JSONField(default=list, blank=True, help_text="List of quiz IDs created by this user")

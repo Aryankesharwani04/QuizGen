@@ -58,3 +58,34 @@ def update_user_xp(user, quiz, score):
         return xp_earned
     
     return 0  # No XP for subsequent attempts
+
+
+def calculate_level(xp):
+    """
+    Calculate user level based on XP with progressive difficulty.
+    Each level requires more XP than the previous, with increasing increments.
+    
+    Level progression:
+    Level 1: 50 XP
+    Level 2: 110 XP (50 + 60)
+    Level 3: 180 XP (110 + 70)
+    And so on...
+    
+    Args:
+        xp: Total XP score
+    
+    Returns:
+        int: Current level
+    """
+    level = 1
+    total_xp_required = 0
+    base_increment = 50
+    current_increment = base_increment
+    
+    # Calculate level by accumulating XP requirements
+    while xp >= total_xp_required + current_increment:
+        total_xp_required += current_increment
+        level += 1
+        current_increment = base_increment + (level - 1) * 10  # Increment increases by 10 each level
+    
+    return level

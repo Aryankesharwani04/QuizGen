@@ -1,15 +1,17 @@
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Brain, Beaker, Atom, BookOpen, Film, Music, Gamepad2, Trophy, Globe, Landmark, Newspaper, Lightbulb, Code, Briefcase, Heart, Palette, Tv, Target, Cpu, BookText, Languages, Puzzle, Sparkles, Smile, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  Brain, Beaker, Atom, BookOpen, Film, Music, Gamepad2, Trophy, Globe, 
+  Landmark, Newspaper, Lightbulb, Code, Briefcase, Heart, Palette, Tv, 
+  Target, Cpu, BookText, Languages, Puzzle, Sparkles, Smile 
+} from "lucide-react";
 import { TOPICS, SUBTOPICS } from "@/lib/topics";
 import { api } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { QuizCard } from "@/components/QuizCard"; // Import the shared component
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -47,54 +49,28 @@ const Categories = () => {
     "Fun & Casual": Lightbulb,
   };
 
-  // Icon mapping for subtopics (fallback to general icons)
+  // Icon mapping for subtopics
   const getSubtopicIcon = (topicName: string, subtopicName: string): any => {
     const iconMap: Record<string, any> = {
-      // Science & Innovation
-      "Physics": Atom,
-      "Chemistry": Beaker,
-      "Biology": Brain,
-      "Mathematics": BookOpen,
-      // Entertainment
-      "Movies": Film,
-      "Music": Music,
-      "Sports": Trophy,
-      "Gaming": Gamepad2,
-      // General Knowledge
-      "Geography": Globe,
-      "History": Landmark,
-      "Current Affairs": Newspaper,
-      // Tech
-      "Programming Languages": Code,
-      "Artificial Intelligence": Sparkles,
-      "Cyber Security": Cpu,
+      "Physics": Atom, "Chemistry": Beaker, "Biology": Brain, "Mathematics": BookOpen,
+      "Movies": Film, "Music": Music, "Sports": Trophy, "Gaming": Gamepad2,
+      "Geography": Globe, "History": Landmark, "Current Affairs": Newspaper,
+      "Programming Languages": Code, "Artificial Intelligence": Sparkles, "Cyber Security": Cpu,
     };
     return iconMap[subtopicName] || topicIcons[topicName] || BookText;
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "Easy": return "bg-success/20 text-success";
-      case "Medium": return "bg-accent/20 text-accent";
-      case "Hard": return "bg-destructive/20 text-destructive";
-      default: return "bg-muted";
-    }
   };
 
   // Fetch quiz counts for all subtopics on mount
   useEffect(() => {
     const fetchAllCounts = async () => {
-      // Try to load from cache first
       const { default: cacheService } = await import('@/lib/cacheService');
       const cachedCounts = cacheService.get<Record<string, number>>('quiz_counts');
 
-      // Show cached data immediately if available
       if (cachedCounts) {
         setQuizCounts(cachedCounts);
         setLoadingCounts(false);
       }
 
-      // Fetch fresh counts (in background if cache exists)
       const counts: Record<string, number> = {};
 
       for (const topic of TOPICS) {
@@ -107,22 +83,20 @@ const Categories = () => {
             const key = `${topic}::${subtopic}`;
             counts[key] = response.count || 0;
           } catch (error) {
-            console.error(`Failed to fetch count for ${topic}/${subtopic}:`, error);
             counts[`${topic}::${subtopic}`] = cachedCounts?.[`${topic}::${subtopic}`] || 0;
           }
         }
       }
 
-      // Update state and cache with fresh data
       setQuizCounts(counts);
-      cacheService.set('quiz_counts', counts, 5 * 60 * 1000); // Cache for 5 minutes
+      cacheService.set('quiz_counts', counts, 5 * 60 * 1000);
       setLoadingCounts(false);
     };
 
     fetchAllCounts();
   }, []);
 
-  // Handle subtopic click - open popup and fetch quizzes
+  // Handle subtopic click
   const handleSubtopicClick = async (category: string, subtopic: string) => {
     setSelectedCategory(category);
     setSelectedSubtopic(subtopic);
@@ -131,27 +105,22 @@ const Categories = () => {
     setAvailableQuizzes([]);
 
     try {
-      // Try to load from cache first
       const { default: cacheService } = await import('@/lib/cacheService');
       const cacheKey = `quizzes_${category}_${subtopic}`;
       const cachedQuizzes = cacheService.get<any[]>(cacheKey);
 
-      // Show cached quizzes immediately if available
       if (cachedQuizzes) {
         setAvailableQuizzes(cachedQuizzes);
         setLoadingQuizzes(false);
       }
 
-      // Fetch fresh quiz list
       const response = await api.getQuizzesByCategory(category, subtopic);
       const quizzes = response.quizzes || [];
 
-      // Update state and cache
       setAvailableQuizzes(quizzes);
-      cacheService.set(cacheKey, quizzes, 5 * 60 * 1000); // Cache for 5 minutes
+      cacheService.set(cacheKey, quizzes, 5 * 60 * 1000);
       setLoadingQuizzes(false);
     } catch (error) {
-      console.error("Failed to fetch quizzes:", error);
       toast({
         variant: "destructive",
         title: "Failed to load quizzes",
@@ -159,11 +128,6 @@ const Categories = () => {
       });
       setLoadingQuizzes(false);
     }
-  };
-
-  // Handle quiz start
-  const handleStartQuiz = (quizId: string) => {
-    navigate(`/quiz/${quizId}`);
   };
 
   const SubcategoryCard = ({ category, topic, subtopic }: { category: any, topic: string, subtopic: string }) => {
@@ -191,11 +155,8 @@ const Categories = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
-          {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold mb-4">
               Explore Quiz <span className="text-foreground">Categories</span>
@@ -205,7 +166,7 @@ const Categories = () => {
             </p>
           </div>
 
-          {/* Dynamic Category Sections from SUBTOPICS */}
+          {/* Dynamic Category Sections */}
           {TOPICS.map((topic, topicIndex) => {
             const subtopics = SUBTOPICS[topic as keyof typeof SUBTOPICS];
             if (!subtopics || subtopics.length === 0) return null;
@@ -227,10 +188,7 @@ const Categories = () => {
                 <div className="flex gap-6 overflow-x-auto pb-4" style={{ scrollbarGutter: 'stable' }}>
                   {subtopics.map((subtopic, index) => {
                     const SubtopicIcon = getSubtopicIcon(topic, subtopic);
-                    const category = {
-                      name: subtopic,
-                      icon: SubtopicIcon,
-                    };
+                    const category = { name: subtopic, icon: SubtopicIcon };
                     return (
                       <div key={index} className="flex-shrink-0 w-64 h-52">
                         <SubcategoryCard category={category} topic={topic} subtopic={subtopic} />
@@ -242,7 +200,6 @@ const Categories = () => {
             );
           })}
 
-          {/* CTA Section */}
           <section className="text-center py-16 px-4 rounded-3xl bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Can't Find What You're Looking For?
@@ -259,60 +216,54 @@ const Categories = () => {
 
       {/* Quiz Selection Popup */}
       <Dialog open={showPopup} onOpenChange={setShowPopup}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col bg-background/95 backdrop-blur-sm">
           <DialogHeader>
-            <DialogTitle className="text-2xl">
-              {selectedSubtopic} Quizzes
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <span className="text-primary">{selectedSubtopic}</span> Quizzes
             </DialogTitle>
             <p className="text-sm text-muted-foreground">
               {selectedCategory}
             </p>
           </DialogHeader>
 
-          <div className="overflow-y-auto flex-1 pr-2">
+          <div className="overflow-y-auto flex-1 pr-2 space-y-4 p-1">
             {loadingQuizzes ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                 <p className="text-muted-foreground">Loading quizzes...</p>
               </div>
             ) : availableQuizzes.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 border rounded-xl bg-muted/20">
+                <Brain className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-muted-foreground">No quizzes available for this topic yet.</p>
+                <Button className="mt-4" variant="outline" onClick={() => setShowPopup(false)}>
+                  Close
+                </Button>
               </div>
             ) : (
               <div className="space-y-4">
                 {availableQuizzes.map((quiz, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-foreground mb-1">{quiz.title}</h3>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span>Quiz ID: {quiz.quiz_id}</span>
-                          <Badge className={getDifficultyColor(quiz.level)}>
-                            {quiz.level}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => handleStartQuiz(quiz.quiz_id)}
-                        size="sm"
-                        className="gradient-primary text-white"
-                      >
-                        Start Quiz
-                      </Button>
-                    </div>
-                  </div>
+                   // Calling QuizCard with data and strict fallbacks
+                  <QuizCard
+                    key={quiz.quiz_id || index}
+                    quiz_id={quiz.quiz_id || 'unknown'}
+                    title={quiz.title || 'Untitled Quiz'}
+                    // Use the selected subtopic if the quiz object lacks a topic
+                    topic={quiz.topic || selectedSubtopic} 
+                    // QuizCard will default to 'time-based' if this is null
+                    quiz_type={quiz.quiz_type} 
+                    level={quiz.level || 'Medium'}
+                    // List views often miss details, so we provide safe defaults
+                    num_questions={quiz.num_questions || 10}
+                    duration_seconds={quiz.duration_seconds || 600}
+                    created_at={quiz.created_at || null}
+                  />
                 ))}
               </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
-
-      <Footer />
     </div>
   );
 };

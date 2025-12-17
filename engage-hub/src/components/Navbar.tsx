@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuizNavigation } from "@/contexts/QuizNavigationContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,9 +26,43 @@ const navLinks = [
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showQuizWarning, setShowQuizWarning] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [quizSubmitLoading, setQuizSubmitLoading] = useState(false);
+  const [pendingNavigate, setPendingNavigate] = useState<string | null>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { isQuizActive, quizSubmitHandler, setQuizActive } = useQuizNavigation();
+
+  // Handle navigation with quiz check
+  const handleNavigation = (e: React.MouseEvent, path: string) => {
+    if (isQuizActive) {
+      e.preventDefault();
+      setPendingNavigate(path);
+      setShowQuizWarning(true);
+    }
+  };
+
+  // Confirm quiz submission and navigate
+  const confirmQuizSubmitAndNavigate = async () => {
+    setQuizSubmitLoading(true);
+    try {
+      if (quizSubmitHandler) {
+        await quizSubmitHandler();
+      }
+      setShowQuizWarning(false);
+      if (pendingNavigate === 'logout') {
+        // Show logout dialog after quiz is submitted
+        setPendingNavigate(null);
+        setShowLogoutDialog(true);
+      } else if (pendingNavigate) {
+        navigate(pendingNavigate);
+        setPendingNavigate(null);
+      }
+    } finally {
+      setQuizSubmitLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     setLogoutLoading(true);
@@ -48,7 +83,7 @@ export const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 hover:opacity-80 transition-opacity group">
+            <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 hover:opacity-80 transition-opacity group" onClick={(e) => handleNavigation(e, user ? "/dashboard" : "/")}>
               <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-primary/30 transition-shadow">
                 <Brain className="w-6 h-6 text-primary-foreground" />
               </div>
@@ -63,6 +98,7 @@ export const Navbar = () => {
                 <Link
                   key={link.to}
                   to={link.to}
+                  onClick={(e) => handleNavigation(e, link.to)}
                   className="relative text-foreground/80 hover:text-primary transition-colors font-medium py-2 group"
                 >
                   {link.label}
@@ -77,7 +113,15 @@ export const Navbar = () => {
               {user ? (
                 // Authenticated: Show Logout Button
                 <Button
-                  onClick={() => setShowLogoutDialog(true)}
+                  onClick={async () => {
+                    if (isQuizActive) {
+                      // First show quiz warning
+                      setPendingNavigate('logout');
+                      setShowQuizWarning(true);
+                    } else {
+                      setShowLogoutDialog(true);
+                    }
+                  }}
                   variant="outline"
                   className="font-semibold gap-2"
                 >
@@ -121,7 +165,13 @@ export const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   className="block py-3 px-4 text-foreground hover:text-primary hover:bg-muted/50 rounded-lg transition-all font-medium"
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => {
+                    if (isQuizActive) {
+                      handleNavigation(e, link.to);
+                    } else {
+                      setIsOpen(false);
+                    }
+                  }}
                 >
                   {link.label}
                 </Link>
@@ -130,9 +180,14 @@ export const Navbar = () => {
                 {user ? (
                   // Authenticated: Show Logout Button
                   <Button
-                    onClick={() => {
+                    onClick={async () => {
                       setIsOpen(false);
-                      setShowLogoutDialog(true);
+                      if (isQuizActive) {
+                        setPendingNavigate('logout');
+                        setShowQuizWarning(true);
+                      } else {
+                        setShowLogoutDialog(true);
+                      }
                     }}
                     variant="outline"
                     className="w-full font-semibold gap-2"
@@ -187,6 +242,40 @@ export const Navbar = () => {
                 </>
               ) : (
                 "Logout"
+              )}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Quiz Auto-Submit Warning Dialog */}
+      <AlertDialog open={showQuizWarning} onOpenChange={quizSubmitLoading ? undefined : setShowQuizWarning}>
+        <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-foreground">
+              Leave Quiz?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground text-base">
+              You are currently taking a quiz. If you leave this page, your quiz will be automatically submitted with your current answers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={quizSubmitLoading}>Stay on Quiz</AlertDialogCancel>
+            <Button
+              onClick={confirmQuizSubmitAndNavigate}
+              disabled={quizSubmitLoading}
+              className="gradient-primary text-white"
+            >
+              {quizSubmitLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Submitting...
+                </>
+              ) : (
+                "Submit & Leave"
               )}
             </Button>
           </AlertDialogFooter>

@@ -6,6 +6,7 @@ from .views import (
     GetQuizzesByCategoryView,
     CountQuizzesByCategoryView,
     GetQuizQuestionsByIdView,
+    GetLeaderboardView,
 )
 
 urlpatterns = [
@@ -17,5 +18,6 @@ urlpatterns = [
     path('by-category/', GetQuizzesByCategoryView.as_view(), name='quizzes-by-category'),
     path('count-by-category/', CountQuizzesByCategoryView.as_view(), name='count-quizzes-by-category'),
     path('csv/<str:quiz_id>/questions/', GetQuizQuestionsByIdView.as_view(), name='csv-quiz-questions'),
+    path('leaderboard/', GetLeaderboardView.as_view(), name='leaderboard'),
 ]
 

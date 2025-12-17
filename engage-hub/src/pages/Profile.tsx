@@ -1,6 +1,4 @@
-﻿import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -232,8 +230,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Profile Header */}
@@ -447,8 +443,6 @@ const Profile = () => {
           </Tabs>
         </div>
       </main>
-
-      <Footer />
 
       {/* Avatar Upload Dialog */}
       <Dialog open={showAvatarDialog} onOpenChange={setShowAvatarDialog}>
