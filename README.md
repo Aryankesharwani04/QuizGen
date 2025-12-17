@@ -142,7 +142,7 @@ The backend will be available at `http://localhost:8000`
 Open a new terminal window and navigate to the frontend directory:
 
 ```bash
-cd frontend
+cd engage-hub
 ```
 
 #### 3.2 Install Node Dependencies
@@ -173,7 +173,7 @@ VITE_GOOGLE_CLIENT_ID=your-google-client-id
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:5173` or `http://localhost:3000` depending on Vite's configuration.
+The frontend will be available at `http://localhost:8081` or `http://localhost:8080` depending on Vite's configuration.
 
 ## Running the Application
 
