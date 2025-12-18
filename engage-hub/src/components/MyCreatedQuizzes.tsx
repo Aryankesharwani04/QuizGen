@@ -74,7 +74,7 @@ export const MyCreatedQuizzes = ({
     }, [refreshTrigger]);
 
     return (
-        <Card className={`border-border/50 card-shadow ${className}`}>
+        <Card className={`bg-background/60border-border/50 card-shadow ${className}`}>
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
@@ -115,12 +115,10 @@ export const MyCreatedQuizzes = ({
                                 title={quiz.title}
                                 // Fallback: Use topic if available, else category, else 'General'
                                 topic={quiz.topic || quiz.category || 'General'}
-                                // Fallback: Use quiz_type if available, else let QuizCard default (or pass 'time-based')
-                                quiz_type={quiz.quiz_type || 'time-based'}
                                 level={quiz.level}
                                 num_questions={quiz.num_questions}
                                 duration_seconds={quiz.duration_seconds}
-                                created_at={quiz.created_at}
+                                created_at={quiz.created_at} 
                             />
                         ))}
 

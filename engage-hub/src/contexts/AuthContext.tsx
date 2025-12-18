@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (fullName: string, email: string, password: string, passwordConfirm: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -44,11 +44,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe?: boolean) => {
     try {
       setLoading(true);
-      const response = await api.login({ email, password });
-      
+      const response = await api.login({ email, password, remember_me: rememberMe });
+
       if (response.success && response.data) {
         setUser(response.data);
         toast({
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         password,
         password_confirm: passwordConfirm,
       });
-      
+
       if (response.success && response.data) {
         setUser(response.data);
         toast({
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       const apiError = error as ApiError;
       let errorMessage = apiError.message || 'Registration failed';
-      
+
       // Extract specific field errors if available
       if (apiError.errors) {
         const errorMessages = Object.entries(apiError.errors)
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           .join('\n');
         errorMessage = errorMessages || errorMessage;
       }
-      
+
       toast({
         title: 'Registration Failed',
         description: errorMessage,
@@ -133,7 +133,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
+    // Set up interceptor for unauthorized responses
+    api.onUnauthorized = () => {
+      setUser(null);
+      // Optional: Show a toast? But maybe too noisy if multiple requests fail at once.
+      // The ProtectedRoute will handle the redirection.
+    };
+
     checkAuth();
+
+    // Cleanup
+    return () => {
+      api.onUnauthorized = null;
+    };
   }, []);
 
   const value = {

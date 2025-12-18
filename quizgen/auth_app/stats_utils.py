@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_user_stats(user, quiz_result):
+def update_user_stats(user, quiz_result, is_learning=False):
     """
     Centralized function to update all user stats after quiz completion.
     
@@ -19,6 +19,7 @@ def update_user_stats(user, quiz_result):
             - total_questions: Total number of questions
             - time_taken: Time spent in seconds
             - percentage_score: Score as percentage
+        is_learning: bool - If True, skip XP and time updates (for learning-based quizzes)
     
     Returns:
         dict: Updated stats
@@ -29,9 +30,10 @@ def update_user_stats(user, quiz_result):
         # 1. Update total quizzes attended
         profile.total_quizzes_attended += 1
         
-        # 2. Update total time spent
-        time_taken = quiz_result.get('time_taken', 0)
-        profile.total_time_spent_seconds += time_taken
+        # 2. Update total time spent (skip for learning-based)
+        if not is_learning:
+            time_taken = quiz_result.get('time_taken', 0)
+            profile.total_time_spent_seconds += time_taken
         
         # 3. Update total questions and correct answers
         total_questions = quiz_result.get('total_questions', 0)
@@ -48,10 +50,12 @@ def update_user_stats(user, quiz_result):
         else:
             profile.average_score = 0.0
         
-        # 5. Update XP (uses existing function)
-        quiz = quiz_result.get('quiz')
-        if quiz:
-            update_user_xp(user, quiz, score)
+        # 5. Update XP (skip for learning-based)
+        if not is_learning:
+            quiz = quiz_result.get('quiz')
+            quiz_type = quiz_result.get('quiz_type', 'time-based')
+            if quiz:
+                update_user_xp(user, quiz, score, quiz_type)
         
         # 6. Update daily streak
         update_user_streak(user)
@@ -59,7 +63,7 @@ def update_user_stats(user, quiz_result):
         # Save all updates
         profile.save()
         
-        logger.info(f"Updated stats for user {user.username}: {profile.total_quizzes_attended} quizzes, {profile.average_score:.2f}% avg")
+        logger.info(f"Updated stats for user {user.username}: {profile.total_quizzes_attended} quizzes, {profile.average_score:.2f}% avg (learning mode: {is_learning})")
         
         return {
             'total_quizzes': profile.total_quizzes_attended,

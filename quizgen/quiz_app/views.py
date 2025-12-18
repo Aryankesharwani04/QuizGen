@@ -132,20 +132,73 @@ class QuizListView(APIView):
 
     def get(self, request):
         try:
-            quizzes = Quiz.objects.all().order_by('-created_at')
+            quizzes_map = {}
             
-            quiz_list = []
-            for quiz in quizzes:
-                quiz_list.append({
-                    'quiz_id': quiz.quiz_id,
+            # 1. Fetch from Database
+            db_quizzes = Quiz.objects.all().order_by('-created_at')
+            for quiz in db_quizzes:
+                quizzes_map[str(quiz.quiz_id)] = {
+                    'quiz_id': str(quiz.quiz_id),
                     'title': quiz.title,
                     'category': quiz.category or quiz.topic,
+                    'topic': quiz.topic,
                     'level': quiz.level or quiz.difficulty_level,
                     'num_questions': quiz.num_questions,
                     'duration_seconds': quiz.duration_seconds or (quiz.duration_minutes * 60 if quiz.duration_minutes else 600),
-                })
+                    'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                    'source': 'database'
+                }
             
-            logger.info(f"Returning {len(quiz_list)} quizzes")
+            # 2. Fetch from ALL CSV files in dataset folder
+            import csv
+            import os
+            
+            dataset_dir = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                'dataset'
+            )
+            
+            if os.path.exists(dataset_dir):
+                # Iterate through all files in the directory
+                for filename in os.listdir(dataset_dir):
+                    if filename.endswith('.csv'):
+                        csv_path = os.path.join(dataset_dir, filename)
+                        try:
+                            with open(csv_path, 'r', encoding='utf-8') as file:
+                                reader = csv.DictReader(file)
+                                # validation to ensure it has required columns
+                                if not reader.fieldnames or 'QuizID' not in reader.fieldnames:
+                                    continue
+                                    
+                                for row in reader:
+                                    quiz_id = row.get('QuizID')
+                                    if not quiz_id:
+                                        continue
+                                    
+                                    if quiz_id not in quizzes_map:
+                                        # New quiz found in CSV
+                                        quizzes_map[quiz_id] = {
+                                            'quiz_id': quiz_id,
+                                            'title': row.get('Title', 'Untitled Quiz'),
+                                            'category': row.get('Category', 'General'),
+                                            'topic': row.get('Subtopic', row.get('Category', 'General')),
+                                            'level': row.get('Level', 'Medium'),
+                                            'num_questions': 1, # Initialize count
+                                            'duration_seconds': int(row['DurationSeconds']) if row.get('DurationSeconds') and row['DurationSeconds'].isdigit() else 600,
+                                            'created_at': None,
+                                            'source': 'dataset'
+                                        }
+                                    elif quizzes_map[quiz_id]['source'] == 'dataset':
+                                        # Increment count for CSV-only quizzes
+                                        quizzes_map[quiz_id]['num_questions'] += 1
+                        except Exception as e:
+                            logger.error(f"Error reading CSV {filename}: {str(e)}")
+                            continue
+            
+            # Convert to list
+            quiz_list = list(quizzes_map.values())
+            
+            logger.info(f"Returning {len(quiz_list)} quizzes (DB+CSV)")
             return Response({
                 'success': True,
                 'quizzes': quiz_list,
@@ -495,3 +548,115 @@ class GetLeaderboardView(APIView):
                 {'error': 'Failed to fetch leaderboard', 'details': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class GetQuizDetailView(APIView):
+    """
+    Unified API to fetch quiz details by quiz_id.
+    Prioritizes CSV dataset, falls back to Database.
+    Returns standardized quiz object with questions.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, quiz_id):
+        import csv
+        import os
+        
+        # 1. Search in CSV (Primary Source for static quizzes)
+        try:
+            csv_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                'dataset',
+                'categoryQuizzes.csv'
+            )
+            
+            if os.path.exists(csv_path):
+                questions = []
+                quiz_metadata = None
+                
+                with open(csv_path, 'r', encoding='utf-8') as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        if row['QuizID'] == str(quiz_id):
+                            # Capture metadata from the first row found
+                            if not quiz_metadata:
+                                quiz_metadata = {
+                                    'quiz_id': row['QuizID'],
+                                    'title': row['Title'],
+                                    'category': row['Category'],
+                                    'subtopic': row['Subtopic'],
+                                    'level': row['Level'],
+                                    'duration_seconds': int(row['DurationSeconds']) if row['DurationSeconds'] else 600,
+                                    'source': 'dataset'
+                                }
+                            
+                            # Add question
+                            questions.append({
+                                'text': row['QuestionText'],
+                                'options': {
+                                    'A': row['OptionA'],
+                                    'B': row['OptionB'],
+                                    'C': row['OptionC'],
+                                    'D': row['OptionD']
+                                },
+                                'correct_answer': row['CorrectAnswer']
+                            })
+                
+                if quiz_metadata:
+                    logger.info(f"Quiz {quiz_id} found in CSV dataset.")
+                    return Response({
+                        'success': True,
+                        'data': {
+                            **quiz_metadata,
+                            'questions': questions,
+                            'total_questions': len(questions)
+                        }
+                    }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            logger.error(f"Error searching CSV for quiz {quiz_id}: {str(e)}")
+            # Continue to DB search if CSV fails
+
+        # 2. Search in Database (Fallback for generated quizzes)
+        try:
+            quiz = Quiz.objects.filter(quiz_id=quiz_id).first()
+            if quiz:
+                questions_qs = Question.objects.filter(quiz=quiz).order_by('order')
+                questions_list = []
+                for q in questions_qs:
+                    questions_list.append({
+                        'id': q.id,
+                        'text': q.text or q.question_text,
+                        'options': q.options,
+                        'correct_answer': q.correct_answer
+                    })
+                
+                logger.info(f"Quiz {quiz_id} found in Database.")
+                return Response({
+                    'success': True,
+                    'data': {
+                        'quiz_id': quiz.quiz_id,
+                        'title': quiz.title,
+                        'category': quiz.category or quiz.topic,
+                        'subtopic': quiz.topic, # topic is often used as subtopic equivalent for DB quizzes
+                        'level': quiz.level or quiz.difficulty_level,
+                        'duration_seconds': quiz.duration_seconds or (quiz.duration_minutes * 60 if quiz.duration_minutes else 600),
+                        'source': 'database',
+                        'questions': questions_list,
+                        'total_questions': len(questions_list)
+                    }
+                }, status=status.HTTP_200_OK)
+                
+        except Exception as e:
+            logger.error(f"Error searching DB for quiz {quiz_id}: {str(e)}")
+            return Response(
+                {"error": "Failed to fetch quiz details", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # 3. Not found
+        return Response(
+            {"error": "Quiz not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )

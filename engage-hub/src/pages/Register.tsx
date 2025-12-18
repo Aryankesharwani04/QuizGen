@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Brain, Mail, Lock, User, Github } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, FormEvent } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register, loading } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,15 +63,16 @@ const Register = () => {
 
     try {
       await register(fullName, email, password, confirmPassword);
-      navigate("/dashboard");
+      const from = (location.state as any)?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
     } catch (error) {
       console.error("Registration error:", error);
     }
   };
 
   return (
-    <div className="h-screen w-full flex bg-background overflow-hidden">
-      
+    <div className="h-screen w-full flex bg-transparent overflow-hidden">
+
       {/* LEFT SIDE - Visual & Branding */}
       <div className="hidden lg:flex w-1/2 relative bg-zinc-900 flex-col justify-between p-12 text-white h-full">
         {/* Background Effects */}
@@ -79,8 +81,8 @@ const Register = () => {
         <div className="absolute -left-20 bottom-0 h-96 w-96 rounded-full bg-secondary/20 blur-3xl" />
 
         {/* Logo Area - Clickable */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="relative z-10 flex items-center gap-3 w-fit hover:opacity-80 transition-opacity cursor-pointer"
         >
           <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/25">
@@ -116,14 +118,14 @@ const Register = () => {
       */}
       <div className="w-full lg:w-1/2 flex items-center justify-center h-full p-8 relative">
         <div className="w-full max-w-md flex flex-col justify-center space-y-5 animate-fade-in-scale">
-          
+
           <div className="text-center space-y-1 lg:text-left">
             <h2 className="text-2xl lg:text-3xl font-bold tracking-tight">Create Account</h2>
             <p className="text-sm text-muted-foreground">Enter your details below to get started.</p>
           </div>
 
           <form className="space-y-3" onSubmit={handleSubmit}>
-            
+
             {/* Full Name */}
             <div className="space-y-1">
               <Label htmlFor="name" className="text-xs lg:text-sm">Full Name</Label>

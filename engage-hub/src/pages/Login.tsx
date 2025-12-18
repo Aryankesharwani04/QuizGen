@@ -2,15 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Brain, Mail, Lock, Github } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, FormEvent } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
 
   const validateForm = () => {
@@ -35,16 +37,17 @@ const Login = () => {
     if (!validateForm()) return;
 
     try {
-      await login(email, password);
-      navigate("/dashboard");
+      await login(email, password, rememberMe);
+      const from = (location.state as any)?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
     } catch (error) {
       console.error("Login error:", error);
     }
   };
 
   return (
-    <div className="h-screen w-full flex bg-background overflow-hidden">
-      
+    <div className="h-screen w-full flex bg-transparent overflow-hidden">
+
       {/* LEFT SIDE - Visual & Branding (Identical to Register) */}
       <div className="hidden lg:flex w-1/2 relative bg-zinc-900 flex-col justify-between p-12 text-white h-full">
         {/* Background Effects */}
@@ -53,8 +56,8 @@ const Login = () => {
         <div className="absolute -left-20 bottom-0 h-96 w-96 rounded-full bg-secondary/20 blur-3xl" />
 
         {/* Logo Area - Clickable */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="relative z-10 flex items-center gap-3 w-fit hover:opacity-80 transition-opacity cursor-pointer"
         >
           <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/25">
@@ -85,14 +88,14 @@ const Login = () => {
       {/* RIGHT SIDE - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center h-full p-8 relative">
         <div className="w-full max-w-md flex flex-col justify-center space-y-6 animate-fade-in-scale">
-          
+
           <div className="text-center space-y-1 lg:text-left">
             <h2 className="text-2xl lg:text-3xl font-bold tracking-tight">Welcome Back</h2>
             <p className="text-sm text-muted-foreground">Enter your credentials to access your account.</p>
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
-            
+
             {/* Email */}
             <div className="space-y-1">
               <Label htmlFor="email" className="text-xs lg:text-sm">Email Address</Label>
@@ -131,23 +134,25 @@ const Login = () => {
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        id="remember"
-                        className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
-                        disabled={loading}
-                    />
-                    <label
-                        htmlFor="remember"
-                        className="text-xs lg:text-sm font-medium leading-none text-muted-foreground cursor-pointer"
-                    >
-                        Remember me
-                    </label>
-                </div>
-                <a href="#" className="text-xs lg:text-sm font-medium text-primary hover:underline">
-                    Forgot password?
-                </a>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                  disabled={loading}
+                />
+                <label
+                  htmlFor="remember"
+                  className="text-xs lg:text-sm font-medium leading-none text-muted-foreground cursor-pointer"
+                >
+                  Remember me
+                </label>
+              </div>
+              <a href="#" className="text-xs lg:text-sm font-medium text-primary hover:underline">
+                Forgot password?
+              </a>
             </div>
 
             <Button
@@ -156,10 +161,10 @@ const Login = () => {
               disabled={loading}
             >
               {loading ? (
-                 <div className="flex items-center gap-2">
-                    <span className="animate-spin h-4 w-4 border-2 border-white/50 border-t-white rounded-full"></span>
-                    Logging in...
-                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="animate-spin h-4 w-4 border-2 border-white/50 border-t-white rounded-full"></span>
+                  Logging in...
+                </div>
               ) : "Login"}
             </Button>
           </form>

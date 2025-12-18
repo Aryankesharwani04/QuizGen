@@ -1,21 +1,36 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { 
-  Brain, Beaker, Atom, BookOpen, Film, Music, Gamepad2, Trophy, Globe, 
-  Landmark, Newspaper, Lightbulb, Code, Briefcase, Heart, Palette, Tv, 
-  Target, Cpu, BookText, Languages, Puzzle, Sparkles, Smile 
+import {
+  Brain, Beaker, Atom, BookOpen, Film, Music, Gamepad2, Trophy, Globe,
+  Landmark, Newspaper, Lightbulb, Code, Briefcase, Heart, Palette, Tv,
+  Target, Cpu, BookText, Languages, Puzzle, Sparkles, Smile, Compass, Layers, Search
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { TOPICS, SUBTOPICS } from "@/lib/topics";
 import { api } from "@/lib/api";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { QuizCard } from "@/components/QuizCard"; // Import the shared component
+import { QuizCard } from "@/components/QuizCard";
+import Explore from "./Explore";
+import { cn } from "@/lib/utils";
 
 const Categories = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Tab State: 'categories' | 'quizzes'
+  const [activeTab, setActiveTab] = useState<'categories' | 'quizzes'>('categories');
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+
+  // Check hash on mount/update
+  useEffect(() => {
+    if (location.hash === '#explore') {
+      setActiveTab('quizzes');
+    }
+  }, [location.hash]);
 
   // State for quiz counts per subtopic
   const [quizCounts, setQuizCounts] = useState<Record<string, number>>({});
@@ -136,7 +151,7 @@ const Categories = () => {
 
     return (
       <div className="h-full block" onClick={() => handleSubtopicClick(topic, subtopic)}>
-        <Card className="border-border/50 card-shadow hover:card-shadow-hover transform hover:scale-105 transition-all duration-300 cursor-pointer group h-full">
+        <Card className="bg-background/60 border-border/50 card-shadow hover:card-shadow-hover transform hover:scale-105 transition-all duration-300 cursor-pointer group h-full">
           <CardContent className="p-6 h-full flex flex-col">
             <div className="flex items-start justify-between mb-4">
               <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -154,67 +169,147 @@ const Categories = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold mb-4">
-              Explore Quiz <span className="text-foreground">Categories</span>
+        <div className="container max-w-6xl px-4 md:px-6">
+
+          {/* Page Title */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Explore <span className="text-foreground">Content</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Choose from our wide range of topics and start testing your knowledge today
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Browse by deep categories or explore individual quizzes directly.
             </p>
           </div>
 
-          {/* Dynamic Category Sections */}
-          {TOPICS.map((topic, topicIndex) => {
-            const subtopics = SUBTOPICS[topic as keyof typeof SUBTOPICS];
-            if (!subtopics || subtopics.length === 0) return null;
+          {/* Custom Tabs */}
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex items-center p-1 rounded-xl bg-muted/30 border border-border/50">
+              <button
+                onClick={() => setActiveTab('quizzes')}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
+                  activeTab === 'quizzes'
+                    ? "bg-background text-primary shadow-sm ring-1 ring-border/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                )}
+              >
+                <Compass className="w-4 h-4" />
+                Explore Quizzes
+              </button>
+              <button
+                onClick={() => setActiveTab('categories')}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
+                  activeTab === 'categories'
+                    ? "bg-background text-primary shadow-sm ring-1 ring-border/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                )}
+              >
+                <Layers className="w-4 h-4" />
+                Quiz Categories
+              </button>
+            </div>
+          </div>
 
-            const TopicIcon = topicIcons[topic] || BookText;
-            const gradientClass = topicIndex % 3 === 0 ? "gradient-primary" : topicIndex % 3 === 1 ? "gradient-secondary" : "gradient-accent";
+          {/* Tab Content */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {activeTab === 'quizzes' ? (
+              /* Explore Quizzes Content: We render the Explore component here. 
+                 It has its own container styling, so it might nest. We'll adjust Explore.tsx later if needed. 
+                 Since user asked to "put the above created component their", we just embed it.
+                 NOTE: The user previously added padding to Explore.tsx, which might double up here.
+                 I will pass a className prop to Explore if it accepted one, but standard practice says just render it. */
+              <div className="-mt-24"> {/* Negative margin to counteract Explore's built-in top padding if possible, or just accept it */}
+                <Explore />
+              </div>
+            ) : (
+              /* Categories Content */
+              <div className="space-y-16">
 
-            return (
-              <section key={topic} className="mb-16">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-12 h-12 rounded-xl ${gradientClass} flex items-center justify-center`}>
-                    <TopicIcon className="w-6 h-6 text-white" />
+                {/* Search Bar for Categories */}
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
+                  <div className="space-y-1">
+                    <h2 className="text-2xl font-bold tracking-tight">Browse Categories</h2>
+                    <p className="text-muted-foreground">Find specific topics and subtopics</p>
                   </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-foreground">{topic}</h2>
-                    <p className="text-muted-foreground">Explore {subtopics.length} subcategories</p>
+                  <div className="relative w-full md:w-72">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search categories..."
+                      className="pl-9"
+                      value={categorySearchTerm}
+                      onChange={(e) => setCategorySearchTerm(e.target.value)}
+                    />
                   </div>
                 </div>
-                <div className="flex gap-6 overflow-x-auto pb-4" style={{ scrollbarGutter: 'stable' }}>
-                  {subtopics.map((subtopic, index) => {
-                    const SubtopicIcon = getSubtopicIcon(topic, subtopic);
-                    const category = { name: subtopic, icon: SubtopicIcon };
-                    return (
-                      <div key={index} className="flex-shrink-0 w-64 h-52">
-                        <SubcategoryCard category={category} topic={topic} subtopic={subtopic} />
+
+                {/* Dynamic Category Sections */}
+                {TOPICS.map((topic, topicIndex) => {
+                  const subtopics = SUBTOPICS[topic as keyof typeof SUBTOPICS];
+                  if (!subtopics || subtopics.length === 0) return null;
+
+                  // Filtering Logic
+                  const lowerTerm = categorySearchTerm.toLowerCase();
+                  const matchesTopic = topic.toLowerCase().includes(lowerTerm);
+
+                  // If topic matches, show all. If not, filter subtopics.
+                  const filteredSubtopics = matchesTopic
+                    ? subtopics
+                    : subtopics.filter(sub => sub.toLowerCase().includes(lowerTerm));
+
+                  // If no subtopics match (and topic doesn't match), hide section
+                  if (filteredSubtopics.length === 0) return null;
+
+                  const TopicIcon = topicIcons[topic] || BookText;
+                  const gradientClass = topicIndex % 3 === 0 ? "gradient-primary" : topicIndex % 3 === 1 ? "gradient-secondary" : "gradient-accent";
+
+                  return (
+                    <section key={topic}>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className={`w-12 h-12 rounded-xl ${gradientClass} flex items-center justify-center`}>
+                          <TopicIcon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-3xl font-bold text-foreground">{topic}</h2>
+                          <p className="text-muted-foreground">Explore {filteredSubtopics.length} subcategories</p>
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
+                      <div className="flex gap-6 overflow-x-auto pb-4" style={{ scrollbarGutter: 'stable' }}>
+                        {filteredSubtopics.map((subtopic, index) => {
+                          const SubtopicIcon = getSubtopicIcon(topic, subtopic);
+                          const category = { name: subtopic, icon: SubtopicIcon };
+                          return (
+                            <div key={index} className="flex-shrink-0 w-64 h-52">
+                              <SubcategoryCard category={category} topic={topic} subtopic={subtopic} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })}
 
-          <section className="text-center py-16 px-4 rounded-3xl bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Can't Find What You're Looking For?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Request a new category or suggest topics you'd like to see on QuizGen
-            </p>
-            <Button size="lg" className="gradient-primary text-white font-semibold">
-              Request New Category
-            </Button>
-          </section>
+                <section className="text-center py-16 px-4 rounded-3xl bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                    Can't Find What You're Looking For?
+                  </h2>
+                  <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+                    Request a new category or suggest topics you'd like to see on QuizGen
+                  </p>
+                  <Button size="lg" className="gradient-primary text-white font-semibold">
+                    Request New Category
+                  </Button>
+                </section>
+              </div>
+            )}
+          </div>
+
         </div>
       </main>
 
-      {/* Quiz Selection Popup */}
+      {/* Quiz Selection Popup (Only relevant for Categories tab) */}
       <Dialog open={showPopup} onOpenChange={setShowPopup}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col bg-background/95 backdrop-blur-sm">
           <DialogHeader>
@@ -243,17 +338,12 @@ const Categories = () => {
             ) : (
               <div className="space-y-4">
                 {availableQuizzes.map((quiz, index) => (
-                   // Calling QuizCard with data and strict fallbacks
                   <QuizCard
                     key={quiz.quiz_id || index}
                     quiz_id={quiz.quiz_id || 'unknown'}
                     title={quiz.title || 'Untitled Quiz'}
-                    // Use the selected subtopic if the quiz object lacks a topic
-                    topic={quiz.topic || selectedSubtopic} 
-                    // QuizCard will default to 'time-based' if this is null
-                    quiz_type={quiz.quiz_type} 
+                    topic={quiz.topic || selectedSubtopic}
                     level={quiz.level || 'Medium'}
-                    // List views often miss details, so we provide safe defaults
                     num_questions={quiz.num_questions || 10}
                     duration_seconds={quiz.duration_seconds || 600}
                     created_at={quiz.created_at || null}

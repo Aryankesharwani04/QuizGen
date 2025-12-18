@@ -14,6 +14,9 @@ import { StatsOverview } from "@/components/StatsOverview";
 import { MyCreatedQuizzes } from "@/components/MyCreatedQuizzes";
 import { ExploreQuizzes } from "@/components/ExploreQuizzes";
 import { CategoryPerformance } from "@/components/CategoryPerformance";
+import { Combobox } from "@/components/ui/combobox";
+import { TOPICS } from "@/lib/topics";
+import { QuizIdSearch } from "@/components/QuizIdSearch";
 
 const PROFILE_CACHE_KEY = 'dashboard_user_profile';
 const PROFILE_TIMESTAMP_KEY = 'dashboard_user_profile_timestamp';
@@ -134,10 +137,14 @@ const Dashboard = () => {
     <div className="min-h-screen bg-transparent flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-8 pt-24">
         <div className="max-w-7xl mx-auto">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Welcome back, {userName || user?.username}! 👋</h1>
-            <p className="text-muted-foreground">Ready to challenge yourself today?</p>
+
+          {/* Welcome Section & Quiz Search */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Welcome back, {userName || user?.username}! 👋</h1>
+              <p className="text-muted-foreground">Ready to challenge yourself today?</p>
+            </div>
+            <QuizIdSearch />
           </div>
 
           {/* Create Quiz Dialog */}
@@ -153,11 +160,13 @@ const Dashboard = () => {
                 {/* Category - Full Width */}
                 <div className="grid gap-2">
                   <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    placeholder="e.g., Science, History, Math"
+                  <Combobox
+                    options={TOPICS.map(topic => ({ value: topic, label: topic }))}
                     value={quizForm.category}
-                    onChange={(e) => setQuizForm({ ...quizForm, category: e.target.value })}
+                    onValueChange={(value) => setQuizForm({ ...quizForm, category: value })}
+                    placeholder="Select a category..."
+                    searchPlaceholder="Search categories..."
+                    emptyMessage="No category found."
                   />
                 </div>
 
@@ -258,6 +267,7 @@ const Dashboard = () => {
                 refreshTrigger={refreshKey}
                 limit={1}
                 showSeeMore={true}
+                className="bg-background/60"
               />
 
               {/* Explore Quizzes */}
@@ -274,7 +284,7 @@ const Dashboard = () => {
                 <CategoryPerformance />
 
                 {/* Quick Actions */}
-                <Card className="border-border/50 card-shadow">
+                <Card className="bg-background/60 border-border/50 card-shadow">
                   <CardHeader>
                     <CardTitle>Quick Actions</CardTitle>
                   </CardHeader>

@@ -50,7 +50,7 @@ const QuizReview = () => {
     }
 
     return (
-        <div className="min-h-screen bg-background">            <main className="pt-24 pb-16">
+        <div className="min-h-screen bg-transparent">            <main className="pt-24 pb-16">
                 <div className="container mx-auto px-4">
                     <Card className="max-w-2xl mx-auto border-border/50 card-shadow">
                         <CardHeader className="text-center">

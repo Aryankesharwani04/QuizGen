@@ -1,4 +1,4 @@
-﻿import { Navigate } from "react-router-dom";
+﻿import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ProtectedRouteProps {
@@ -26,8 +26,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <LoadingSpinner />;
   }
 
+  const location = useLocation();
+
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   return <>{children}</>;

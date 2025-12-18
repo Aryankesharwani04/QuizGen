@@ -5,6 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000
 export interface LoginRequest {
   email: string;
   password: string;
+  remember_me?: boolean;
 }
 
 export interface RegisterRequest {
@@ -44,6 +45,7 @@ export interface ApiError {
 
 class ApiService {
   private baseURL: string;
+  public onUnauthorized: (() => void) | null = null;
 
   constructor() {
     this.baseURL = `${API_BASE_URL}/api/auth`;
@@ -71,6 +73,12 @@ class ApiService {
     try {
       const response = await fetch(url, config);
       const data = await response.json();
+
+      if (response.status === 401) {
+        if (this.onUnauthorized) {
+          this.onUnauthorized();
+        }
+      }
 
       if (!response.ok) {
         throw data;
@@ -208,7 +216,8 @@ class ApiService {
   async saveQuizAttempt(
     quizId: string,
     selectedAnswers: any,
-    timeTaken: number
+    timeTaken: number,
+    quizType?: string
   ): Promise<ApiResponse<any>> {
     const response = await fetch(`${API_BASE_URL}/api/auth/quiz/attempt/save/`, {
       method: "POST",
@@ -220,6 +229,7 @@ class ApiService {
         quiz_id: quizId,
         selected_answers: selectedAnswers,
         time_taken: timeTaken,
+        quiz_type: quizType || 'time-based',
       }),
     });
 
@@ -338,6 +348,14 @@ class ApiService {
     return response.json();
   }
 
+  async getQuizDetail(quizId: string): Promise<ApiResponse<any>> {
+    const response = await fetch(
+      `${API_BASE_URL}/api/quiz/detail/${quizId}/`
+    );
+    if (!response.ok) throw new Error("Failed to fetch quiz details");
+    return response.json();
+  }
+
   async getQuizQuestionsFromCSV(quizId: string): Promise<any> {
     const response = await fetch(
       `${API_BASE_URL}/api/quiz/csv/${quizId}/questions/`
@@ -354,13 +372,18 @@ class ApiService {
     });
   }
 
-  // Get global leaderboard
-  async getLeaderboard(limit: number = 10): Promise<ApiResponse<any>> {
-    const response = await fetch(`${API_BASE_URL}/api/quiz/leaderboard/?limit=${limit}`, {
+  // Get global leaderboard with overall top 100 and weekly top 10
+  async getGlobalLeaderboard(): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/leaderboard/global/`, {
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch leaderboard');
+    if (!response.ok) throw new Error('Failed to fetch global leaderboard');
     return response.json();
+  }
+
+  // Old leaderboard method - deprecated, use getGlobalLeaderboard instead
+  async getLeaderboard(limit: number = 10): Promise<ApiResponse<any>> {
+    return this.getGlobalLeaderboard();
   }
 
   // Get user achievements

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
     AlertDialog,
@@ -21,6 +21,7 @@ const getStorageKey = (quizId: string, key: string) => `quiz_${quizId}_${key}`;
 
 const QuizAttempt = () => {
     const { quizId } = useParams();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { toast } = useToast();
     const { setQuizActive, setQuizSubmitHandler } = useQuizNavigation();
@@ -30,7 +31,9 @@ const QuizAttempt = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({});
     const [loading, setLoading] = useState(true);
-    const [timeRemaining, setTimeRemaining] = useState<number | null>(null); // Null initially to avoid hydration mismatch
+    const [timeRemaining, setTimeRemaining] = useState<number | null>(null); // For time-based mode
+    const [questionTimeRemaining, setQuestionTimeRemaining] = useState<number | null>(null); // For fast-paced per-question timer
+    const [timeSpentPerQuestion, setTimeSpentPerQuestion] = useState<{ [key: number]: number }>({}); // Track time spent on each question for fast-paced
     const [quizCompleted, setQuizCompleted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -84,6 +87,12 @@ const QuizAttempt = () => {
                     throw new Error('Invalid response format');
                 }
 
+                // Override quiz_type if provided in URL query parameter
+                const urlQuizType = searchParams.get('type');
+                if (urlQuizType) {
+                    quizData.quiz_type = urlQuizType;
+                }
+
                 setQuiz(quizData);
                 setQuestions(quizData.questions || []);
 
@@ -105,14 +114,23 @@ const QuizAttempt = () => {
                         const remaining = Math.floor((parseInt(savedEndTime) - now) / 1000);
                         if (remaining <= 0) {
                             setTimeRemaining(0);
-                            // If time expired while away, we might want to auto-submit here
-                            // But for now we just set it to 0 and let the useEffect handle it
                         } else {
                             setTimeRemaining(remaining);
                         }
                     } else {
                         // First start: Set target time
-                        const duration = quizData.duration_seconds || 600;
+                        let duration = quizData.duration_seconds || 600;
+
+                        // For fast-paced mode, calculate total time based on difficulty
+                        if (quizType === 'fast-paced') {
+                            const level = (quizData.level || 'medium').toLowerCase();
+                            let timePerQuestion = 20; // default medium
+                            if (level === 'easy') timePerQuestion = 10;
+                            else if (level === 'hard') timePerQuestion = 30;
+
+                            duration = timePerQuestion * quizData.questions.length;
+                        }
+
                         const targetTime = now + (duration * 1000);
                         localStorage.setItem(getStorageKey(quizId!, 'endTime'), targetTime.toString());
                         setTimeRemaining(duration);
@@ -191,6 +209,90 @@ const QuizAttempt = () => {
         return () => clearInterval(timer);
     }, [timeRemaining, quizCompleted, loading, quiz, quizId]);
 
+    // --- 2.5. PER-QUESTION TIMER FOR FAST-PACED MODE ---
+    useEffect(() => {
+        if (loading || quizCompleted) return;
+
+        const quizType = quiz?.quiz_type || 'time-based';
+        if (quizType !== 'fast-paced') return;
+
+        // Calculate time per question based on difficulty
+        const level = (quiz?.level || 'medium').toLowerCase();
+        let timePerQuestion = 20; // default medium
+        if (level === 'easy') timePerQuestion = 10;
+        else if (level === 'hard') timePerQuestion = 30;
+
+        // Initialize timer for current question
+        if (questionTimeRemaining === null) {
+            setQuestionTimeRemaining(timePerQuestion);
+            return;
+        }
+
+        // Auto-advance when time runs out
+        if (questionTimeRemaining <= 0) {
+            // Track time spent on this question (full time allocated)
+            const level = (quiz?.level || 'medium').toLowerCase();
+            let timePerQuestion = 20;
+            if (level === 'easy') timePerQuestion = 10;
+            else if (level === 'hard') timePerQuestion = 30;
+
+            setTimeSpentPerQuestion(prev => ({
+                ...prev,
+                [currentQuestionIndex]: timePerQuestion // Full time used
+            }));
+
+            if (currentQuestionIndex < questions.length - 1) {
+                setCurrentQuestionIndex(currentQuestionIndex + 1);
+                setQuestionTimeRemaining(timePerQuestion); // Reset for next question
+            } else {
+                // Last question, submit quiz
+                handleSubmitQuiz();
+            }
+            return;
+        }
+
+        // Countdown timer
+        const timer = setInterval(() => {
+            setQuestionTimeRemaining((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [questionTimeRemaining, currentQuestionIndex, quizCompleted, loading, quiz, questions.length]);
+
+    // --- 2.6. RESET QUESTION TIMER WHEN MOVING TO NEXT QUESTION IN FAST-PACED MODE ---
+    useEffect(() => {
+        if (loading || quizCompleted) return;
+
+        const quizType = quiz?.quiz_type || 'time-based';
+        if (quizType !== 'fast-paced') return;
+
+        // Reset question timer when index changes (for manual navigation)
+        const level = (quiz?.level || 'medium').toLowerCase();
+        let timePerQuestion = 20;
+        if (level === 'easy') timePerQuestion = 10;
+        else if (level === 'hard') timePerQuestion = 30;
+
+        setQuestionTimeRemaining(timePerQuestion);
+    }, [currentQuestionIndex, quiz, loading, quizCompleted]);
+
+    // --- 2.7. TRACK TIME SPENT WHEN MANUALLY MOVING TO NEXT QUESTION IN FAST-PACED MODE ---
+    const handleNextFastPaced = () => {
+        if (isFastPaced && questionTimeRemaining !== null) {
+            // Calculate time spent on current question
+            const level = (quiz?.level || 'medium').toLowerCase();
+            let timePerQuestion = 20;
+            if (level === 'easy') timePerQuestion = 10;
+            else if (level === 'hard') timePerQuestion = 30;
+
+            const timeSpent = timePerQuestion - questionTimeRemaining;
+            setTimeSpentPerQuestion(prev => ({
+                ...prev,
+                [currentQuestionIndex]: timeSpent
+            }));
+        }
+    };
+
+
     // --- 3. HANDLERS ---
 
     // Determine Logic based on Type
@@ -203,9 +305,6 @@ const QuizAttempt = () => {
         // Prevent changing answers during submission
         if (isSubmitting) return;
 
-        // Fast-paced: Prevent changing answer once selected
-        if (isFastPaced && selectedAnswers[currentQuestionIndex]) return;
-
         const newAnswers = { ...selectedAnswers, [currentQuestionIndex]: answer };
         setSelectedAnswers(newAnswers);
 
@@ -214,6 +313,9 @@ const QuizAttempt = () => {
     };
 
     const handleNext = () => {
+        if (isFastPaced) {
+            handleNextFastPaced(); // Track time before moving
+        }
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         }
@@ -248,9 +350,28 @@ const QuizAttempt = () => {
         // Calculate time taken
         let timeTaken = 0;
         if (!isLearning) {
-            const duration = quiz?.duration_seconds || 600;
-            const currentRemaining = timeRemaining || 0;
-            timeTaken = duration - currentRemaining;
+            if (isFastPaced) {
+                // For fast-paced: sum up time spent on all questions
+                // Add time spent on current question (last question before submit)
+                const level = (quiz?.level || 'medium').toLowerCase();
+                let timePerQuestion = 20;
+                if (level === 'easy') timePerQuestion = 10;
+                else if (level === 'hard') timePerQuestion = 30;
+
+                const currentQuestionTime = timePerQuestion - (questionTimeRemaining || 0);
+                const updatedTimeSpent = {
+                    ...timeSpentPerQuestion,
+                    [currentQuestionIndex]: currentQuestionTime
+                };
+
+                // Sum all time spent
+                timeTaken = Object.values(updatedTimeSpent).reduce((sum, time) => sum + time, 0);
+            } else {
+                // For time-based: use original calculation
+                const duration = quiz?.duration_seconds || 600;
+                const currentRemaining = timeRemaining || 0;
+                timeTaken = duration - currentRemaining;
+            }
         }
 
         // Calculate XP based on difficulty: easy=5, medium=10, hard=15 per correct answer
@@ -259,7 +380,7 @@ const QuizAttempt = () => {
         const xpEarned = score * xpPerQuestion;
 
         try {
-            await api.saveQuizAttempt(quizId!, selectedAnswers, timeTaken);
+            await api.saveQuizAttempt(quizId!, selectedAnswers, timeTaken, quiz?.quiz_type);
         } catch (error) {
             console.error(error);
             setIsSubmitting(false); // Reset on error
@@ -291,6 +412,7 @@ const QuizAttempt = () => {
                 timeInSeconds: timeTaken,
                 difficulty: quiz?.difficulty || 'Medium',
                 xpEarned: xpEarned,
+                quizType: quiz?.quiz_type || 'time-based', // Pass quiz type to results page
                 questions: questions.map((q, idx) => ({
                     id: q.id,
                     question: q.question,
@@ -357,7 +479,7 @@ const QuizAttempt = () => {
 
     // --- ACTIVE QUIZ VIEW ---
     return (
-        <div className="h-screen w-screen bg-background flex flex-col overflow-hidden font-sans">
+        <div className="h-screen w-screen bg-transparent flex flex-col overflow-hidden font-sans">
             <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 pt-20 md:pt-20 overflow-hidden relative">
 
                 <div className="absolute w-[400px] h-[400px] bg-primary/10 rounded-full blur-[100px] top-0 -left-20 pointer-events-none" />
@@ -377,9 +499,17 @@ const QuizAttempt = () => {
 
                             {/* Timer Visibility */}
                             {!isLearning && (
-                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${timeRemaining && timeRemaining < 60 ? 'bg-red-500/10 border-red-500 text-red-500 animate-pulse' : 'bg-background/40 border-white/10 text-foreground'}`}>
+                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${(isFastPaced ? questionTimeRemaining : timeRemaining) && (isFastPaced ? questionTimeRemaining : timeRemaining)! < 60
+                                    ? 'bg-red-500/10 border-red-500 text-red-500 animate-pulse'
+                                    : 'bg-background/40 border-white/10 text-foreground'
+                                    }`}>
                                     <Clock className="w-3.5 h-3.5" />
-                                    <span className="font-mono font-bold">{formatTime(timeRemaining)}</span>
+                                    <span className="font-mono font-bold">
+                                        {isFastPaced
+                                            ? formatTime(questionTimeRemaining)
+                                            : formatTime(timeRemaining)
+                                        }
+                                    </span>
                                 </div>
                             )}
                             {isLearning && (
@@ -406,9 +536,9 @@ const QuizAttempt = () => {
                                     const isSelected = selectedAnswers[currentQuestionIndex] === option;
                                     const isCorrect = option === currentQuestion.correct_answer;
 
-                                    // Determines if we show the result immediately (Green/Red)
-                                    // Only true if "Fast Paced" AND an answer has been selected for this index
-                                    const showImmediateResult = isFastPaced && !!selectedAnswers[currentQuestionIndex];
+                                    // DISABLE immediate feedback for fast-paced mode
+                                    // User should not see correct answers until quiz is complete
+                                    const showImmediateResult = false; // Changed from: isFastPaced && !!selectedAnswers[currentQuestionIndex]
 
                                     // Base styles
                                     let baseStyle = "border-white/10 hover:border-primary/50 hover:bg-white/5";
@@ -416,7 +546,7 @@ const QuizAttempt = () => {
                                     let icon = null;
 
                                     if (showImmediateResult) {
-                                        // --- FAST PACED LOGIC (Show Right/Wrong) ---
+                                        // --- FAST PACED LOGIC (Show Right/Wrong) --- DISABLED
                                         if (isSelected && isCorrect) {
                                             baseStyle = "border-green-500 bg-green-500/10";
                                             badgeStyle = "bg-green-500 text-white";
@@ -432,7 +562,7 @@ const QuizAttempt = () => {
                                             baseStyle = "opacity-40 border-transparent";
                                         }
                                     } else {
-                                        // --- TIME BASED / LEARNING LOGIC (Standard Select) ---
+                                        // --- TIME BASED / LEARNING / FAST-PACED LOGIC (Standard Select) ---
                                         // Just show selection, don't reveal answer
                                         if (isSelected) {
                                             baseStyle = "border-primary bg-primary/10 shadow-[0_0_15px_rgba(var(--primary),0.1)]";
@@ -444,8 +574,6 @@ const QuizAttempt = () => {
                                     return (
                                         <button
                                             key={idx}
-                                            // Disable clicking if fast-paced and already answered
-                                            disabled={isFastPaced && !!selectedAnswers[currentQuestionIndex]}
                                             onClick={() => handleAnswerSelect(option)}
                                             className={`
                                                 group relative px-4 py-3 rounded-xl border transition-all duration-200
@@ -474,7 +602,7 @@ const QuizAttempt = () => {
                     <div className="shrink-0 px-6 py-4 border-t border-white/5 bg-white/5 backdrop-blur-sm flex justify-between items-center">
                         <Button
                             onClick={handlePrevious}
-                            disabled={currentQuestionIndex === 0}
+                            disabled={currentQuestionIndex === 0 || isFastPaced}
                             variant="ghost"
                             size="sm"
                             className="text-muted-foreground h-9"

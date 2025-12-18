@@ -42,9 +42,11 @@ const Results = () => {
     timeTaken: resultsData.timeTaken,
     difficulty: resultsData.difficulty,
     xpEarned: resultsData.xpEarned,
+    quizType: resultsData.quizType || 'time-based', // Get quiz type from navigation state
   };
 
   const questions = resultsData.questions || [];
+  const isLearningBased = results.quizType === 'learning-based';
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-success";
@@ -60,7 +62,7 @@ const Results = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Score Header */}
@@ -91,7 +93,9 @@ const Results = () => {
             <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.1s" }}>
               <CardContent className="p-6">
                 <Clock className="w-8 h-8 text-primary mx-auto mb-2" />
-                <p className="text-2xl font-bold">{results.timeTaken}</p>
+                <p className="text-2xl font-bold">
+                  {isLearningBased ? 'N/A' : results.timeTaken}
+                </p>
                 <p className="text-sm text-muted-foreground">Time Taken</p>
               </CardContent>
             </Card>
@@ -107,7 +111,9 @@ const Results = () => {
             <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.3s" }}>
               <CardContent className="p-6">
                 <Zap className="w-8 h-8 text-secondary mx-auto mb-2" />
-                <p className="text-2xl font-bold">+{results.xpEarned}</p>
+                <p className="text-2xl font-bold">
+                  {isLearningBased ? 'N/A' : `+${results.xpEarned}`}
+                </p>
                 <p className="text-sm text-muted-foreground">XP Earned</p>
               </CardContent>
             </Card>
@@ -129,7 +135,7 @@ const Results = () => {
             </Link>
             <Button variant="outline" className="px-8 py-6 text-lg">
               <Share2 className="w-5 h-5 mr-2" />
-              Share Results
+              Share Quiz
             </Button>
           </div>
 

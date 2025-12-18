@@ -345,10 +345,22 @@ class Question(models.Model):
 
 
 class QuizHistory(models.Model):
+    QUIZ_TYPE_CHOICES = [
+        ('fast-paced', 'Fast Paced'),
+        ('time-based', 'Time Based'),
+        ('learning-based', 'Learning Based'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_history')
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='attempted_by')
     score = models.IntegerField(null=True, blank=True)
     total_questions = models.IntegerField()
+    quiz_type = models.CharField(
+        max_length=20,
+        choices=QUIZ_TYPE_CHOICES,
+        default='time-based',
+        help_text='Quiz mode: fast-paced, time-based, or learning-based'
+    )
     questions = models.JSONField(default=list, help_text="List of questions generated for this attempt")
     user_answers = models.JSONField(default=list, help_text="List of user answers with correctness")
     completed_at = models.DateTimeField(blank=True, null=True)

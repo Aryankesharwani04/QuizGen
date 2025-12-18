@@ -28,6 +28,8 @@ class UserProfile(models.Model):
     
     # XP and Level
     xp_score = models.IntegerField(default=0, help_text="Total experience points earned")
+    fast_paced_points = models.IntegerField(default=0, help_text="XP earned from fast-paced quizzes")
+    time_based_points = models.IntegerField(default=0, help_text="XP earned from time-based quizzes")
     
     # Comprehensive Stats Tracking
     total_quizzes_attended = models.IntegerField(default=0, help_text="Total number of quizzes attended")

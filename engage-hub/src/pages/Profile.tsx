@@ -60,17 +60,17 @@ const Profile = () => {
     const fetchXP = async () => {
       try {
         const { default: cacheService } = await import('@/lib/cacheService');
-        const cachedXP: any = cacheService.get('user_xp');
+        const cachedStats: any = cacheService.get('comprehensive_stats');
 
-        if (cachedXP) {
-          setXP(cachedXP.data?.xp_score || 0);
+        if (cachedStats) {
+          setXP(cachedStats.data?.xp_score || 0);
           setLoadingStats(false);
         }
 
-        const xpRes = await api.getUserXP();
-        const xpData: any = xpRes;
-        setXP(xpData.data?.xp_score || 0);
-        cacheService.set('user_xp', xpRes);
+        const statsRes = await api.getComprehensiveStats();
+        const statsData: any = statsRes;
+        setXP(statsData.data?.xp_score || 0);
+        cacheService.set('comprehensive_stats', statsRes);
       } catch (error) {
         console.error('Failed to fetch XP:', error);
       } finally {
@@ -229,7 +229,7 @@ const Profile = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Profile Header */}
@@ -307,7 +307,7 @@ const Profile = () => {
           </div>
 
           {/* Level Progress */}
-          <Card className="border-border/50 card-shadow mb-8 bg-gradient-to-r from-primary/10 to-secondary/10">
+          <Card className="bg-background/60 border-border/50 card-shadow mb-8 bg-gradient-to-r from-primary/10 to-secondary/10">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">

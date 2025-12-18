@@ -54,7 +54,7 @@ export const Achievements = ({ className = "" }: AchievementsProps) => {
     const unlockedCount = ACHIEVEMENTS.filter(isAchievementUnlocked).length;
 
     return (
-        <Card className={`border-border/50 card-shadow ${className}`}>
+        <Card className={`border-border/50 card-shadow bg-background/60 ${className}`}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Award className="w-5 h-5 text-warning" />

@@ -23,6 +23,7 @@ import Profile from "./pages/Profile";
 import QuizAttempt from "./pages/QuizAttempt";
 import QuizReview from "./pages/QuizReview";
 import NotFound from "./pages/NotFound";
+import Quiz from "./pages/Quiz";
 
 
 const queryClient = new QueryClient();
@@ -67,8 +68,11 @@ const App = () => (
                 <Route path="/profile" element={<Layout><ProtectedRoute><Profile /></ProtectedRoute></Layout>} />
 
                 {/* Quiz routes with Header-only layout (no footer for focus) */}
-                <Route path="/quiz/:quizId" element={<HeaderOnlyLayout><ProtectedRoute><QuizAttempt /></ProtectedRoute></HeaderOnlyLayout>} />
+                <Route path="/quiz/start/:quizId" element={<HeaderOnlyLayout><ProtectedRoute><QuizAttempt /></ProtectedRoute></HeaderOnlyLayout>} />
                 <Route path="/quiz/review/:attemptId" element={<Layout><ProtectedRoute><QuizReview /></ProtectedRoute></Layout>} />
+
+                {/* Public Quiz Detail Page */}
+                <Route path="/quiz/:quizId" element={<Layout><Quiz /></Layout>} />
 
                 {/* Auth routes without Layout */}
                 <Route path="/login" element={<Login />} />

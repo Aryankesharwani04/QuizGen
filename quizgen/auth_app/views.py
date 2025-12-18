@@ -146,6 +146,16 @@ class LoginView(APIView):
                 profile = UserProfile.objects.create(user=user)
             
             login(request, user)
+            
+            # Check for remember_me flag
+            remember_me = request.data.get('remember_me', False)
+            if remember_me:
+                # Set session expiry to 2 days (48 hours)
+                request.session.set_expiry(172800)
+            else:
+                # Use default session expiry (usually browser close or settings default)
+                request.session.set_expiry(0)
+                
             profile_serializer = UserProfileSerializer(profile, context={'request': request})
             
             return ResponseFormatter.success(
@@ -681,9 +691,13 @@ class SaveQuizAttemptView(APIView):
         quiz_id = request.data.get('quiz_id')
         selected_answers = request.data.get('selected_answers', {})
         time_taken = request.data.get('time_taken', 0)
+        quiz_type = request.data.get('quiz_type', 'time-based')  # Get quiz_type from request
         
         if not quiz_id:
             return ResponseFormatter.error("quiz_id is required", status_code=400)
+        
+        # Check if this is a learning-based quiz
+        is_learning_based = quiz_type == 'learning-based'
         
         try:
             # First, try to find quiz in database
@@ -803,6 +817,7 @@ class SaveQuizAttemptView(APIView):
                 quiz=quiz,
                 score=score,
                 total_questions=len(questions),
+                quiz_type=quiz_type,  # Save quiz type (fast-paced, time-based, learning-based)
                 questions=questions,
                 user_answers=user_answers_list,
                 completed_at=timezone.now()
@@ -812,24 +827,41 @@ class SaveQuizAttemptView(APIView):
             from auth_app.streak_utils import update_user_streak
             update_user_streak(request.user, history.completed_at)
             
-            # Update XP based on score and quiz difficulty
-            from .xp_utils import update_user_xp
-            total_questions = len(questions) # Ensure total_questions is defined for percentage calculation
-            update_user_xp(request.user, quiz, score)
-            
-            # Calculate percentage score
-            percentage_score = (score / total_questions * 100) if total_questions > 0 else 0
-            
-            # Update comprehensive user stats
-            from .stats_utils import update_user_stats
-            quiz_result = {
-                'quiz': quiz,
-                'score': score,
-                'total_questions': total_questions,
-                'time_taken': time_taken,
-                'percentage_score': percentage_score
-            }
-            updated_stats = update_user_stats(request.user, quiz_result)
+            # Only update XP and time stats if NOT learning-based quiz
+            if not is_learning_based:
+                # Update XP based on score and quiz difficulty
+                from .xp_utils import update_user_xp
+                total_questions = len(questions) # Ensure total_questions is defined for percentage calculation
+                update_user_xp(request.user, quiz, score, quiz_type)
+                
+                # Calculate percentage score
+                percentage_score = (score / total_questions * 100) if total_questions > 0 else 0
+                
+                # Update comprehensive user stats (includes time_taken)
+                from .stats_utils import update_user_stats
+                quiz_result = {
+                    'quiz': quiz,
+                    'score': score,
+                    'total_questions': total_questions,
+                    'time_taken': time_taken,
+                    'percentage_score': percentage_score,
+                    'quiz_type': quiz_type
+                }
+                updated_stats = update_user_stats(request.user, quiz_result)
+            else:
+                # For learning-based: only update quiz attendance, not XP or time
+                from .stats_utils import update_user_stats
+                total_questions = len(questions)
+                percentage_score = (score / total_questions * 100) if total_questions > 0 else 0
+                quiz_result = {
+                    'quiz': quiz,
+                    'score': score,
+                    'total_questions': total_questions,
+                    'time_taken': 0,  # Don't track time for learning-based
+                    'percentage_score': percentage_score
+                }
+                # Pass is_learning flag to stats_utils so it can skip time/XP updates
+                updated_stats = update_user_stats(request.user, quiz_result, is_learning=True)
             
             return ResponseFormatter.success({
                 'message': 'Quiz attempt saved successfully',
@@ -837,7 +869,7 @@ class SaveQuizAttemptView(APIView):
                 'score': score,
                 'total_questions': total_questions,
                 'percentage': percentage_score,
-                'time_taken': time_taken,
+                'time_taken': time_taken if not is_learning_based else 0,
                 'stats_updated': updated_stats  # Include updated stats in response
             })
             
@@ -867,6 +899,7 @@ class GetHistoryView(APIView):
                     'title': h.quiz.title,
                     'topic': h.quiz.category or h.quiz.topic,
                     'level': h.quiz.level or h.quiz.difficulty_level,
+                    'quiz_type': h.quiz_type,  # Include quiz mode for displaying in frontend
                     'questions_answered': h.score,
                     'total_questions': h.total_questions,
                     'score': h.score,
@@ -944,6 +977,7 @@ class GetQuizHistoryByIdView(APIView):
                 'title': history.quiz.title,
                 'category': history.quiz.category or history.quiz.topic,
                 'level': history.quiz.level or history.quiz.difficulty_level,
+                'quiz_type': history.quiz_type,  # Include quiz mode
                 'score': history.score,
                 'total_questions': history.total_questions,
                 'percentage': percentage,
@@ -1379,6 +1413,8 @@ class GetUserStatsView(APIView):
             return ResponseFormatter.success({
                 # Core stats
                 'xp_score': profile.xp_score,
+                'fast_paced_points': profile.fast_paced_points,
+                'time_based_points': profile.time_based_points,
                 'level': current_level,
                 'total_quizzes_attended': profile.total_quizzes_attended,
                 'average_score': round(profile.average_score, 2),

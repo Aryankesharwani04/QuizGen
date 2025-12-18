@@ -87,7 +87,7 @@ export const CategoryPerformance = () => {
     }, []);
 
     return (
-        <Card className="border-border/50 card-shadow">
+        <Card className="bg-background/60 border-border/50 card-shadow">
             <CardHeader>
                 <CardTitle>Your Performance</CardTitle>
             </CardHeader>

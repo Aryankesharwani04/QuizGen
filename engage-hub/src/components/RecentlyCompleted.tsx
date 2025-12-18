@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, History } from "lucide-react";
 import { api } from "@/lib/api";
+import { ReviewCard } from "@/components/ReviewCard";
 
 interface QuizAttempt {
     attempt_id: number;
@@ -13,6 +13,7 @@ interface QuizAttempt {
     total_questions: number;
     percentage: number;
     completed_at: string;
+    quiz_type?: string; // Added here to capture API data
 }
 
 interface RecentlyCompletedProps {
@@ -36,7 +37,7 @@ export const RecentlyCompleted = ({ limit = 2, className = "" }: RecentlyComplet
                     setLoading(false);
                 }
 
-                // Fetch fresh data (will update if cache was stale)
+                // Fetch fresh data
                 const response = await api.getQuizHistory();
                 const data: any = response;
                 const attempts = data.data?.attempts || [];
@@ -59,58 +60,55 @@ export const RecentlyCompleted = ({ limit = 2, className = "" }: RecentlyComplet
     const hasMore = allAttempts.length > limit;
 
     return (
-        <Card className={`border-border/50 card-shadow ${className}`}>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-success" />
-                    Recently Completed
+        <Card className={`bg-background/40 backdrop-blur-sm border-border/50 card-shadow ${className}`}>
+            <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-lg">
+                    <div className="flex items-center gap-2">
+                        <History className="w-5 h-5 text-primary" />
+                        <span>Recently Completed</span>
+                    </div>
+                    {hasMore && (
+                        <Link to="/profile#activity" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                            View All
+                        </Link>
+                    )}
                 </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
                     {loading ? (
-                        <div className="text-center py-8 text-muted-foreground">Loading history...</div>
+                        <div className="text-center py-8 text-muted-foreground text-sm">Loading history...</div>
                     ) : allAttempts.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                            No quizzes completed yet. Start your first quiz!
+                        <div className="text-center py-10 px-4 border border-dashed border-muted rounded-lg bg-muted/10">
+                            <CheckCircle2 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground mb-3">No quizzes completed yet.</p>
+                            <Link to="/categories" className="text-xs font-medium text-primary hover:underline">
+                                Start your first quiz →
+                            </Link>
                         </div>
                     ) : (
                         <>
                             {displayedAttempts.map((attempt) => (
-                                <div key={attempt.attempt_id} className="p-4 rounded-lg bg-muted/30">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div>
-                                            <h4 className="font-medium text-foreground">{attempt.title}</h4>
-                                            <p className="text-sm text-muted-foreground">
-                                                Quiz ID: {attempt.quiz_id} • Score: {attempt.score}/{attempt.total_questions}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-2xl font-bold text-success">{attempt.percentage}%</p>
-                                        </div>
-                                    </div>
-                                    {/* Progress bar for score */}
-                                    <Progress value={attempt.percentage} className="h-2 mb-2" />
-                                    {/* Review button */}
-                                    <div className="flex justify-end">
-                                        <Link
-                                            to={`/quiz/review/${attempt.attempt_id}`}
-                                            className="text-sm text-primary hover:underline cursor-pointer"
-                                        >
-                                            Review
-                                        </Link>
-                                    </div>
-                                </div>
+                                <ReviewCard
+                                    key={attempt.attempt_id}
+                                    attempt_id={attempt.attempt_id}
+                                    quiz_id={attempt.quiz_id}
+                                    title={attempt.title}
+                                    score={attempt.score}
+                                    total_questions={attempt.total_questions}
+                                    percentage={attempt.percentage}
+                                    completed_at={attempt.completed_at}
+                                    quiz_type={attempt.quiz_type} // Passing it here
+                                />
                             ))}
 
-                            {/* See more link */}
                             {hasMore && (
                                 <div className="text-center pt-2">
                                     <Link
                                         to="/profile#activity"
-                                        className="text-sm text-primary hover:underline font-medium"
+                                        className="inline-flex items-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
                                     >
-                                        See more ({allAttempts.length - limit} more)
+                                        Show {allAttempts.length - limit} more attempts
                                     </Link>
                                 </div>
                             )}

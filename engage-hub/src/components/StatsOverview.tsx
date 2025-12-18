@@ -44,9 +44,9 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
     }, []);
 
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${className}`}>
+        <div className={` grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${className}`}>
             {/* Total Quizzes */}
-            <Card className="border-border/50 card-shadow">
+            <Card className="bg-background/60 border-border/50 card-shadow">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -63,7 +63,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
             </Card>
 
             {/* Average Score */}
-            <Card className="border-border/50 card-shadow">
+            <Card className="bg-background/60 border-border/50 card-shadow">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -80,7 +80,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
             </Card>
 
             {/* Time Spent */}
-            <Card className="border-border/50 card-shadow">
+            <Card className="bg-background/60 border-border/50 card-shadow">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -97,13 +97,16 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
             </Card>
 
             {/* Current Streak */}
-            <Card className="border-border/50 card-shadow">
+            <Card className="bg-background/60 border-border/50 card-shadow">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-muted-foreground mb-1">Current Streak</p>
                             <p className="text-3xl font-bold text-foreground">
                                 {loading ? '...' : `${stats?.current_streak || 0} 🔥`}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Best: {loading ? '...' : `${stats?.longest_streak || 0} days`}
                             </p>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
