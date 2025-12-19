@@ -19,3 +19,7 @@ google-auth-oauthlib==1.2.3
 # HTTP Requests (for Gemini API)
 requests==2.32.5
 certifi==2025.11.12
+
+# Production
+gunicorn==21.2.0
+whitenoise==6.6.0
