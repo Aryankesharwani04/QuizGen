@@ -373,3 +373,101 @@ class QuizHistory(models.Model):
         verbose_name = 'Quiz History'
         verbose_name_plural = 'Quiz Histories'
         ordering = ['-completed_at']
+
+
+class Activity(models.Model):
+    ACTIVITY_TYPES = [
+        ('buzzer', 'Buzzer Mode'),
+        ('lightning', 'Lightning Round'),
+        ('scramble', 'Word Scramble'),
+        ('two_truths', 'Two Truths One Lie'),
+    ]
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('hard', 'Hard'),
+    ]
+
+    type = models.CharField(max_length=50, choices=ACTIVITY_TYPES, db_index=True)
+    date = models.DateField(db_index=True, help_text="Date this activity is scheduled for")
+    title = models.CharField(max_length=255)
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Daily Activity'
+        verbose_name_plural = 'Daily Activities'
+        unique_together = ('type', 'date')
+        indexes = [
+            models.Index(fields=['date', 'type']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_type_display()} - {self.date}"
+
+
+class ActivityQuestion(models.Model):
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='questions')
+    content = models.JSONField(help_text="Flexible content: {question: '...', options: [], answer: '...'}")
+    correct_answer = models.CharField(max_length=500)
+    points = models.IntegerField(default=10)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.activity} - Q{self.order}"
+
+
+class GameSession(models.Model):
+    STATUS_CHOICES = [
+        ('lobby', 'Lobby'),
+        ('active', 'Active'),
+        ('finished', 'Finished'),
+    ]
+
+    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hosted_games')
+    quiz_source = models.ForeignKey(Quiz, on_delete=models.SET_NULL, null=True, blank=True, help_text="Optional link to a pre-built quiz")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='lobby')
+    current_question_index = models.IntegerField(default=0)
+    state = models.JSONField(default=dict, help_text="Current game state (timer, active flags)")
+    join_code = models.CharField(max_length=6, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Game {self.join_code} ({self.get_status_display()})"
+
+
+class PlayerSession(models.Model):
+    game_session = models.ForeignKey(GameSession, on_delete=models.CASCADE, related_name='players')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='played_games', null=True, blank=True)
+    guest_name = models.CharField(max_length=100, blank=True, null=True)
+    score = models.IntegerField(default=0)
+    streak = models.IntegerField(default=0)
+    rank = models.IntegerField(default=0)
+    xp_earned = models.IntegerField(default=0)
+    last_active = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('game_session', 'user') 
+
+    def __str__(self):
+        return f"{self.user.username if self.user else self.guest_name} in {self.game_session.join_code}"
+
+
+class UserActivityAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activity_attempts')
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='attempts')
+    score = models.IntegerField(default=0)
+    completed_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-score', 'completed_at']
+        indexes = [
+            models.Index(fields=['activity', 'score']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.activity} - {self.score}"

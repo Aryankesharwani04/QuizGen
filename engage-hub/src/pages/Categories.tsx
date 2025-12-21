@@ -290,18 +290,6 @@ const Categories = () => {
                     </section>
                   );
                 })}
-
-                <section className="text-center py-16 px-4 rounded-3xl bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                    Can't Find What You're Looking For?
-                  </h2>
-                  <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-                    Request a new category or suggest topics you'd like to see on QuizGen
-                  </p>
-                  <Button size="lg" className="gradient-primary text-white font-semibold">
-                    Request New Category
-                  </Button>
-                </section>
               </div>
             )}
           </div>

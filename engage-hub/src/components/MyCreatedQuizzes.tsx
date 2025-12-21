@@ -27,12 +27,12 @@ interface MyCreatedQuizzesProps {
     showSeeMore?: boolean;
 }
 
-export const MyCreatedQuizzes = ({ 
-    onCreateClick, 
-    refreshTrigger, 
-    className = "", 
-    limit = 3, 
-    showSeeMore = false 
+export const MyCreatedQuizzes = ({
+    onCreateClick,
+    refreshTrigger,
+    className = "",
+    showSeeMore = false,
+    limit
 }: MyCreatedQuizzesProps) => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState(true);
@@ -81,7 +81,7 @@ export const MyCreatedQuizzes = ({
                         <BookOpen className="w-5 h-5 text-primary" />
                         My Created Quizzes ({quizzes.length})
                     </CardTitle>
-                    <Button 
+                    <Button
                         onClick={onCreateClick}
                         size="sm"
                         className="gradient-primary text-white"
@@ -108,7 +108,7 @@ export const MyCreatedQuizzes = ({
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {quizzes.slice(0, limit).map((quiz) => (
+                        {quizzes.slice(0, limit || quizzes.length).map((quiz) => (
                             <QuizCard
                                 key={quiz.quiz_id}
                                 quiz_id={quiz.quiz_id}
@@ -118,11 +118,11 @@ export const MyCreatedQuizzes = ({
                                 level={quiz.level}
                                 num_questions={quiz.num_questions}
                                 duration_seconds={quiz.duration_seconds}
-                                created_at={quiz.created_at} 
+                                created_at={quiz.created_at}
                             />
                         ))}
 
-                        {showSeeMore && quizzes.length > limit && (
+                        {showSeeMore && (
                             <div className="text-center pt-2">
                                 <Link to="/profile#MyQuizzes" className="text-primary hover:underline text-sm font-medium">
                                     See more →

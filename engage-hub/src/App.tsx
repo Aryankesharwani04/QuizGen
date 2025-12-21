@@ -14,6 +14,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import Categories from "./pages/Categories";
 import About from "./pages/About";
@@ -24,6 +25,13 @@ import QuizAttempt from "./pages/QuizAttempt";
 import QuizReview from "./pages/QuizReview";
 import NotFound from "./pages/NotFound";
 import Quiz from "./pages/Quiz";
+import FunActivities from "./pages/FunActivities";
+
+import LightningQuiz from "@/components/activities/LightningQuiz";
+import ScrambledWordsLive from "@/components/activities/ScrambledWordsLive";
+import TwoTruthsOneLie from "@/components/activities/TwoTruthsOneLie";
+import LiveQuizHub from "@/components/activities/live-quiz/LiveQuizHub";
+import LiveQuizPlayer from "@/components/activities/live-quiz/LiveQuizPlayer";
 
 
 const queryClient = new QueryClient();
@@ -67,6 +75,15 @@ const App = () => (
                 <Route path="/leaderboard" element={<Layout><Leaderboard /></Layout>} />
                 <Route path="/profile" element={<Layout><ProtectedRoute><Profile /></ProtectedRoute></Layout>} />
 
+                {/* Fun & Activities Routes */}
+                <Route path="/fun-activities" element={<Layout><FunActivities /></Layout>} />
+
+                <Route path="/fun-activities/lightning" element={<Layout><LightningQuiz /></Layout>} />
+                <Route path="/fun-activities/scramble" element={<Layout><ScrambledWordsLive /></Layout>} />
+                <Route path="/fun-activities/two-truths" element={<Layout><TwoTruthsOneLie /></Layout>} />
+                <Route path="/fun-activities/live-host" element={<Layout><LiveQuizHub /></Layout>} />
+                <Route path="/fun-activities/live/:code" element={<Layout><LiveQuizPlayer /></Layout>} />
+
                 {/* Quiz routes with Header-only layout (no footer for focus) */}
                 <Route path="/quiz/start/:quizId" element={<HeaderOnlyLayout><ProtectedRoute><QuizAttempt /></ProtectedRoute></HeaderOnlyLayout>} />
                 <Route path="/quiz/review/:attemptId" element={<Layout><ProtectedRoute><QuizReview /></ProtectedRoute></Layout>} />
@@ -77,6 +94,7 @@ const App = () => (
                 {/* Auth routes without Layout */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<Layout><NotFound /></Layout>} />

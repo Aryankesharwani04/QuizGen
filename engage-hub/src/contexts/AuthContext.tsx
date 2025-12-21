@@ -26,8 +26,13 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    // Initialize from cache
+    const cached = localStorage.getItem('auth_user_cache');
+    return cached ? JSON.parse(cached) : null;
+  });
+  // If we have a user in cache, we are not loading. If not, we are loading (checking backend).
+  const [loading, setLoading] = useState(!user);
   const { toast } = useToast();
 
   const checkAuth = async () => {
@@ -35,10 +40,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await api.checkAuth();
       if (response.success && response.data) {
         setUser(response.data);
+        localStorage.setItem('auth_user_cache', JSON.stringify(response.data));
       }
     } catch (error) {
-      // User is not authenticated, which is fine
+      // User is not authenticated
       setUser(null);
+      localStorage.removeItem('auth_user_cache');
     } finally {
       setLoading(false);
     }
@@ -51,6 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (response.success && response.data) {
         setUser(response.data);
+        localStorage.setItem('auth_user_cache', JSON.stringify(response.data));
         toast({
           title: 'Success',
           description: response.message || 'Login successful',
@@ -86,6 +94,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (response.success && response.data) {
         setUser(response.data);
+        localStorage.setItem('auth_user_cache', JSON.stringify(response.data));
         toast({
           title: 'Success',
           description: response.message || 'Registration successful',
@@ -118,6 +127,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       await api.logout();
       setUser(null);
+      localStorage.removeItem('auth_user_cache');
       toast({
         title: 'Logged Out',
         description: 'You have been logged out successfully',
@@ -136,6 +146,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up interceptor for unauthorized responses
     api.onUnauthorized = () => {
       setUser(null);
+      localStorage.removeItem('auth_user_cache');
       // Optional: Show a toast? But maybe too noisy if multiple requests fail at once.
       // The ProtectedRoute will handle the redirection.
     };

@@ -350,11 +350,10 @@ const Profile = () => {
             }
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="achievements">Achievements</TabsTrigger>
               <TabsTrigger value="myquizzes">My Quizzes</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
             <TabsContent value="activity">
@@ -369,77 +368,7 @@ const Profile = () => {
               <MyCreatedQuizzes onCreateClick={() => {/* Can add create dialog here if needed */ }} />
             </TabsContent>
 
-            <TabsContent value="settings">
-              <div className="grid gap-6">
-                <Card className="border-border/50 card-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="w-5 h-5 text-primary" />
-                      Account Settings
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input id="name" defaultValue={userProfile.name} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="username">Username</Label>
-                        <Input id="username" defaultValue={userProfile.username} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue={userProfile.email} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="bio">Bio</Label>
-                        <Input id="bio" defaultValue={userProfile.bio} />
-                      </div>
-                    </div>
-                    <Button className="gradient-primary text-white">Save Changes</Button>
-                  </CardContent>
-                </Card>
 
-                <Card className="border-border/50 card-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Bell className="w-5 h-5 text-primary" />
-                      Notifications
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {["Email notifications", "Push notifications", "Weekly digest", "Achievement alerts"].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                        <span className="text-foreground">{item}</span>
-                        <Button variant="outline" size="sm">Toggle</Button>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border/50 card-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-primary" />
-                      Security
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button variant="outline" className="w-full justify-start">
-                      Change Password
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      Two-Factor Authentication
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start text-destructive hover:text-destructive">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
       </main>

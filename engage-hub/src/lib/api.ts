@@ -1,6 +1,15 @@
 ﻿// API Base URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+// Helper to get WebSocket URL
+export const getWebSocketUrl = (endpoint: string) => {
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  // If API_BASE_URL is relative or just a host, handle appropriately. 
+  // Assuming API_BASE_URL is full URL like http://localhost:8000
+  const host = API_BASE_URL.replace(/^http(s)?:\/\//, "");
+  return `${protocol}//${host}/${endpoint}`;
+};
+
 // Type definitions
 export interface LoginRequest {
   email: string;
@@ -398,6 +407,189 @@ class ApiService {
     return this.request('/stats/comprehensive/', {
       method: 'GET',
     });
+  }
+
+  // --- Fun & Activities APIs ---
+
+  async getActivitySchedule(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/activities/schedule/`);
+    if (!response.ok) throw new Error("Failed to fetch activity schedule");
+    return response.json();
+  }
+
+  async getDailyProgress(dateStr?: string): Promise<any> {
+    const token = localStorage.getItem("token");
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const url = dateStr
+      ? `${API_BASE_URL}/api/quiz/activities/daily-progress/?date=${dateStr}`
+      : `${API_BASE_URL}/api/quiz/activities/daily-progress/`;
+
+    const response = await fetch(url, {
+      headers
+    });
+    if (!response.ok) throw new Error("Failed to fetch daily progress");
+    return response.json();
+  }
+
+  async playActivity(activityId: number): Promise<any> {
+    const token = localStorage.getItem("token");
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_BASE_URL}/api/quiz/activities/${activityId}/play/`, {
+      method: "GET",
+      headers,
+      credentials: "include"
+    });
+
+    if (!response.ok) throw new Error("Failed to load activity");
+    return response.json();
+  }
+
+  async submitActivityScore(activityId: number, score: number): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/activities/${activityId}/submit/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include",
+      body: JSON.stringify({ score })
+    });
+    if (!response.ok) throw new Error("Failed to submit score");
+    return response.json();
+  }
+
+  async getActivityLeaderboard(activityId: number): Promise<{ total_participants: number, leaderboard: any[] }> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/activities/${activityId}/leaderboard/`, {
+      credentials: "include"
+    });
+    if (!response.ok) throw new Error("Failed to fetch leaderboard");
+    return response.json();
+  }
+
+  // --- Live Quiz APIs ---
+
+  async createLiveSession(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/live/create/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include"
+    });
+    if (!response.ok) throw new Error("Failed to create session");
+    return response.json();
+  }
+
+  async joinLiveSession(code: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/live/join/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include",
+      body: JSON.stringify({ code })
+    });
+    // Handle specific error messages
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Failed to join session");
+    }
+    return response.json();
+  }
+
+  async getLiveSessionState(code: string, role: 'host' | 'player'): Promise<any> {
+    const endpoint = role === 'host' ? 'host_state' : 'player_state';
+    const response = await fetch(`${API_BASE_URL}/api/quiz/live/session/${code}/${endpoint}/`, {
+      credentials: "include"
+    });
+    if (!response.ok) throw new Error("Failed to fetch session state");
+    return response.json();
+  }
+
+  async updateLiveSession(code: string, action: string, data?: any): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/live/session/${code}/update_state/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include",
+      body: JSON.stringify({ action, ...data })
+    });
+    if (!response.ok) throw new Error("Failed to update session");
+    return response.json();
+  }
+
+  async updateLivePlayerScore(code: string, scoreDelta: number): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/live/session/${code}/player_update/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include",
+      body: JSON.stringify({ score_delta: scoreDelta })
+    });
+    if (!response.ok) throw new Error("Failed to update score");
+    return response.json();
+  }
+
+  async getLiveHistory(): Promise<any[]> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/live/history/`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include"
+    });
+    if (!response.ok) throw new Error("Failed to fetch live history");
+    return response.json();
+  }
+
+  async getLiveSessionResult(sessionId: number): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/live/session/${sessionId}/result/`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: "include"
+    });
+    if (!response.ok) throw new Error("Failed to fetch session result");
+    return response.json();
+  }
+
+  // --- Password Reset APIs ---
+
+  async requestPasswordReset(email: string): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/password-reset/request/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!response.ok) throw new Error('Failed to request password reset');
+    return response.json();
+  }
+
+  async confirmPasswordReset(email: string, otp: string, newPassword: string): Promise<ApiResponse<any>> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/password-reset/confirm/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, new_password: newPassword }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || data.error || 'Failed to reset password');
+    }
+    return response.json();
   }
 }
 

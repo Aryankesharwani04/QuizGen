@@ -1,6 +1,8 @@
 # Core Django
 Django==4.2.7
 djangorestframework==3.14.0
+channels==4.0.0
+daphne==4.0.0
 
 # Database - PostgreSQL
 psycopg2-binary==2.9.10

@@ -45,62 +45,68 @@ export const ExploreQuizzes = () => {
                 return shuffle([...allQuizzes]);
             }
 
-            // Group quizzes into Preferred and Others
-            const preferred: Quiz[] = [];
+            // Group quizzes by preference to ensure diversity
+            const preferredMap: Record<string, Quiz[]> = {};
             const others: Quiz[] = [];
+
+            // Initialize buckets for each preference
+            preferences.forEach(p => preferredMap[p.toLowerCase()] = []);
 
             allQuizzes.forEach(quiz => {
                 const topic = (quiz.topic || quiz.category || '').toLowerCase();
-                const matches = preferences.some(p => topic.includes(p.toLowerCase()));
-                if (matches) {
-                    preferred.push(quiz);
+                const matchedPref = preferences.find(p => topic.includes(p.toLowerCase()));
+
+                if (matchedPref) {
+                    preferredMap[matchedPref.toLowerCase()].push(quiz);
                 } else {
                     others.push(quiz);
                 }
             });
 
-            // Shuffle buckets to avoid stale order
-            shuffle(preferred);
+            // Diverse Selection Construction
+            const selectedQuizzes: Quiz[] = [];
+            const prefKeys = Object.keys(preferredMap);
+
+            // Shuffle quizzes within each bucket
+            prefKeys.forEach(key => shuffle(preferredMap[key]));
+            // Shuffle the order of preferences themselves to avoid bias
+            shuffle(prefKeys);
+
+            // Round-robin selection: Pick 1 from each preference until we have 3 or run out
+            let addedCount = 0;
+            let i = 0;
+            const maxSelection = 3;
+
+            // Flatten preferred quizzes using round-robin
+            while (selectedQuizzes.length < maxSelection && prefKeys.length > 0) {
+                let foundInPass = false;
+                for (const key of prefKeys) {
+                    if (selectedQuizzes.length >= maxSelection) break;
+
+                    const bucket = preferredMap[key];
+                    if (bucket.length > 0) {
+                        selectedQuizzes.push(bucket.pop()!);
+                        foundInPass = true;
+                    }
+                }
+                // If we went through all prefs and found nothing, break
+                if (!foundInPass) break;
+            }
+
+            // Shuffle the others bucket
             shuffle(others);
 
-            // Construct Top 3 to cover different preferences if possible
-            const top3: Quiz[] = [];
-            const usedPrefs = new Set<string>();
-
-            // 1. Try to find one quiz for each distinct preference up to 3
-            // We iterate through shuffled preferred list
-            for (let i = 0; i < preferred.length; i++) {
-                if (top3.length >= 3) break;
-
-                const quiz = preferred[i];
-                const topic = (quiz.topic || quiz.category || '').toLowerCase();
-
-                // Which preference did this quiz match?
-                const matchedPref = preferences.find(p => topic.includes(p.toLowerCase()));
-
-                if (matchedPref && !usedPrefs.has(matchedPref)) {
-                    top3.push(quiz);
-                    usedPrefs.add(matchedPref);
-                    // Remove from 'preferred' list effectively (we'll filter later or just track indices)
-                    preferred[i] = null as any; // Mark for removal
-                }
+            // Fill remainder with others
+            while (selectedQuizzes.length < maxSelection && others.length > 0) {
+                selectedQuizzes.push(others.shift()!);
             }
 
-            // Cleanup nulls from preferred
-            const remainingPreferred = preferred.filter(q => q !== null);
+            // Append remaining others for full list (if needed by UI later, though we only show 3)
+            // We combine our top picks + any remaining quizzes to ensure 'View All' still has content
+            const remainingPreferred = Object.values(preferredMap).flat();
+            shuffle(remainingPreferred);
 
-            // 2. If top3 not full, fill with other preferred quizzes
-            while (top3.length < 3 && remainingPreferred.length > 0) {
-                top3.push(remainingPreferred.shift()!);
-            }
-
-            // 3. If still not full, fill with 'others'
-            while (top3.length < 3 && others.length > 0) {
-                top3.push(others.shift()!);
-            }
-
-            // Combine: Top 3 + Remaining Preferred + Others
-            return [...top3, ...remainingPreferred, ...others];
+            return [...selectedQuizzes, ...remainingPreferred, ...others];
         };
 
         const fetchQuizzes = async () => {

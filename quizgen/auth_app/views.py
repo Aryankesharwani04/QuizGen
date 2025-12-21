@@ -1,7 +1,15 @@
 ﻿from rest_framework.views import APIView
+from django.core.cache import cache
+from django.core.mail import send_mail
+from django.conf import settings
+import random
+import logging
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+import logging
+
+logger = logging.getLogger(__name__)
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -1011,7 +1019,10 @@ class GetCategoryPerformanceView(APIView):
             # Calculate average score per category
             category_stats = {}
             for h in history:
-                category = h.quiz.category or h.quiz.topic or 'General'
+                raw_category = h.quiz.category or h.quiz.topic or 'General'
+                # Normalize: strip whitespace and convert to Title Case to merge "c++" and "C++"
+                category = raw_category.strip().title()
+                
                 percentage = round((h.score / h.total_questions * 100)) if h.total_questions > 0 else 0
                 
                 if category not in category_stats:
@@ -1447,5 +1458,80 @@ class GetUserStatsView(APIView):
             })
             
         except Exception as e:
-            logger.error(f"Error fetching comprehensive stats: {str(e)}")
             return ResponseFormatter.error(f"Failed to fetch stats: {str(e)}", status_code=500)
+
+
+# Password Reset Views
+class RequestPasswordResetView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return ResponseFormatter.error('Email is required', status_code=400)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return ResponseFormatter.error('Email does not exist', status_code=404)
+
+        # Generate 6-digit OTP
+        otp = str(random.randint(100000, 999999))
+        
+        # Cache key
+        cache_key = f'password_reset_otp_{email}'
+        
+        try:
+            # Store in cache for 10 minutes
+            cache.set(cache_key, otp, timeout=600)
+
+            # Send Email
+            send_mail(
+                'Password Reset OTP - QuizGen',
+                f'Your OTP for password reset is: {otp}. It is valid for 10 minutes.',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+            logger.info(f"Password reset OTP sent to {email}")
+            return ResponseFormatter.success({'message': 'OTP sent successfully'})
+
+        except Exception as e:
+            logger.error(f"Failed to send password reset email: {str(e)}")
+            return ResponseFormatter.error('Failed to send email service', status_code=500)
+
+
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+        new_password = request.data.get('new_password')
+        
+        if not all([email, otp, new_password]):
+            return ResponseFormatter.error('Email, OTP, and new password are required', status_code=400)
+
+        # Verify OTP
+        cache_key = f'password_reset_otp_{email}'
+        cached_otp = cache.get(cache_key)
+
+        if not cached_otp or str(cached_otp) != str(otp):
+            return ResponseFormatter.error('Invalid or expired OTP', status_code=400)
+
+        try:
+            user = User.objects.get(email=email)
+            
+            # Set new password
+            user.set_password(new_password)
+            user.save()
+
+            # Clear OTP
+            cache.delete(cache_key)
+            
+            logger.info(f"Password reset successful for {email}")
+            return ResponseFormatter.success({'message': 'Password updated successfully'})
+            
+        except User.DoesNotExist:
+            return ResponseFormatter.error('User not found', status_code=404)
+

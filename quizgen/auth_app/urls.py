@@ -18,6 +18,8 @@ from auth_app.views import (
     GetUserCreatedQuizzesView,
     GetUserAchievementsView,
     GetUserStatsView,
+    RequestPasswordResetView,
+    ResetPasswordView,
 )
 
 urlpatterns = [
@@ -39,4 +41,6 @@ urlpatterns = [
     path('quiz/my-quizzes/', GetUserCreatedQuizzesView.as_view(), name='my-created-quizzes'),
     path('achievements/', GetUserAchievementsView.as_view(), name='user-achievements'),
     path('stats/comprehensive/', GetUserStatsView.as_view(), name='comprehensive-stats'),
+    path('password-reset/request/', RequestPasswordResetView.as_view(), name='password-reset-request'),
+    path('password-reset/confirm/', ResetPasswordView.as_view(), name='password-reset-confirm'),
 ]

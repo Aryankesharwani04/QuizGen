@@ -10,6 +10,7 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from auth_app.models import UserProfile
 from auth_app.xp_utils import calculate_level
+from django.core.cache import cache
 import logging
 
 logger = logging.getLogger(__name__)
@@ -124,14 +125,26 @@ class CreateQuizView(APIView):
             )
 
 
+
 class QuizListView(APIView):
     """
     Get list of all available quizzes with basic details.
+    Cached for 10 minutes to improve performance.
     """
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         try:
+            # Check cache first
+            cached_quizzes = cache.get('explore_quiz_list')
+            if cached_quizzes:
+                logger.info("Returning cached quiz list")
+                return Response({
+                    'success': True,
+                    'quizzes': cached_quizzes,
+                    'count': len(cached_quizzes)
+                }, status=status.HTTP_200_OK)
+
             quizzes_map = {}
             
             # 1. Fetch from Database
@@ -197,6 +210,9 @@ class QuizListView(APIView):
             
             # Convert to list
             quiz_list = list(quizzes_map.values())
+            
+            # Cache the result for 10 minutes (600 seconds)
+            cache.set('explore_quiz_list', quiz_list, timeout=600)
             
             logger.info(f"Returning {len(quiz_list)} quizzes (DB+CSV)")
             return Response({
@@ -286,50 +302,89 @@ class GetQuizzesByCategoryView(APIView):
             )
         
         try:
-            # Path to CSV file
-            csv_path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                'dataset',
-                'categoryQuizzes.csv'
-            )
+            # Create a safe cache key
+            cache_key = f"cat_quizzes_{category.replace(' ', '_')}_{subtopic.replace(' ', '_')}"
             
-            if not os.path.exists(csv_path):
-                return Response(
-                    {"error": "Quiz dataset not found"},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            
-            # Read CSV and collect unique quizzes
+            # Check cache
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                logger.info(f"Returning cached quizzes for {category}/{subtopic}")
+                return Response(cached_data, status=status.HTTP_200_OK)
+
+            # 1. Fetch from Database
+            db_quizzes = Quiz.objects.filter(
+                category__iexact=category,
+                topic__iexact=subtopic
+            ).order_by('-created_at')
+
             unique_quizzes = OrderedDict()
             
-            with open(csv_path, 'r', encoding='utf-8') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    # Match category and subtopic (case-insensitive)
-                    if (row['Category'].strip().lower() == category.strip().lower() and 
-                        row['Subtopic'].strip().lower() == subtopic.strip().lower()):
-                        
-                        quiz_id = row['QuizID']
-                        
-                        # Store unique quiz only once
-                        if quiz_id not in unique_quizzes:
-                            unique_quizzes[quiz_id] = {
-                                'quiz_id': quiz_id,
-                                'title': row['Title'],
-                                'level': row['Level']
-                            }
+            # Add DB quizzes first
+            for quiz in db_quizzes:
+                if str(quiz.quiz_id) not in unique_quizzes:
+                    unique_quizzes[str(quiz.quiz_id)] = {
+                        'quiz_id': str(quiz.quiz_id),
+                        'title': quiz.title,
+                        'level': quiz.level or quiz.difficulty_level,
+                        'source': 'database'
+                    }
+
+            # 2. Fetch from ALL CSV files in dataset folder
+            dataset_dir = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                'dataset'
+            )
+            
+            if os.path.exists(dataset_dir):
+                for filename in os.listdir(dataset_dir):
+                    if filename.endswith('.csv'):
+                        csv_path = os.path.join(dataset_dir, filename)
+                        try:
+                            with open(csv_path, 'r', encoding='utf-8') as file:
+                                reader = csv.DictReader(file)
+                                # Basic validation
+                                if not reader.fieldnames or 'QuizID' not in reader.fieldnames:
+                                    continue
+                                    
+                                for row in reader:
+                                    # Safe get for columns
+                                    row_cat = row.get('Category', '').strip().lower()
+                                    row_sub = row.get('Subtopic', '').strip().lower()
+                                    target_cat = category.strip().lower()
+                                    target_sub = subtopic.strip().lower()
+
+                                    # Match category and subtopic
+                                    if row_cat == target_cat and row_sub == target_sub:
+                                        quiz_id = row['QuizID']
+                                        
+                                        # Add if not already present (DB takes precedence)
+                                        if quiz_id not in unique_quizzes:
+                                            unique_quizzes[quiz_id] = {
+                                                'quiz_id': quiz_id,
+                                                'title': row.get('Title', 'Untitled'),
+                                                'level': row.get('Level', 'Medium'),
+                                                'source': 'dataset'
+                                            }
+                        except Exception as e:
+                            logger.error(f"Error reading CSV {filename}: {str(e)}")
+                            continue
             
             # Convert to list
             quiz_list = list(unique_quizzes.values())
             
-            logger.info(f"Found {len(quiz_list)} unique quizzes for {category}/{subtopic}")
-            return Response({
+            response_data = {
                 'success': True,
                 'category': category,
                 'subtopic': subtopic,
                 'quizzes': quiz_list,
                 'count': len(quiz_list)
-            }, status=status.HTTP_200_OK)
+            }
+            
+            # Cache the response data
+            cache.set(cache_key, response_data, timeout=900)
+            
+            logger.info(f"Found {len(quiz_list)} unique quizzes for {category}/{subtopic}")
+            return Response(response_data, status=status.HTTP_200_OK)
             
         except Exception as e:
             logger.error(f"Error fetching quizzes: {str(e)}")
@@ -361,39 +416,68 @@ class CountQuizzesByCategoryView(APIView):
             )
         
         try:
-            # Path to CSV file
-            csv_path = os.path.join(
+            # Create a safe cache key
+            cache_key = f"cat_count_{category.replace(' ', '_')}_{subtopic.replace(' ', '_')}"
+            
+            # Check cache
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                # logger.info(f"Returning cached count for {category}/{subtopic}")
+                return Response(cached_data, status=status.HTTP_200_OK)
+
+            # Using a set to track unique IDs
+            unique_quiz_ids = set()
+
+            # 1. Count from Database
+            db_quizzes_ids = Quiz.objects.filter(
+                category__iexact=category,
+                topic__iexact=subtopic
+            ).values_list('quiz_id', flat=True)
+            
+            for qid in db_quizzes_ids:
+                unique_quiz_ids.add(str(qid))
+
+            # 2. Count from ALL CSV files
+            dataset_dir = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                'dataset',
-                'categoryQuizzes.csv'
+                'dataset'
             )
             
-            if not os.path.exists(csv_path):
-                return Response(
-                    {"error": "Quiz dataset not found"},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            
-            # Read CSV and collect unique quiz IDs
-            unique_quiz_ids = set()
-            
-            with open(csv_path, 'r', encoding='utf-8') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    # Match category and subtopic (case-insensitive)
-                    if (row['Category'].strip().lower() == category.strip().lower() and 
-                        row['Subtopic'].strip().lower() == subtopic.strip().lower()):
-                        unique_quiz_ids.add(row['QuizID'])
+            if os.path.exists(dataset_dir):
+                for filename in os.listdir(dataset_dir):
+                    if filename.endswith('.csv'):
+                        csv_path = os.path.join(dataset_dir, filename)
+                        try:
+                            with open(csv_path, 'r', encoding='utf-8') as file:
+                                reader = csv.DictReader(file)
+                                if not reader.fieldnames or 'QuizID' not in reader.fieldnames:
+                                    continue
+                                    
+                                for row in reader:
+                                    row_cat = row.get('Category', '').strip().lower()
+                                    row_sub = row.get('Subtopic', '').strip().lower()
+                                    target_cat = category.strip().lower()
+                                    target_sub = subtopic.strip().lower()
+
+                                    if row_cat == target_cat and row_sub == target_sub:
+                                        unique_quiz_ids.add(row['QuizID'])
+                        except Exception:
+                            continue
             
             count = len(unique_quiz_ids)
             
-            logger.info(f"Found {count} unique quizzes for {category}/{subtopic}")
-            return Response({
+            response_data = {
                 'success': True,
                 'category': category,
                 'subtopic': subtopic,
                 'count': count
-            }, status=status.HTTP_200_OK)
+            }
+            
+            # Cache the result
+            cache.set(cache_key, response_data, timeout=900)
+            
+            logger.info(f"Found {count} unique quizzes for {category}/{subtopic}")
+            return Response(response_data, status=status.HTTP_200_OK)
             
         except Exception as e:
             logger.error(f"Error counting quizzes: {str(e)}")
@@ -563,59 +647,70 @@ class GetQuizDetailView(APIView):
         import csv
         import os
         
-        # 1. Search in CSV (Primary Source for static quizzes)
+        # 1. Search in ALL CSV files (Primary Source for dataset quizzes)
         try:
-            csv_path = os.path.join(
+            dataset_dir = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                'dataset',
-                'categoryQuizzes.csv'
+                'dataset'
             )
             
-            if os.path.exists(csv_path):
-                questions = []
-                quiz_metadata = None
-                
-                with open(csv_path, 'r', encoding='utf-8') as file:
-                    reader = csv.DictReader(file)
-                    for row in reader:
-                        if row['QuizID'] == str(quiz_id):
-                            # Capture metadata from the first row found
-                            if not quiz_metadata:
-                                quiz_metadata = {
-                                    'quiz_id': row['QuizID'],
-                                    'title': row['Title'],
-                                    'category': row['Category'],
-                                    'subtopic': row['Subtopic'],
-                                    'level': row['Level'],
-                                    'duration_seconds': int(row['DurationSeconds']) if row['DurationSeconds'] else 600,
-                                    'source': 'dataset'
-                                }
+            if os.path.exists(dataset_dir):
+                for filename in os.listdir(dataset_dir):
+                    if filename.endswith('.csv'):
+                        csv_path = os.path.join(dataset_dir, filename)
+                        try:
+                            questions = []
+                            quiz_metadata = None
                             
-                            # Add question
-                            questions.append({
-                                'text': row['QuestionText'],
-                                'options': {
-                                    'A': row['OptionA'],
-                                    'B': row['OptionB'],
-                                    'C': row['OptionC'],
-                                    'D': row['OptionD']
-                                },
-                                'correct_answer': row['CorrectAnswer']
-                            })
-                
-                if quiz_metadata:
-                    logger.info(f"Quiz {quiz_id} found in CSV dataset.")
-                    return Response({
-                        'success': True,
-                        'data': {
-                            **quiz_metadata,
-                            'questions': questions,
-                            'total_questions': len(questions)
-                        }
-                    }, status=status.HTTP_200_OK)
+                            with open(csv_path, 'r', encoding='utf-8') as file:
+                                reader = csv.DictReader(file)
+                                # Basic validation
+                                if not reader.fieldnames or 'QuizID' not in reader.fieldnames:
+                                    continue
+
+                                for row in reader:
+                                    if row['QuizID'] == str(quiz_id):
+                                        # Capture metadata from the first row found
+                                        if not quiz_metadata:
+                                            quiz_metadata = {
+                                                'quiz_id': row['QuizID'],
+                                                'title': row.get('Title', 'Untitled Quiz'),
+                                                'category': row.get('Category', 'General'),
+                                                'subtopic': row.get('Subtopic', row.get('Category', 'General')),
+                                                'level': row.get('Level', 'Medium'),
+                                                'duration_seconds': int(row['DurationSeconds']) if row.get('DurationSeconds') and row['DurationSeconds'].isdigit() else 600,
+                                                'source': 'dataset'
+                                            }
+                                        
+                                        # Add question
+                                        questions.append({
+                                            'text': row.get('QuestionText', ''),
+                                            'options': {
+                                                'A': row.get('OptionA', ''),
+                                                'B': row.get('OptionB', ''),
+                                                'C': row.get('OptionC', ''),
+                                                'D': row.get('OptionD', '')
+                                            },
+                                            'correct_answer': row.get('CorrectAnswer', '')
+                                        })
+                            
+                            if quiz_metadata:
+                                logger.info(f"Quiz {quiz_id} found in CSV: {filename}")
+                                return Response({
+                                    'success': True,
+                                    'data': {
+                                        **quiz_metadata,
+                                        'questions': questions,
+                                        'total_questions': len(questions)
+                                    }
+                                }, status=status.HTTP_200_OK)
+                                
+                        except Exception as e:
+                            logger.error(f"Error reading CSV {filename}: {str(e)}")
+                            continue
         
         except Exception as e:
-            logger.error(f"Error searching CSV for quiz {quiz_id}: {str(e)}")
+            logger.error(f"Error searching CSVs for quiz {quiz_id}: {str(e)}")
             # Continue to DB search if CSV fails
 
         # 2. Search in Database (Fallback for generated quizzes)

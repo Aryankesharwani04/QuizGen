@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Quiz, Question, QuizHistory
+from .models import Quiz, Question, QuizHistory, GameSession, PlayerSession
 
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,3 +58,13 @@ class QuizDetailSerializer(serializers.ModelSerializer):
     
     def get_questions_count(self, obj):
         return obj.questions.count()
+
+class GameSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GameSession
+        fields = '__all__'
+
+class PlayerSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlayerSession
+        fields = '__all__'

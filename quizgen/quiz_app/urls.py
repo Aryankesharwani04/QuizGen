@@ -8,6 +8,19 @@ from .views import (
     GetQuizQuestionsByIdView,
     GetQuizDetailView,
 )
+from .views_activity import (
+    ActivityScheduleView, 
+    ActivityPlayView,
+    ActivitySubmitView,
+    ActivityLeaderboardView,
+    CreateGameSessionView, 
+    JoinGameSessionView, 
+    GameSessionStateView, 
+    UpdateGameSessionView,
+    LiveGamePlayerUpdateView,
+    GetDailyProgressView
+)
+from .views_history import LiveQuizHistoryView, LiveQuizResultView
 from .leaderboard_view import GetGlobalLeaderboardView
 
 urlpatterns = [
@@ -24,5 +37,24 @@ urlpatterns = [
     # Leaderboard endpoints
     path('leaderboard/global/', GetGlobalLeaderboardView.as_view(), name='global-leaderboard'),
     path('leaderboard/', GetGlobalLeaderboardView.as_view(), name='leaderboard'),  # Backward compatibility
+    
+    # Fun & Activities
+    path('activities/schedule/', ActivityScheduleView.as_view(), name='activity-schedule'),
+    path('activities/daily-progress/', GetDailyProgressView.as_view(), name='activity-daily-progress'),
+    path('activities/<int:activity_id>/play/', ActivityPlayView.as_view(), name='activity-play'),
+    path('activities/<int:activity_id>/submit/', ActivitySubmitView.as_view(), name='activity-submit'),
+    path('activities/<int:activity_id>/leaderboard/', ActivityLeaderboardView.as_view(), name='activity-leaderboard'),
+    
+    # Live Hosted Quiz
+    path('live/create/', CreateGameSessionView.as_view(), name='live-create'),
+    path('live/join/', JoinGameSessionView.as_view(), name='live-join'),
+    path('live/session/<str:code>/host_state/', GameSessionStateView.as_view(), name='live-host-state'),
+    path('live/session/<str:code>/player_state/', GameSessionStateView.as_view(), name='live-player-state'),
+    path('live/session/<str:code>/update_state/', UpdateGameSessionView.as_view(), name='live-update-state'),
+    path('live/session/<str:code>/player_update/', LiveGamePlayerUpdateView.as_view(), name='live-player-update'),
+    
+    # Live Quiz History
+    path('live/history/', LiveQuizHistoryView.as_view(), name='live-history'),
+    path('live/session/<int:session_id>/result/', LiveQuizResultView.as_view(), name='live-result'),
 ]
 

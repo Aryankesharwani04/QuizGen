@@ -24,7 +24,13 @@ def generate_quiz_content(topic, difficulty, num_questions):
     
     CRITICAL INSTRUCTION:
     If the topic contains specific keywords, years, sub-genres, or specific names (e.g., "Bollywood 2024", "Quantum Physics", "1990s Pop Music"), the questions MUST be specifically about those details. Do NOT generate generic questions about the broad category if more specific details are provided.
-
+    TARGET AUDIENCE & CONTEXT:
+    1. Target Audience: Indian students and general Indian users.
+    2. Cultural Context: Use examples, terms, and references commonly known in India (e.g., Indian education, daily life, government, sports (Cricket/Hockey), festivals (Diwali/Holi), geography, trademarks).
+    3. AVOID: American, Hollywood, or US-centric references unless globally ubiquitous.
+    4. Avoid tricky wording or obscure facts.
+    5. Style: Clear, short, simple language. No complex vocabulary.
+    
     The output must be a valid JSON object with the following structure:
     {{
         "title": "Quiz Title",
@@ -114,6 +120,13 @@ Context:
 - Constraints: Each question must have EXACTLY 4 options. Mark the correct answer explicitly.
 {f'- Additional instructions: {additional_instructions}' if additional_instructions else ''}
 
+TARGET AUDIENCE & CONTEXT:
+1. Target Audience: Indian students and general Indian users.
+2. Cultural Context: Use examples, terms, and references commonly known in India (e.g., Indian education, daily life, government, sports (Cricket/Hockey), festivals (Diwali/Holi), geography, trademarks).
+3. AVOID: American, Hollywood, or US-centric references unless globally ubiquitous.
+4. Difficulty: SUPER EASY (Beginner/School Level). Avoid tricky wording or obscure facts.
+5. Style: Clear, short, simple language. No complex vocabulary.
+
 Required output format (JSON array):
 [
   {{
@@ -191,3 +204,39 @@ CRITICAL RULES:
     except requests.RequestException as e:
         logger.error(f"Error calling Gemini API: {e}")
         return None, f"Network Error: {str(e)}"
+
+def generate_content_with_gemini(prompt):
+    """
+    Generic function to get raw text content from Gemini for a given prompt.
+    Returns the text content directly (or validation error string).
+    """
+    api_key = config('GEMINI_API_KEY', default=None)
+    if not api_key:
+        return "GEMINI_API_KEY not set"
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+    
+    payload = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+    
+    headers = {'Content-Type': 'application/json'}
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        if response.status_code != 200:
+            return f"Error: {response.status_code} {response.text}"
+            
+        data = response.json()
+        try:
+            text = data['candidates'][0]['content']['parts'][0]['text']
+            # Clean generic markdown
+            text = text.replace('```json', '').replace('```', '').strip()
+            return text
+        except (KeyError, IndexError) as e:
+            return f"Parse Error: {str(e)}"
+            
+    except Exception as e:
+        return f"Request Error: {str(e)}"

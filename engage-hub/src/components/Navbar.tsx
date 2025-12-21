@@ -18,6 +18,7 @@ import {
 
 const navLinks = [
   { to: "/categories", label: "Categories" },
+  { to: "/fun-activities", label: "Arcade" },
   { to: "/leaderboard", label: "Leaderboard" },
   { to: "/profile", label: "Profile" },
   { to: "/about", label: "About" },

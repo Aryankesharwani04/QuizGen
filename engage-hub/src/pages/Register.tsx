@@ -64,7 +64,7 @@ const Register = () => {
     try {
       await register(fullName, email, password, confirmPassword);
       const from = (location.state as any)?.from?.pathname || "/dashboard";
-      navigate(from, { replace: true });
+      navigate(from, { replace: true, state: { showWelcome: true } });
     } catch (error) {
       console.error("Registration error:", error);
     }

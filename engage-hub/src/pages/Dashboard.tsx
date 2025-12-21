@@ -8,7 +8,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { PreferenceModal } from "@/components/PreferenceModal";
+import { Link, useLocation } from "react-router-dom";
+
 import { RecentlyCompleted } from "@/components/RecentlyCompleted";
 import { StatsOverview } from "@/components/StatsOverview";
 import { MyCreatedQuizzes } from "@/components/MyCreatedQuizzes";
@@ -17,6 +19,7 @@ import { CategoryPerformance } from "@/components/CategoryPerformance";
 import { Combobox } from "@/components/ui/combobox";
 import { TOPICS } from "@/lib/topics";
 import { QuizIdSearch } from "@/components/QuizIdSearch";
+import { ArcadeFunWidget } from "@/components/ArcadeFunWidget";
 
 const PROFILE_CACHE_KEY = 'dashboard_user_profile';
 const PROFILE_TIMESTAMP_KEY = 'dashboard_user_profile_timestamp';
@@ -24,7 +27,19 @@ const PROFILE_TIMESTAMP_KEY = 'dashboard_user_profile_timestamp';
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
   const [userName, setUserName] = useState<string>('');
+
+  // Welcome Modal Logic
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.showWelcome) {
+      setShowWelcomeModal(true);
+      // Clear state history so refresh doesn't pop it up again (optional, depending on router behavior)
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   // Quiz creation state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -146,6 +161,9 @@ const Dashboard = () => {
             </div>
             <QuizIdSearch />
           </div>
+
+          {/* Preference Selection Modal (for new users) */}
+          <PreferenceModal open={showWelcomeModal} onOpenChange={setShowWelcomeModal} />
 
           {/* Create Quiz Dialog */}
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -280,6 +298,9 @@ const Dashboard = () => {
             {/* Sidebar - Sticky, Full Height */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
+                {/* Arcade Fun Widget */}
+                <ArcadeFunWidget />
+
                 {/* Performance Chart */}
                 <CategoryPerformance />
 
