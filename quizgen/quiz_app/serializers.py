@@ -14,7 +14,7 @@ class QuizSerializer(serializers.ModelSerializer):
         fields = [
             'quiz_id', 'title', 'topic', 'difficulty_level', 
             'image_link', 'num_questions', 'duration_minutes', 
-            'created_at', 'questions'
+            'created_at', 'questions', 'language'
         ]
 
 class QuizHistorySerializer(serializers.ModelSerializer):
@@ -53,7 +53,7 @@ class QuizDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'quiz_id', 'category', 'title', 'topic', 'level',
             'num_questions', 'duration_seconds', 'is_mock',
-            'created_by', 'created_at', 'updated_at', 'questions_count'
+            'created_by', 'created_at', 'updated_at', 'questions_count', 'language'
         ]
     
     def get_questions_count(self, obj):

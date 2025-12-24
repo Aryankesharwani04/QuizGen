@@ -175,6 +175,7 @@ class ApiService {
     num_questions: number;
     duration_seconds: number;
     additional_instructions?: string;
+    language?: string;
   }): Promise<ApiResponse<any>> {
     const token = localStorage.getItem("token");
 
@@ -429,7 +430,8 @@ class ApiService {
       : `${API_BASE_URL}/api/quiz/activities/daily-progress/`;
 
     const response = await fetch(url, {
-      headers
+      headers,
+      credentials: "include"
     });
     if (!response.ok) throw new Error("Failed to fetch daily progress");
     return response.json();

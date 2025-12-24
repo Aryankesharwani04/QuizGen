@@ -56,15 +56,21 @@ def update_user_xp(user, quiz, score, quiz_type='time-based'):
         xp_earned = calculate_quiz_xp(quiz, score)
         
         # Update total XP score
+        user.profile.check_and_reset_weekly_xp()
         user.profile.xp_score += xp_earned
+        user.profile.weekly_xp += xp_earned
+        
+        update_fields = ['xp_score', 'weekly_xp']
         
         # Update specific quiz type points
         if quiz_type == 'fast-paced':
             user.profile.fast_paced_points += xp_earned
+            update_fields.append('fast_paced_points')
         elif quiz_type == 'time-based':
             user.profile.time_based_points += xp_earned
+            update_fields.append('time_based_points')
             
-        user.profile.save()
+        user.profile.save(update_fields=update_fields)
         return xp_earned
     
     return 0  # No XP for subsequent attempts

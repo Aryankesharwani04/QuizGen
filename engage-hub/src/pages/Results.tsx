@@ -13,27 +13,86 @@ import {
   Star,
   Zap
 } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const resultsData = location.state;
+  const { attemptId } = useParams();
+  const { toast } = useToast();
 
-  // Redirect to dashboard if no results data
+  const [fetchedData, setFetchedData] = useState<any>(null);
+  const [loading, setLoading] = useState(!location.state);
+
+  const resultsData = location.state || fetchedData;
+
+  // Fetch attempt if no state and attemptId exists
   useEffect(() => {
-    if (!resultsData) {
+    if (!location.state && attemptId) {
+      const fetchAttempt = async () => {
+        try {
+          const response: any = await api.getQuizHistoryById(parseInt(attemptId));
+          const data = response.data; // ResponseFormatter wrapper
+
+          // Map API response to Results format
+          const mappedResults = {
+            quizId: data.quiz_id,
+            quizTitle: data.title,
+            category: data.category,
+            score: data.percentage, // Percentage is used as 'score' in Results logic
+            correctAnswers: data.questions.filter((q: any) => q.is_correct).length,
+            totalQuestions: data.total_questions,
+            timeTaken: "N/A", // Not stored in history currently
+            difficulty: data.level,
+            xpEarned: 0, // Not stored in history detail currently
+            quizType: data.quiz_type || 'time-based',
+            questions: data.questions.map((q: any, idx: number) => ({
+              id: idx,
+              question: q.text,
+              yourAnswer: q.user_answer,
+              correctAnswer: q.correct_answer,
+              correct: q.is_correct
+            }))
+          };
+
+          setFetchedData(mappedResults);
+        } catch (error) {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load quiz results."
+          });
+          navigate('/dashboard');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchAttempt();
+    } else if (!location.state && !attemptId) {
       navigate('/dashboard');
     }
-  }, [resultsData, navigate]);
+  }, [location.state, attemptId, navigate, toast]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-transparent pt-32 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading results...</p>
+      </div>
+    );
+  }
 
   if (!resultsData) {
     return null; // Will redirect
   }
 
-  // Use passed data from QuizAttempt
+  // Use passed or fetched data
   const results = {
+    quizId: resultsData.quizId,
     quizTitle: resultsData.quizTitle,
     category: resultsData.category,
     score: resultsData.score,
@@ -42,7 +101,7 @@ const Results = () => {
     timeTaken: resultsData.timeTaken,
     difficulty: resultsData.difficulty,
     xpEarned: resultsData.xpEarned,
-    quizType: resultsData.quizType || 'time-based', // Get quiz type from navigation state
+    quizType: resultsData.quizType || 'time-based',
   };
 
   const questions = resultsData.questions || [];
@@ -61,6 +120,23 @@ const Results = () => {
     return "Keep Practicing! 📚";
   };
 
+  const handleShare = () => {
+    // Copy full link as requested
+    const shareText = `${window.location.origin}/quiz/${results.quizId}`;
+    navigator.clipboard.writeText(shareText).then(() => {
+      toast({
+        title: "Link Copied!",
+        description: `Copied to clipboard: ${shareText}`,
+      });
+    }).catch(() => {
+      toast({
+        variant: "destructive",
+        title: "Failed to copy",
+        description: "Could not copy link to clipboard."
+      });
+    });
+  };
+
   return (
     <div className="min-h-screen bg-transparent">
       <main className="pt-24 pb-16">
@@ -70,54 +146,51 @@ const Results = () => {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Quiz Complete!</h1>
             <p className="text-xl text-muted-foreground mb-8">{results.quizTitle}</p>
 
-            <div className="relative inline-block">
-              <div className="w-48 h-48 rounded-full gradient-primary p-1 mx-auto animate-glow">
-                <div className="w-full h-full rounded-full bg-background flex flex-col items-center justify-center">
-                  <span className={`text-6xl font-bold ${getScoreColor(results.score)}`}>
-                    {results.score}%
-                  </span>
-                  <span className="text-muted-foreground text-sm mt-1">
-                    {results.correctAnswers}/{results.totalQuestions} correct
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-2xl font-semibold mt-6 animate-slide-up">
-              {getScoreMessage(results.score)}
-            </p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-3xl mx-auto">
-            <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.1s" }}>
-              <CardContent className="p-6">
-                <Clock className="w-8 h-8 text-primary mx-auto mb-2" />
-                <p className="text-2xl font-bold">
-                  {isLearningBased ? 'N/A' : results.timeTaken}
-                </p>
-                <p className="text-sm text-muted-foreground">Time Taken</p>
-              </CardContent>
-            </Card>
+          {/* Stats Grid */}
+          {!attemptId && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
+              <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.1s" }}>
+                <CardContent className="p-6">
+                  <Clock className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-bold">
+                    {isLearningBased ? 'N/A' : results.timeTaken}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Time Taken</p>
+                </CardContent>
+              </Card>
 
-            <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.2s" }}>
-              <CardContent className="p-6">
-                <Target className="w-8 h-8 text-warning mx-auto mb-2" />
-                <p className="text-2xl font-bold">{results.difficulty}</p>
-                <p className="text-sm text-muted-foreground">Difficulty</p>
-              </CardContent>
-            </Card>
+              <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.2s" }}>
+                <CardContent className="p-6">
+                  <Target className="w-8 h-8 text-warning mx-auto mb-2" />
+                  <p className="text-2xl font-bold">{results.difficulty}</p>
+                  <p className="text-sm text-muted-foreground">Difficulty</p>
+                </CardContent>
+              </Card>
 
-            <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.3s" }}>
-              <CardContent className="p-6">
-                <Zap className="w-8 h-8 text-secondary mx-auto mb-2" />
-                <p className="text-2xl font-bold">
-                  {isLearningBased ? 'N/A' : `+${results.xpEarned}`}
-                </p>
-                <p className="text-sm text-muted-foreground">XP Earned</p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.3s" }}>
+                <CardContent className="p-6">
+                  <Zap className="w-8 h-8 text-secondary mx-auto mb-2" />
+                  <p className="text-2xl font-bold">
+                    {isLearningBased ? 'N/A' : `+${results.xpEarned}`}
+                  </p>
+                  <p className="text-sm text-muted-foreground">XP Earned</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/50 card-shadow text-center animate-fade-in-scale" style={{ animationDelay: "0.4s" }}>
+                <CardContent className="p-6">
+                  <CheckCircle2 className="w-8 h-8 text-success mx-auto mb-2" />
+                  <p className="text-2xl font-bold">
+                    {results.correctAnswers}/{results.totalQuestions}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Correct Answers</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-4 justify-center mb-12">
@@ -133,7 +206,7 @@ const Results = () => {
                 Go Home
               </Button>
             </Link>
-            <Button variant="outline" className="px-8 py-6 text-lg">
+            <Button variant="outline" className="px-8 py-6 text-lg" onClick={handleShare}>
               <Share2 className="w-5 h-5 mr-2" />
               Share Quiz
             </Button>

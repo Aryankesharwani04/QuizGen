@@ -14,7 +14,8 @@ import {
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useQuizNavigation } from "@/contexts/QuizNavigationContext";
-import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, RefreshCcw } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, RefreshCcw, Volume2, VolumeX } from "lucide-react";
+import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 
 // Helper to manage local storage keys
 const getStorageKey = (quizId: string, key: string) => `quiz_${quizId}_${key}`;
@@ -62,6 +63,7 @@ const QuizAttempt = () => {
                         level: response.quiz_info.level,
                         quiz_type: response.quiz_info.quiz_type, // Fetch Type
                         duration_seconds: parseInt(response.quiz_info.duration_seconds) || 600,
+                        language: response.quiz_info.language || 'English',
                         questions: response.questions.map((q: any) => ({
                             text: q.question_text,
                             options: Object.values(q.options),
@@ -77,6 +79,7 @@ const QuizAttempt = () => {
                         level: quizInfo.level || quizInfo.difficulty_level,
                         quiz_type: quizInfo.quiz_type, // Fetch Type
                         duration_seconds: quizInfo.duration_seconds,
+                        language: quizInfo.language || 'English',
                         questions: quizInfo.questions.map((q: any) => ({
                             text: q.text || q.question_text,
                             options: Array.isArray(q.options) ? q.options : Object.values(q.options),
@@ -301,6 +304,32 @@ const QuizAttempt = () => {
     const isLearning = getQuizType() === 'learning-based';
 
 
+    // --- TTS HOOK ---
+    const { speak, cancel, isSpeaking } = useTextToSpeech();
+
+    // Stop speaking when moving to next/prev question
+    useEffect(() => {
+        cancel();
+        return () => cancel();
+    }, [currentQuestionIndex, cancel]);
+
+    const handleSpeakQuestion = (question: any) => {
+        if (isSpeaking) {
+            cancel();
+            return;
+        }
+
+        const language = quiz?.language || 'English';
+
+        let textToSpeak = `Question. ${question.text}. `;
+        question.options.forEach((opt: string, idx: number) => {
+            textToSpeak += `Option ${String.fromCharCode(65 + idx)}. ${opt}. `;
+        });
+
+        speak(textToSpeak, language);
+    };
+
+
     const handleAnswerSelect = (answer: string) => {
         // Prevent changing answers during submission
         if (isSubmitting) return;
@@ -313,6 +342,7 @@ const QuizAttempt = () => {
     };
 
     const handleNext = () => {
+        cancel(); // Stop speaking
         if (isFastPaced) {
             handleNextFastPaced(); // Track time before moving
         }
@@ -322,6 +352,7 @@ const QuizAttempt = () => {
     };
 
     const handlePrevious = () => {
+        cancel(); // Stop speaking
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
@@ -403,6 +434,7 @@ const QuizAttempt = () => {
         // Navigate to results page with quiz data
         navigate('/results', {
             state: {
+                quizId: quizId,
                 quizTitle: quiz?.title || 'Quiz',
                 category: quiz?.category || 'General',
                 score: scorePercentage,
@@ -527,9 +559,20 @@ const QuizAttempt = () => {
                     {/* Content */}
                     <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar flex flex-col justify-center">
                         <div className="w-full max-w-4xl mx-auto">
-                            <h2 className="text-lg md:text-xl font-medium leading-relaxed text-foreground mb-6 text-center">
-                                {currentQuestion?.text}
-                            </h2>
+                            <div className="flex items-center justify-center gap-3 mb-6 relative">
+                                <h2 className="text-lg md:text-xl font-medium leading-relaxed text-foreground text-center">
+                                    {currentQuestion?.text}
+                                </h2>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleSpeakQuestion(currentQuestion)}
+                                    className={`shrink-0 rounded-full h-8 w-8 hover:bg-primary/10 ${isSpeaking ? 'text-primary animate-pulse' : 'text-muted-foreground'}`}
+                                    title={isSpeaking ? "Stop Speaking" : "Read Aloud"}
+                                >
+                                    {isSpeaking ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                </Button>
+                            </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {currentQuestion?.options.map((option: string, idx: number) => {

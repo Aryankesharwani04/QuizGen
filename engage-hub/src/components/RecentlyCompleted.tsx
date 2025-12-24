@@ -19,9 +19,10 @@ interface QuizAttempt {
 interface RecentlyCompletedProps {
     limit?: number;
     className?: string;
+    layout?: "list" | "grid";
 }
 
-export const RecentlyCompleted = ({ limit = 2, className = "" }: RecentlyCompletedProps) => {
+export const RecentlyCompleted = ({ limit = 2, className = "", layout = "list" }: RecentlyCompletedProps) => {
     const [allAttempts, setAllAttempts] = useState<QuizAttempt[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -65,9 +66,9 @@ export const RecentlyCompleted = ({ limit = 2, className = "" }: RecentlyComplet
                 <CardTitle className="flex items-center justify-between text-lg">
                     <div className="flex items-center gap-2">
                         <History className="w-5 h-5 text-primary" />
-                        <span>Recently Completed</span>
+                        <span>{layout === "grid" ? "Activity History" : "Recently Completed"}</span>
                     </div>
-                    {hasMore && (
+                    {hasMore && layout === "list" && (
                         <Link to="/profile#activity" className="text-xs text-muted-foreground hover:text-primary transition-colors">
                             View All
                         </Link>
@@ -75,11 +76,11 @@ export const RecentlyCompleted = ({ limit = 2, className = "" }: RecentlyComplet
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="space-y-3">
+                <div className={layout === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-3"}>
                     {loading ? (
-                        <div className="text-center py-8 text-muted-foreground text-sm">Loading history...</div>
+                        <div className="text-center py-8 text-muted-foreground text-sm col-span-full">Loading history...</div>
                     ) : allAttempts.length === 0 ? (
-                        <div className="text-center py-10 px-4 border border-dashed border-muted rounded-lg bg-muted/10">
+                        <div className="text-center py-10 px-4 border border-dashed border-muted rounded-lg bg-muted/10 col-span-full">
                             <CheckCircle2 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                             <p className="text-sm text-muted-foreground mb-3">No quizzes completed yet.</p>
                             <Link to="/categories" className="text-xs font-medium text-primary hover:underline">
@@ -102,7 +103,7 @@ export const RecentlyCompleted = ({ limit = 2, className = "" }: RecentlyComplet
                                 />
                             ))}
 
-                            {hasMore && (
+                            {hasMore && layout === "list" && (
                                 <div className="text-center pt-2">
                                     <Link
                                         to="/profile#activity"

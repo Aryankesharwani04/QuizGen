@@ -16,6 +16,7 @@ interface Quiz {
     num_questions: number;
     duration_seconds: number;
     created_at?: string;
+    language?: string;
 }
 
 const Explore = () => {
@@ -199,6 +200,7 @@ const Explore = () => {
                             num_questions={quiz.num_questions}
                             duration_seconds={quiz.duration_seconds}
                             created_at={quiz.created_at}
+                            language={quiz.language}
                         />
                     ))}
                 </div>

@@ -256,9 +256,19 @@ const Leaderboard = () => {
 
                     {/* Main Leaderboard */}
                     <Tabs defaultValue="global" className="max-w-4xl mx-auto">
-                        <TabsList className="grid w-full grid-cols-2 mb-8">
-                            <TabsTrigger value="global">Global Rankings</TabsTrigger>
-                            <TabsTrigger value="weekly">Weekly Top 10</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-2 gap-8 bg-transparent p-0 mb-8">
+                            <TabsTrigger
+                                value="global"
+                                className="h-14 data-[state=active]:bg-card/80 border-2 border-transparent hover:border-primary/60 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-105 data-[state=active]:scale-105 data-[state=active]:border-primary/60 data-[state=active]:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] rounded-xl"
+                            >
+                                Global Rankings
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="weekly"
+                                className="h-14 data-[state=active]:bg-card/80 border-2 border-transparent hover:border-primary/60 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-105 data-[state=active]:scale-105 data-[state=active]:border-primary/60 data-[state=active]:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] rounded-xl"
+                            >
+                                Weekly Top 10
+                            </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="global">

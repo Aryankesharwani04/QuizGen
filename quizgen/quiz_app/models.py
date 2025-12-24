@@ -294,6 +294,7 @@ class Quiz(models.Model):
     title = models.CharField(max_length=255)
     topic = models.CharField(max_length=255, help_text="Interest or topic of the quiz")
     level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, db_index=True, help_text="Difficulty level", blank=True, null=True)
+    language = models.CharField(max_length=50, default='English', help_text="Language of the quiz content")
     # Legacy field for backwards compatibility
     difficulty_level = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, blank=True, null=True)
     image_link = models.URLField(blank=True, null=True)

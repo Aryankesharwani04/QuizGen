@@ -22,7 +22,6 @@ import Results from "./pages/Results";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import QuizAttempt from "./pages/QuizAttempt";
-import QuizReview from "./pages/QuizReview";
 import NotFound from "./pages/NotFound";
 import Quiz from "./pages/Quiz";
 import FunActivities from "./pages/FunActivities";
@@ -73,6 +72,7 @@ const App = () => (
                 <Route path="/about" element={<Layout><About /></Layout>} />
                 <Route path="/results" element={<Layout><Results /></Layout>} />
                 <Route path="/leaderboard" element={<Layout><Leaderboard /></Layout>} />
+                <Route path="/leaderboard" element={<Layout><Leaderboard /></Layout>} />
                 <Route path="/profile" element={<Layout><ProtectedRoute><Profile /></ProtectedRoute></Layout>} />
 
                 {/* Fun & Activities Routes */}
@@ -86,7 +86,7 @@ const App = () => (
 
                 {/* Quiz routes with Header-only layout (no footer for focus) */}
                 <Route path="/quiz/start/:quizId" element={<HeaderOnlyLayout><ProtectedRoute><QuizAttempt /></ProtectedRoute></HeaderOnlyLayout>} />
-                <Route path="/quiz/review/:attemptId" element={<Layout><ProtectedRoute><QuizReview /></ProtectedRoute></Layout>} />
+                <Route path="/quiz/review/:attemptId" element={<Layout><ProtectedRoute><Results /></ProtectedRoute></Layout>} />
 
                 {/* Public Quiz Detail Page */}
                 <Route path="/quiz/:quizId" element={<Layout><Quiz /></Layout>} />

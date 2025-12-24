@@ -17,6 +17,7 @@ interface Quiz {
     num_questions: number;
     duration_seconds: number;
     created_at: string;
+    language?: string;
 }
 
 interface MyCreatedQuizzesProps {
@@ -24,15 +25,15 @@ interface MyCreatedQuizzesProps {
     refreshTrigger?: number;
     className?: string;
     limit?: number;
-    showSeeMore?: boolean;
+    layout?: "list" | "grid";
 }
 
 export const MyCreatedQuizzes = ({
     onCreateClick,
     refreshTrigger,
     className = "",
-    showSeeMore = false,
-    limit
+    limit,
+    layout = "list"
 }: MyCreatedQuizzesProps) => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState(true);
@@ -74,7 +75,7 @@ export const MyCreatedQuizzes = ({
     }, [refreshTrigger]);
 
     return (
-        <Card className={`bg-background/60border-border/50 card-shadow ${className}`}>
+        <Card className={`bg-background/60 border-border/50 card-shadow ${className}`}>
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
@@ -93,9 +94,9 @@ export const MyCreatedQuizzes = ({
             </CardHeader>
             <CardContent>
                 {loading ? (
-                    <div className="text-center py-8 text-muted-foreground">Loading your quizzes...</div>
+                    <div className="text-center py-8 text-muted-foreground col-span-full">Loading your quizzes...</div>
                 ) : quizzes.length === 0 ? (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12 col-span-full">
                         <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
                         <p className="text-muted-foreground mb-4">You haven't created any quizzes yet</p>
                         <Button
@@ -107,7 +108,7 @@ export const MyCreatedQuizzes = ({
                         </Button>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className={layout === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
                         {quizzes.slice(0, limit || quizzes.length).map((quiz) => (
                             <QuizCard
                                 key={quiz.quiz_id}
@@ -119,13 +120,14 @@ export const MyCreatedQuizzes = ({
                                 num_questions={quiz.num_questions}
                                 duration_seconds={quiz.duration_seconds}
                                 created_at={quiz.created_at}
+                                language={quiz.language}
                             />
                         ))}
 
-                        {showSeeMore && (
+                        {layout === "list" && (
                             <div className="text-center pt-2">
                                 <Link to="/profile#MyQuizzes" className="text-primary hover:underline text-sm font-medium">
-                                    See more →
+                                    See all ({quizzes.length}) quizzes→
                                 </Link>
                             </div>
                         )}

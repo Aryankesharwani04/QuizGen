@@ -114,6 +114,7 @@ class ActivityPlayView(views.APIView):
             return Response({
                 'completed': True,
                 'score': attempt.score,
+                'total_questions': activity.questions.count(),
                 'rank': UserActivityAttempt.objects.filter(activity=activity, score__gt=attempt.score).values('user').distinct().count() + 1,
                 'activity': {
                     'id': activity.id,
@@ -171,12 +172,15 @@ class ActivitySubmitView(views.APIView):
         completed_today_ids.add(activity.id)
         
         is_bonus = False
-        if len(completed_today_ids) == todays_activities.count() and todays_activities.count() >= 3:
-            xp_earned += 20
+        if len(completed_today_ids) == 3:
             is_bonus = True
+            xp_earned += 20
             
+        # Update XP
+        profile.check_and_reset_weekly_xp()
         profile.xp_score += xp_earned
-        profile.save()
+        profile.weekly_xp += xp_earned
+        profile.save(update_fields=['xp_score', 'weekly_xp'])
         
         return Response({'status': 'saved', 'rank': rank, 'xp_earned': xp_earned, 'bonus_unlocked': is_bonus})
 
@@ -189,16 +193,21 @@ class ActivityLeaderboardView(views.APIView):
 
         # Top 10 users by score (distinct users)
         attempts = UserActivityAttempt.objects.filter(activity_id=activity_id) \
-            .values('user__username', 'score') \
+            .select_related('user__profile') \
+            .values('user__username', 'user__email', 'user__profile__full_name', 'score') \
             .order_by('-score')[:20]
             
-        # Deduplicate users keeping highest score (done via python for simplicity if not using Distinct ON)
+        # Deduplicate users keeping highest score
         leaderboard = []
         seen_users = set()
         for att in attempts:
             if att['user__username'] not in seen_users:
+                # Use full name if available, fallback to username
+                display_name = att.get('user__profile__full_name') or att['user__username']
                 leaderboard.append({
-                    'username': att['user__username'],
+                    'username': display_name,  # Mapping full_name to 'username' field to avoid breaking frontend immediately, but I also send email
+                    'full_name': display_name,
+                    'email': att.get('user__email', ''),
                     'score': att['score']
                 })
                 seen_users.add(att['user__username'])

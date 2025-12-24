@@ -21,6 +21,7 @@ interface QuizCardProps {
     num_questions: number;
     duration_seconds: number;
     created_at?: string | null;
+    language?: string;
 }
 
 export const QuizCard = ({
@@ -30,7 +31,8 @@ export const QuizCard = ({
     level,
     num_questions,
     duration_seconds,
-    created_at
+    created_at,
+    language
 }: QuizCardProps) => {
 
     const [copied, setCopied] = useState(false);
@@ -39,6 +41,9 @@ export const QuizCard = ({
     const navigate = useNavigate();
     const location = useLocation();
     const { toast } = useToast();
+
+    // Default to English if language is not provided (backwards compatibility)
+    const displayLanguage = language || 'English';
 
     const handleCopyId = () => {
         navigator.clipboard.writeText(quiz_id);
@@ -67,7 +72,19 @@ export const QuizCard = ({
         return 'bg-slate-500/10 text-slate-600 dark:text-slate-400';
     };
 
-
+    const getLanguageFlag = (lang: string) => {
+        const l = lang.toLowerCase();
+        if (l === 'hindi') return '🇮🇳';
+        if (l === 'spanish') return '🇪🇸';
+        if (l === 'french') return '🇫🇷';
+        if (l === 'german') return '🇩🇪';
+        if (l === 'italian') return '🇮🇹';
+        if (l === 'portuguese') return '🇵🇹';
+        if (l === 'russian') return '🇷🇺';
+        if (l === 'japanese') return '🇯🇵';
+        if (l === 'chinese') return '🇨🇳';
+        return '🇬🇧'; // Default to UK flag for English/Others
+    };
 
     const formatDate = (dateString: string) => {
         if (!dateString) return '';
@@ -120,10 +137,17 @@ export const QuizCard = ({
                         </span>
                     </div>
 
-                    {/* Topic */}
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                        <Layers className="w-4 h-4 text-primary/60" />
-                        <span>{topic || 'General Knowledge'}</span>
+                    {/* Topic & Language */}
+                    <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                            <Layers className="w-4 h-4 text-primary/60" />
+                            <span>{topic || 'General Knowledge'}</span>
+                        </div>
+                        <span className="text-border/60">|</span>
+                        <div className="flex items-center gap-1.5 text-xs bg-muted/50 px-2 py-0.5 rounded-full">
+                            <span>{getLanguageFlag(displayLanguage)}</span>
+                            <span>{displayLanguage}</span>
+                        </div>
                     </div>
 
                     {/* Metadata */}

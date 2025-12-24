@@ -72,6 +72,7 @@ const Quiz = () => {
                             num_questions={quiz.total_questions || quiz.num_questions}
                             duration_seconds={quiz.duration_seconds}
                             created_at={quiz.created_at}
+                            language={quiz.language}
                         />
                     </div>
                 </div>

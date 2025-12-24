@@ -89,7 +89,7 @@ def generate_quiz_content(topic, difficulty, num_questions):
 
 
 
-def generate_quiz_questions(category, title, level, num_questions, additional_instructions=""):
+def generate_quiz_questions(category, title, level, num_questions, additional_instructions="", language="English"):
     """
     Generate quiz questions using Gemini API with structured output.
     
@@ -99,6 +99,7 @@ def generate_quiz_questions(category, title, level, num_questions, additional_in
         level: Difficulty level ('easy', 'medium', 'hard')
         num_questions: Number of questions to generate
         additional_instructions: Optional additional context
+        language: Language for the quiz content (default: English)
         
     Returns:
         tuple: (list of questions, error_message)
@@ -117,14 +118,15 @@ Context:
 - Category: {category}
 - Title: {title}
 - Level: {level}
+- Language: {language}
 - Constraints: Each question must have EXACTLY 4 options. Mark the correct answer explicitly.
 {f'- Additional instructions: {additional_instructions}' if additional_instructions else ''}
 
 TARGET AUDIENCE & CONTEXT:
 1. Target Audience: Indian students and general Indian users.
-2. Cultural Context: Use examples, terms, and references commonly known in India (e.g., Indian education, daily life, government, sports (Cricket/Hockey), festivals (Diwali/Holi), geography, trademarks).
-3. AVOID: American, Hollywood, or US-centric references unless globally ubiquitous.
-4. Difficulty: SUPER EASY (Beginner/School Level). Avoid tricky wording or obscure facts.
+2. Language: The quiz MUST be generated in {language}. All questions and options must be in {language}.
+3. Cultural Context: Use examples, terms, and references commonly known in India (e.g., Indian education, daily life, government, sports (Cricket/Hockey), festivals (Diwali/Holi), geography, trademarks).
+4. AVOID: American, Hollywood, or US-centric references unless globally ubiquitous.
 5. Style: Clear, short, simple language. No complex vocabulary.
 
 Required output format (JSON array):

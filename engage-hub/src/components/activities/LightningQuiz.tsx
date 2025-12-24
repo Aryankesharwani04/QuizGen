@@ -23,6 +23,7 @@ export default function LightningQuiz() {
     const [score, setScore] = useState(0);
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [totalParticipants, setTotalParticipants] = useState(0);
+    const [totalQuestions, setTotalQuestions] = useState(0);
     const [userRank, setUserRank] = useState<number | null>(null);
 
     // Auth Check
@@ -59,6 +60,7 @@ export default function LightningQuiz() {
                 if (data.completed) {
                     setScore(data.score);
                     setUserRank(data.rank);
+                    setTotalQuestions(data.total_questions || 0);
 
                     // Stale-while-revalidate: Load from cache first
                     const cacheKey = `lightning_lb_${activityId}`;
@@ -213,12 +215,12 @@ export default function LightningQuiz() {
     if (gameState === "finished") {
         // ... (previous finished state code) ...
         return (
-            <div className="mt-24 container max-w-md mx-auto px-6 py-6 h-full flex flex-col items-center justify-center animate-in slide-in-from-bottom duration-500">
-                <Card className="w-full bg-card/80 backdrop-blur-sm border-2 border-primary/20">
+            <div className="mt-10 container max-w-md mx-auto px-6 py-6 h-full flex flex-col items-center justify-center animate-in slide-in-from-bottom duration-500">
+                <Card className="w-full max-w-2xl bg-card/80 backdrop-blur-sm border-2 border-primary/20">
                     <CardHeader className="text-center">
                         <h2 className="text-4xl font-bold">Time's Up!</h2>
                         <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-blue-600 to-indigo-600 my-4">
-                            {score}/{questions.length}
+                            {score}/{totalQuestions || questions.length}
                         </div>
                         <p className="text-muted-foreground text-lg">
                             {score > questions.length * 0.8 ? "Godlike Speed! ⚡" : score > questions.length * 0.5 ? "Not bad!" : "Too slow! 🐢"}
@@ -232,16 +234,29 @@ export default function LightningQuiz() {
                                 <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Daily Leaderboard</span>
                                 <span className="text-xs text-muted-foreground">{totalParticipants} Participants Today</span>
                             </h3>
-                            <div className="space-y-2">
-                                {leaderboard.map((entry, idx) => (
-                                    <div key={idx} className={`flex justify-between items-center p-2 rounded ${entry.username === user?.username ? "bg-primary/10 border border-primary/20" : "bg-card"}`}>
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-mono font-bold text-muted-foreground w-6">#{idx + 1}</span>
-                                            <span className="font-medium">{entry.username}</span>
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                {leaderboard.map((entry, idx) => {
+                                    const isCurrentUser = entry.email === user?.email || entry.username === user?.username || entry.username === user?.email;
+                                    const maskedEmail = entry.email ? `${entry.email.substring(0, 3)}...@${entry.email.split('@')[1] || ''}` : '';
+
+                                    return (
+                                        <div key={idx} className={`flex justify-between items-center p-3 rounded-lg border ${isCurrentUser ? "bg-primary/10 border-primary/30" : "bg-card border-border/50"}`}>
+                                            <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
+                                                <span className={`font-mono font-bold w-8 text-center flex-shrink-0 ${idx < 3 ? "text-primary" : "text-muted-foreground"}`}>#{idx + 1}</span>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold truncate text-foreground">{entry.full_name || entry.username}</span>
+                                                        {isCurrentUser && <span className="text-xs font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full flex-shrink-0">(You)</span>}
+                                                    </div>
+                                                    {entry.email && (
+                                                        <div className="text-xs text-muted-foreground truncate">{maskedEmail}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="font-bold text-lg flex-shrink-0 bg-muted/50 px-3 py-1 rounded-md">{entry.score}</div>
                                         </div>
-                                        <span className="font-bold">{entry.score}</span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
 

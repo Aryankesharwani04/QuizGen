@@ -16,6 +16,7 @@ interface Quiz {
     num_questions: number;
     duration_seconds: number;
     created_at?: string;
+    language?: string;
 }
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -180,6 +181,7 @@ export const ExploreQuizzes = () => {
                             num_questions={quiz.num_questions}
                             duration_seconds={quiz.duration_seconds}
                             created_at={quiz.created_at}
+                            language={quiz.language}
                         />
                     ))
                 )}

@@ -64,6 +64,7 @@ export default function FunActivities() {
                     });
                     localStorage.setItem("daily_progress_cache", JSON.stringify({ ...progress, date: todayStr }));
                 }
+                console.log(progress);
             } catch (error) {
                 console.error("Failed to fetch activities:", error);
             } finally {
@@ -121,44 +122,113 @@ export default function FunActivities() {
         return <div className="pt-32 text-center">Loading activities...</div>;
     }
 
-    const sortedDates = Object.keys(schedule).sort((a, b) => {
-        const dateA = new Date(a);
-        const dateB = new Date(b);
+    const { upcomingDates, pastDates } = (() => {
+        const allDates = Object.keys(schedule);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const isTodayA = isToday(dateA);
-        const isTodayB = isToday(dateB);
+        const todayStrs = allDates.filter(d => isToday(parseISO(d)));
 
-        // 1. Today first
-        if (isTodayA && !isTodayB) return -1;
-        if (!isTodayA && isTodayB) return 1;
+        const futureStrs = allDates.filter(d => {
+            const date = parseISO(d);
+            return !isToday(date) && date > today;
+        }).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
-        const isPastA = dateA < today;
-        const isPastB = dateB < today;
+        const pastStrs = allDates.filter(d => {
+            const date = parseISO(d);
+            return !isToday(date) && date < today;
+        }).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
-        // 2. Past
-        if (isPastA && isPastB) {
-            // Sort past dates descending (newest first)
-            return dateB.getTime() - dateA.getTime();
-        }
-
-        // 3. Future (implied if not today and not past)
-        if (!isPastA && !isPastB) {
-            // Sort future dates ascending (soonest first)
-            return dateA.getTime() - dateB.getTime();
-        }
-
-        // 4. Past before Future
-        if (isPastA && !isPastB) return -1;
-        if (!isPastA && isPastB) return 1;
-
-        return 0;
-    });
+        return {
+            upcomingDates: [
+                ...todayStrs,
+                ...futureStrs.slice(0, 3), // Show only next 3 upcoming days
+            ],
+            pastDates: pastStrs
+        };
+    })();
 
     // Use state-based stats instead of deriving from schedule
     const { completed: completedCount, total: totalDaily } = dailyStats;
     const progressPercentage = totalDaily > 0 ? (completedCount / totalDaily) * 100 : 0;
+
+    const renderActivitySection = (dateStr: string) => {
+        const dateObj = parseISO(dateStr);
+        const isCurrentDay = isToday(dateObj);
+        const isPast = dateObj < new Date(new Date().setHours(0, 0, 0, 0));
+
+        return (
+            <div key={dateStr} className="space-y-4">
+                <div className="flex items-center gap-2 border-b pb-2">
+                    <Calendar className={`w-5 h-5 ${isCurrentDay ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <h2 className={`text-2xl font-bold ${isCurrentDay ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        {isCurrentDay ? "Today's Challenges" : format(dateObj, "EEEE, MMMM do")}
+                    </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {schedule[dateStr].filter((a: any) => a.type !== 'buzzer').map((activity: any) => {
+                        const Icon = getActivityIcon(activity.type);
+                        const colorClass = getActivityColor(activity.type);
+
+                        const isAccessible = isCurrentDay || isPast;
+
+                        return (
+                            <div
+                                key={activity.id}
+                                className="relative scroll-mt-32"
+                                id={isCurrentDay ? activity.type : undefined}
+                            >
+                                <Card
+                                    onClick={() => {
+                                        if (isAccessible) {
+                                            const path = getActivityPath(activity.type, activity.id);
+                                            const separator = path.includes('?') ? '&' : '?';
+                                            navigate(isPast ? `${path}${separator}view_only=true` : path);
+                                        }
+                                    }}
+                                    className={`group transition-all duration-300 border-2 relative overflow-hidden backdrop-blur-sm bg-card/80
+                                    ${isAccessible
+                                            ? 'cursor-pointer hover:shadow-xl hover:border-primary/50'
+                                            : 'opacity-70 grayscale-[0.5] cursor-not-allowed'}
+                                    ${activity.completed ? 'border-green-500/50 bg-green-500/5' : ''}`}
+                                >
+                                    <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform duration-500 ${colorClass}`}>
+                                        <Icon className="w-24 h-24" />
+                                    </div>
+
+                                    <CardHeader className="relative z-10">
+                                        <div className="flex justify-between items-start">
+                                            <div className={`w-12 h-12 rounded-lg ${colorClass} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                                                <Icon className="w-6 h-6" />
+                                            </div>
+                                            {!isAccessible && <Lock className="w-5 h-5 text-muted-foreground" />}
+                                            {isCurrentDay && activity.completed && <Trophy className="w-5 h-5 text-green-500" />}
+                                            {isPast && <Users className="w-5 h-5 text-primary" />}
+                                        </div>
+
+                                        <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
+                                            {activity.title}
+                                        </CardTitle>
+                                        <CardDescription className="text-sm font-medium pt-1 capitalize">
+                                            {activity.difficulty} • {activity.type.replace('_', ' ')}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className={`text-sm ${activity.completed ? "font-bold text-green-600" : "text-muted-foreground"}`}>
+                                            {isCurrentDay
+                                                ? (activity.completed ? "Completed - View Leaderboard" : "Play now to earn +10 XP!")
+                                                : (isPast ? "View Leaderboard" : "Coming soon")}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="container mx-auto px-4 py-8 pt-24 space-y-8 animate-in fade-in duration-500">
@@ -234,85 +304,25 @@ export default function FunActivities() {
                 </div>
             </div>
 
-            {
-                sortedDates.map(dateStr => {
-                    const dateObj = parseISO(dateStr);
-                    const isCurrentDay = isToday(dateObj);
-                    const isPast = dateObj < new Date(new Date().setHours(0, 0, 0, 0)); // Check if strictly before today (midnight)
+            {/* Upcoming & Today */}
+            {upcomingDates.map(dateStr => renderActivitySection(dateStr))}
 
-                    return (
-                        <div key={dateStr} className="space-y-4">
-                            <div className="flex items-center gap-2 border-b pb-2">
-                                <Calendar className={`w-5 h-5 ${isCurrentDay ? 'text-primary' : 'text-muted-foreground'}`} />
-                                <h2 className={`text-2xl font-bold ${isCurrentDay ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                    {isCurrentDay ? "Today's Challenges" : format(dateObj, "EEEE, MMMM do")}
-                                </h2>
-                            </div>
+            {/* Divider for Past Activities */}
+            {pastDates.length > 0 && (
+                <div className="relative py-8">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-muted" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-4 text-muted-foreground font-bold tracking-widest">
+                            Past Challenges
+                        </span>
+                    </div>
+                </div>
+            )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {schedule[dateStr].filter((a: any) => a.type !== 'buzzer').map((activity: any) => {
-                                    const Icon = getActivityIcon(activity.type);
-                                    const colorClass = getActivityColor(activity.type);
-
-                                    const isAccessible = isCurrentDay || isPast;
-
-                                    return (
-                                        <div
-                                            key={activity.id}
-                                            className="relative scroll-mt-32"
-                                            id={isCurrentDay ? activity.type : undefined}
-                                        >
-                                            <Card
-                                                onClick={() => {
-                                                    if (isAccessible) {
-                                                        const path = getActivityPath(activity.type, activity.id);
-                                                        const separator = path.includes('?') ? '&' : '?';
-                                                        navigate(isPast ? `${path}${separator}view_only=true` : path);
-                                                    }
-                                                }}
-                                                className={`group transition-all duration-300 border-2 relative overflow-hidden backdrop-blur-sm bg-card/80
-                                                ${isAccessible
-                                                        ? 'cursor-pointer hover:shadow-xl hover:border-primary/50'
-                                                        : 'opacity-70 grayscale-[0.5] cursor-not-allowed'}
-                                                ${activity.completed ? 'border-green-500/50 bg-green-500/5' : ''}`}
-                                            >
-                                                <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform duration-500 ${colorClass}`}>
-                                                    <Icon className="w-24 h-24" />
-                                                </div>
-
-                                                <CardHeader className="relative z-10">
-                                                    <div className="flex justify-between items-start">
-                                                        <div className={`w-12 h-12 rounded-lg ${colorClass} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                                                            <Icon className="w-6 h-6" />
-                                                        </div>
-                                                        {!isAccessible && <Lock className="w-5 h-5 text-muted-foreground" />}
-                                                        {isCurrentDay && activity.completed && <Trophy className="w-5 h-5 text-green-500" />}
-                                                        {isPast && <Users className="w-5 h-5 text-primary" />}
-                                                    </div>
-
-                                                    <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
-                                                        {activity.title}
-                                                    </CardTitle>
-                                                    <CardDescription className="text-sm font-medium pt-1 capitalize">
-                                                        {activity.difficulty} • {activity.type.replace('_', ' ')}
-                                                    </CardDescription>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <p className={`text-sm ${activity.completed ? "font-bold text-green-600" : "text-muted-foreground"}`}>
-                                                        {isCurrentDay
-                                                            ? (activity.completed ? "Completed - View Leaderboard" : "Play now to earn +10 XP!")
-                                                            : (isPast ? "View Leaderboard" : "Coming soon")}
-                                                    </p>
-                                                </CardContent>
-                                            </Card>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    );
-                })
-            }
+            {/* Past Dates */}
+            {pastDates.map(dateStr => renderActivitySection(dateStr))}
 
             {
                 Object.keys(schedule).length === 0 && (

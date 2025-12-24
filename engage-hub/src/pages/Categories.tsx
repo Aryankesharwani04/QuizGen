@@ -151,14 +151,18 @@ const Categories = () => {
 
     return (
       <div className="h-full block" onClick={() => handleSubtopicClick(topic, subtopic)}>
-        <Card className="bg-background/60 border-border/50 card-shadow hover:card-shadow-hover transform hover:scale-105 transition-all duration-300 cursor-pointer group h-full">
-          <CardContent className="p-6 h-full flex flex-col">
+        <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50 relative overflow-hidden backdrop-blur-sm bg-card/80 h-full">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform duration-500 bg-primary/20 text-primary">
+            <category.icon className="w-24 h-24" />
+          </div>
+
+          <CardContent className="p-6 h-full flex flex-col relative z-10">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <category.icon className="w-7 h-7 text-white" />
               </div>
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2">{category.name}</h3>
+            <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">{category.name}</h3>
             <p className="text-sm text-muted-foreground">
               {loadingCounts ? "Loading..." : `${count} quizzes available`}
             </p>
@@ -185,29 +189,29 @@ const Categories = () => {
 
           {/* Custom Tabs */}
           <div className="flex justify-center mb-12">
-            <div className="inline-flex items-center p-1 rounded-xl bg-muted/30 border border-border/50">
+            <div className="inline-flex items-center gap-8 bg-transparent p-0">
               <button
                 onClick={() => setActiveTab('quizzes')}
                 className={cn(
-                  "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
+                  "flex items-center gap-2 px-8 py-3 rounded-xl text-base font-medium transition-all duration-300 border-2 border-transparent",
                   activeTab === 'quizzes'
-                    ? "bg-background text-primary shadow-sm ring-1 ring-border/50"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    ? "bg-card/80 text-foreground border-primary/60 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] scale-105"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/60 hover:border-primary/60 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] hover:scale-105"
                 )}
               >
-                <Compass className="w-4 h-4" />
+                <Compass className="w-5 h-5" />
                 Explore Quizzes
               </button>
               <button
                 onClick={() => setActiveTab('categories')}
                 className={cn(
-                  "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300",
+                  "flex items-center gap-2 px-8 py-3 rounded-xl text-base font-medium transition-all duration-300 border-2 border-transparent",
                   activeTab === 'categories'
-                    ? "bg-background text-primary shadow-sm ring-1 ring-border/50"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    ? "bg-card/80 text-foreground border-primary/60 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] scale-105"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/60 hover:border-primary/60 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] hover:scale-105"
                 )}
               >
-                <Layers className="w-4 h-4" />
+                <Layers className="w-5 h-5" />
                 Quiz Categories
               </button>
             </div>
@@ -335,6 +339,7 @@ const Categories = () => {
                     num_questions={quiz.num_questions || 10}
                     duration_seconds={quiz.duration_seconds || 600}
                     created_at={quiz.created_at || null}
+                    language={quiz.language}
                   />
                 ))}
               </div>

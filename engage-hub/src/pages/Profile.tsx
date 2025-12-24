@@ -34,6 +34,7 @@ import { RecentlyCompleted } from "@/components/RecentlyCompleted";
 import { StatsOverview } from "@/components/StatsOverview";
 import { Achievements } from "@/components/Achievements";
 import { MyCreatedQuizzes } from "@/components/MyCreatedQuizzes";
+import { Combobox } from "@/components/ui/combobox";
 
 const Profile = () => {
   const { user, checkAuth } = useAuth();
@@ -102,6 +103,61 @@ const Profile = () => {
       interests: userInterests
     }
   });
+
+  // Quiz creation state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [quizForm, setQuizForm] = useState({
+    category: '',
+    title: '',
+    level: 'easy' as 'easy' | 'medium' | 'hard',
+    num_questions: 10,
+    duration_seconds: 600,
+    additional_instructions: '',
+    language: 'English'
+  });
+
+  const LANGUAGES = ["English", "Hindi", "Spanish", "French", "German", "Italian", "Portuguese", "Russian", "Japanese", "Chinese"];
+
+  const handleCreateQuiz = async () => {
+    if (!quizForm.category || !quizForm.title) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fill in category and title"
+      });
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const response = await api.createQuiz(quizForm);
+      toast({
+        title: "Quiz Created Successfully! 🎉",
+        description: `Quiz ID: ${response.data.quiz_id} with ${response.data.num_questions} questions`
+      });
+      setShowCreateDialog(false);
+      setRefreshKey(prev => prev + 1);
+      setQuizForm({
+        category: '',
+        title: '',
+        level: 'easy',
+        num_questions: 10,
+        duration_seconds: 600,
+        additional_instructions: '',
+        language: 'English'
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Failed to create quiz",
+        description: error.response?.data?.error || "An error occurred"
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
 
   // Predefined preference options from topics
   const availablePreferences = TOPICS;
@@ -344,34 +400,174 @@ const Profile = () => {
           <Tabs
             id="activity-section"
             defaultValue={
-              window.location.hash === '#achievements' ? 'achievements' :
+              window.location.hash === '#activity' ? 'activity' :
                 window.location.hash === '#MyQuizzes' ? 'myquizzes' :
-                  'activity'
+                  'achievements'
             }
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-              <TabsTrigger value="achievements">Achievements</TabsTrigger>
-              <TabsTrigger value="myquizzes">My Quizzes</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 gap-8 bg-transparent p-0">
+              <TabsTrigger
+                value="achievements"
+                className="h-14 data-[state=active]:bg-card/80 border-2 border-transparent hover:border-primary/60 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-105 data-[state=active]:scale-105 data-[state=active]:border-primary/60 data-[state=active]:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] rounded-xl"
+              >
+                Achievements
+              </TabsTrigger>
+              <TabsTrigger
+                value="myquizzes"
+                className="h-14 data-[state=active]:bg-card/80 border-2 border-transparent hover:border-primary/60 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-105 data-[state=active]:scale-105 data-[state=active]:border-primary/60 data-[state=active]:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] rounded-xl"
+              >
+                My Created Quizzes
+              </TabsTrigger>
+              <TabsTrigger
+                value="activity"
+                className="h-14 data-[state=active]:bg-card/80 border-2 border-transparent hover:border-primary/60 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-105 data-[state=active]:scale-105 data-[state=active]:border-primary/60 data-[state=active]:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] rounded-xl"
+              >
+                Activity History
+              </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="activity">
-              <RecentlyCompleted limit={999999} />
-            </TabsContent>
 
             <TabsContent value="achievements">
               <Achievements />
             </TabsContent>
 
             <TabsContent value="myquizzes">
-              <MyCreatedQuizzes onCreateClick={() => {/* Can add create dialog here if needed */ }} />
+              <MyCreatedQuizzes
+                onCreateClick={() => setShowCreateDialog(true)}
+                refreshTrigger={refreshKey}
+                layout="grid"
+              />
+            </TabsContent>
+
+            <TabsContent value="activity">
+              <RecentlyCompleted limit={999999} layout="grid" />
             </TabsContent>
 
 
           </Tabs>
         </div>
       </main>
+
+      {/* Create Quiz Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Create New Quiz</DialogTitle>
+            <DialogDescription>
+              Fill in the details to generate a custom quiz
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            {/* Category - Full Width */}
+            <div className="grid gap-2">
+              <Label htmlFor="category">Category</Label>
+              <Combobox
+                options={TOPICS.map(topic => ({ value: topic, label: topic }))}
+                value={quizForm.category}
+                onValueChange={(value) => setQuizForm({ ...quizForm, category: value })}
+                placeholder="Select a category..."
+                searchPlaceholder="Search categories..."
+                emptyMessage="No category found."
+              />
+            </div>
+
+            {/* Title - Full Width */}
+            <div className="grid gap-2">
+              <Label htmlFor="title">Quiz Title</Label>
+              <Input
+                id="title"
+                placeholder="e.g., World War II Quiz"
+                value={quizForm.title}
+                onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })}
+              />
+            </div>
+
+            {/* 3-Column Grid: Difficulty, Number of Questions & Duration */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="level">Difficulty Level</Label>
+                <select
+                  id="level"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={quizForm.level}
+                  onChange={(e) => setQuizForm({ ...quizForm, level: e.target.value as 'easy' | 'medium' | 'hard' })}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="num_questions">Number of Questions</Label>
+                <Input
+                  id="num_questions"
+                  type="number"
+                  min="5"
+                  max="50"
+                  value={quizForm.num_questions}
+                  onChange={(e) => setQuizForm({ ...quizForm, num_questions: parseInt(e.target.value) })}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  min="5"
+                  max="120"
+                  value={quizForm.duration_seconds / 60}
+                  onChange={(e) => setQuizForm({ ...quizForm, duration_seconds: parseInt(e.target.value) * 60 })}
+                />
+              </div>
+            </div>
+
+            {/* Additional Instructions - Full Width */}
+            <div className="grid gap-2">
+              <Label htmlFor="instructions">Additional Instructions (Optional)</Label>
+              <Input
+                id="instructions"
+                placeholder="Any specific requirements..."
+                value={quizForm.additional_instructions}
+                onChange={(e) => setQuizForm({ ...quizForm, additional_instructions: e.target.value })}
+              />
+            </div>
+
+            {/* Language Selection - Full Width */}
+            <div className="grid gap-2">
+              <Label htmlFor="language">Language</Label>
+              <select
+                id="language"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={quizForm.language}
+                onChange={(e) => setQuizForm({ ...quizForm, language: e.target.value })}
+              >
+                {LANGUAGES.map(lang => (
+                  <option key={lang} value={lang}>{lang}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={handleCreateQuiz}
+              disabled={creating}
+              className="gradient-primary text-white"
+            >
+              {creating ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Creating...
+                </>
+              ) : (
+                "Create Quiz"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Avatar Upload Dialog */}
       <Dialog open={showAvatarDialog} onOpenChange={setShowAvatarDialog}>

@@ -50,8 +50,11 @@ const Dashboard = () => {
     level: 'easy' as 'easy' | 'medium' | 'hard',
     num_questions: 10,
     duration_seconds: 600,
-    additional_instructions: ''
+    additional_instructions: '',
+    language: 'English'
   });
+
+  const LANGUAGES = ["English", "Hindi", "Spanish", "French", "German", "Italian", "Portuguese", "Russian", "Japanese", "Chinese"];
 
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -135,7 +138,8 @@ const Dashboard = () => {
         level: 'easy',
         num_questions: 10,
         duration_seconds: 600,
-        additional_instructions: ''
+        additional_instructions: '',
+        language: 'English'
       });
     } catch (error: any) {
       toast({
@@ -252,6 +256,20 @@ const Dashboard = () => {
                     onChange={(e) => setQuizForm({ ...quizForm, additional_instructions: e.target.value })}
                   />
                 </div>
+                {/* Language Selection - Full Width */}
+                <div className="grid gap-2">
+                  <Label htmlFor="language">Language</Label>
+                  <select
+                    id="language"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={quizForm.language}
+                    onChange={(e) => setQuizForm({ ...quizForm, language: e.target.value })}
+                  >
+                    {LANGUAGES.map(lang => (
+                      <option key={lang} value={lang}>{lang}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <DialogFooter>
                 <Button
@@ -284,7 +302,6 @@ const Dashboard = () => {
                 onCreateClick={() => setShowCreateDialog(true)}
                 refreshTrigger={refreshKey}
                 limit={1}
-                showSeeMore={true}
                 className="bg-background/60"
               />
 

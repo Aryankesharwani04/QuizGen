@@ -48,6 +48,10 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Weekly XP
+    weekly_xp = models.IntegerField(default=0, help_text="XP earned this week")
+    last_weekly_reset = models.DateTimeField(auto_now_add=True, help_text="Last time weekly XP was reset")
+
     class Meta:
         verbose_name = 'User Profile'
         verbose_name_plural = 'User Profiles'
@@ -55,10 +59,33 @@ class UserProfile(models.Model):
             models.Index(fields=['user', 'email_verified']),
             models.Index(fields=['last_active']),
             models.Index(fields=['is_active']),
+            models.Index(fields=['weekly_xp']), # Index for leaderboard sorting
         ]
 
     def __str__(self):
         return f"{self.full_name or self.user.username} - {self.user.email}"
+
+    def check_and_reset_weekly_xp(self):
+        """
+        Check if we've crossed a Monday boundary since the last reset.
+        If so, reset weekly_xp to 0 and update last_weekly_reset.
+        """
+        now = timezone.now()
+        last_reset = self.last_weekly_reset
+        
+        # Calculate the start of the current week (Monday at 00:00:00)
+        # weekday(): Monday is 0, Sunday is 6
+        days_since_monday = now.weekday()
+        current_week_start = now - timezone.timedelta(days=days_since_monday)
+        current_week_start = current_week_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # If the last reset was before the start of this week, reset
+        if last_reset < current_week_start:
+            self.weekly_xp = 0
+            self.last_weekly_reset = now
+            self.save(update_fields=['weekly_xp', 'last_weekly_reset'])
+            return True
+        return False
     
     def is_session_valid(self):
         if not self.is_active:

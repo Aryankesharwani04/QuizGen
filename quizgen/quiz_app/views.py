@@ -159,6 +159,7 @@ class QuizListView(APIView):
                     'num_questions': quiz.num_questions,
                     'duration_seconds': quiz.duration_seconds or (quiz.duration_minutes * 60 if quiz.duration_minutes else 600),
                     'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                    'language': quiz.language or 'English',
                     'source': 'database'
                 }
             
@@ -199,6 +200,7 @@ class QuizListView(APIView):
                                             'num_questions': 1, # Initialize count
                                             'duration_seconds': int(row['DurationSeconds']) if row.get('DurationSeconds') and row['DurationSeconds'].isdigit() else 600,
                                             'created_at': None,
+                                            'language': 'English', # Default for CSV
                                             'source': 'dataset'
                                         }
                                     elif quizzes_map[quiz_id]['source'] == 'dataset':
@@ -267,6 +269,7 @@ class QuizQuestionsView(APIView):
                 'category': quiz.category or quiz.topic,
                 'level': quiz.level or quiz.difficulty_level,
                 'duration_seconds': quiz.duration_seconds or (quiz.duration_minutes * 60 if quiz.duration_minutes else 600),
+                'language': quiz.language or 'English',
                 'questions': questions_list,
                 'total_questions': len(questions_list)
             }, status=status.HTTP_200_OK)
@@ -326,6 +329,7 @@ class GetQuizzesByCategoryView(APIView):
                         'quiz_id': str(quiz.quiz_id),
                         'title': quiz.title,
                         'level': quiz.level or quiz.difficulty_level,
+                        'language': quiz.language or 'English',
                         'source': 'database'
                     }
 
@@ -363,6 +367,7 @@ class GetQuizzesByCategoryView(APIView):
                                                 'quiz_id': quiz_id,
                                                 'title': row.get('Title', 'Untitled'),
                                                 'level': row.get('Level', 'Medium'),
+                                                'language': 'English', # Default for CSV
                                                 'source': 'dataset'
                                             }
                         except Exception as e:
@@ -574,55 +579,72 @@ class GetLeaderboardView(APIView):
 
     def get(self, request):
         try:
-            # Get limit parameter (default 10, max 100)
-            limit = min(int(request.GET.get('limit', 10)), 100)
-            
-            # Get all users with profiles, ordered by XP
-            users_with_xp = []
+            # Get all users with profiles
             all_users = User.objects.select_related('profile').all()
+            
+            processed_users = []
             
             for user in all_users:
                 try:
                     profile = user.profile
-                    xp_score = profile.xp_score or 0
-                    level = calculate_level(xp_score)
+                    # Check and reset weekly XP just in case
+                    profile.check_and_reset_weekly_xp()
                     
-                    users_with_xp.append({
+                    level = calculate_level(profile.xp_score or 0)
+                    
+                    user_data = {
                         'user_id': user.id,
                         'username': user.username,
                         'full_name': user.get_full_name() or user.username,
-                        'xp_score': xp_score,
+                        'xp_score': profile.xp_score or 0,
+                        'weekly_xp': profile.weekly_xp or 0,
                         'level': level,
                         'avatar': profile.avatar_file if hasattr(profile, 'avatar_file') and profile.avatar_file else None
-                    })
+                    }
+                    processed_users.append(user_data)
                 except UserProfile.DoesNotExist:
-                    # Skip users without profiles
                     continue
             
-            # Sort by XP score descending
-            users_with_xp.sort(key=lambda x: x['xp_score'], reverse=True)
+            # 1. Global Leaderboard
+            global_sorted = sorted(processed_users, key=lambda x: x['xp_score'], reverse=True)
+            for idx, u in enumerate(global_sorted, 1):
+                u['rank'] = idx # Add global rank
             
-            # Add ranks
-            for idx, user_data in enumerate(users_with_xp, start=1):
-                user_data['rank'] = idx
+            top_100 = global_sorted[:100]
             
-            # Get current user's rank if authenticated
-            current_user_rank = None
+            # 2. Weekly Leaderboard
+            weekly_sorted = sorted(processed_users, key=lambda x: x['weekly_xp'], reverse=True)
+            weekly_top_10 = []
+            for idx, u in enumerate(weekly_sorted, 1):
+                # We create a copy or modify a new dict for weekly entry to have weekly rank
+                weekly_entry = u.copy()
+                weekly_entry['rank'] = idx
+                if len(weekly_top_10) < 10:
+                    weekly_top_10.append(weekly_entry)
+            
+            # Current user ranks
+            current_user_overall_rank = None
+            current_user_weekly_rank = None
+            
             if request.user.is_authenticated:
-                for user_data in users_with_xp:
-                    if user_data['user_id'] == request.user.id:
-                        current_user_rank = user_data['rank']
+                for u in global_sorted:
+                    if u['user_id'] == request.user.id:
+                        current_user_overall_rank = u['rank']
                         break
-            
-            # Return top N users
-            top_users = users_with_xp[:limit]
-            
+                # For weekly rank, we need to find in weekly_sorted
+                for idx, u in enumerate(weekly_sorted, 1):
+                    if u['user_id'] == request.user.id:
+                        current_user_weekly_rank = idx
+                        break
+
             return Response({
                 'success': True,
                 'data': {
-                    'leaderboard': top_users,
-                    'total_users': len(users_with_xp),
-                    'current_user_rank': current_user_rank
+                    'overall_top_100': top_100,
+                    'weekly_top_10': weekly_top_10,
+                    'total_users': len(processed_users),
+                    'current_user_overall_rank': current_user_overall_rank,
+                    'current_user_weekly_rank': current_user_weekly_rank
                 }
             }, status=status.HTTP_200_OK)
             
@@ -678,7 +700,9 @@ class GetQuizDetailView(APIView):
                                                 'category': row.get('Category', 'General'),
                                                 'subtopic': row.get('Subtopic', row.get('Category', 'General')),
                                                 'level': row.get('Level', 'Medium'),
+                                                'level': row.get('Level', 'Medium'),
                                                 'duration_seconds': int(row['DurationSeconds']) if row.get('DurationSeconds') and row['DurationSeconds'].isdigit() else 600,
+                                                'language': 'English', # Default for CSV
                                                 'source': 'dataset'
                                             }
                                         
@@ -736,7 +760,11 @@ class GetQuizDetailView(APIView):
                         'category': quiz.category or quiz.topic,
                         'subtopic': quiz.topic, # topic is often used as subtopic equivalent for DB quizzes
                         'level': quiz.level or quiz.difficulty_level,
+                        'level': quiz.level or quiz.difficulty_level,
+                        'num_questions': quiz.num_questions,
                         'duration_seconds': quiz.duration_seconds or (quiz.duration_minutes * 60 if quiz.duration_minutes else 600),
+                        'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                        'language': quiz.language or 'English',
                         'source': 'database',
                         'questions': questions_list,
                         'total_questions': len(questions_list)

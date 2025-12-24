@@ -1080,59 +1080,16 @@ class GetUserStreakView(APIView):
 
 class GetUserXPView(APIView):
     """
-    Get user's total XP score calculated from quiz history.
-    XP is awarded based on correct answers and quiz difficulty:
-    - Easy: 5 XP per correct answer
-    - Medium: 10 XP per correct answer  
-    - Hard: 15 XP per correct answer
-    Only first attempts of each quiz count towards XP.
+    Get user's total XP score directly from profile.
+    This is a pure getter method that does not modify the XP score.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
-            from quiz_app.models import QuizHistory
-            
-            # XP rates per correct answer by difficulty
-            xp_rates = {
-                'easy': 5,
-                'medium': 10,
-                'hard': 15
-            }
-            
-            total_xp = 0
-            quizzes_counted = set()  # Track which quizzes we've counted (for first attempt only)
-            
-            # Get all completed quiz attempts, ordered by completion time
-            history = QuizHistory.objects.filter(
-                user=request.user,
-                completed_at__isnull=False
-            ).select_related('quiz').order_by('completed_at')
-            
-            for attempt in history:
-                quiz_id = attempt.quiz.quiz_id
-                
-                # Only count XP for first attempt of each quiz
-                if quiz_id not in quizzes_counted:
-                    quizzes_counted.add(quiz_id)
-                    
-                    # Get quiz difficulty level
-                    difficulty = (attempt.quiz.level or attempt.quiz.difficulty_level or 'medium').lower()
-                    xp_per_question = xp_rates.get(difficulty, 10)
-                    
-                    # Calculate XP from correct answers
-                    score = attempt.score or 0
-                    xp_earned = score * xp_per_question
-                    total_xp += xp_earned
-            
-            # Update the stored XP score for consistency
             profile = request.user.profile
-            if profile.xp_score != total_xp:
-                profile.xp_score = total_xp
-                profile.save()
-            
             return ResponseFormatter.success({
-                'xp_score': total_xp
+                'xp_score': profile.xp_score
             })
             
         except Exception as e:
@@ -1163,6 +1120,7 @@ class CreateUserQuizView(APIView):
         num_questions = request.data.get('num_questions', 10)
         duration_seconds = request.data.get('duration_seconds', 600)
         additional_instructions = request.data.get('additional_instructions', '')
+        language = request.data.get('language', 'English')
         
         # Validate required fields
         if not category or not title:
@@ -1170,7 +1128,7 @@ class CreateUserQuizView(APIView):
         
         try:
             # Step 1: Generate unique quiz_id
-            logger.info(f"Generating quiz: {title} - {category} for user {request.user.email}")
+            logger.info(f"Generating quiz: {title} - {category} ({language}) for user {request.user.email}")
             quiz_id = generate_unique_quiz_id()
             logger.info(f"Generated quiz_id: {quiz_id}")
             
@@ -1181,7 +1139,8 @@ class CreateUserQuizView(APIView):
                 title=title,
                 level=level,
                 num_questions=num_questions,
-                additional_instructions=additional_instructions
+                additional_instructions=additional_instructions,
+                language=language
             )
             
             if not questions_data:
@@ -1204,7 +1163,8 @@ class CreateUserQuizView(APIView):
                     duration_seconds=duration_seconds,
                     duration_minutes=duration_seconds // 60,
                     created_by=request.user,
-                    is_mock=False
+                    is_mock=False,
+                    language=language
                 )
                 
                 # Create question objects
@@ -1286,7 +1246,8 @@ class GetUserCreatedQuizzesView(APIView):
                     'level': quiz.level,
                     'num_questions': quiz.num_questions,
                     'duration_seconds': quiz.duration_seconds,
-                    'created_at': quiz.created_at.isoformat() if quiz.created_at else None
+                    'created_at': quiz.created_at.isoformat() if quiz.created_at else None,
+                    'language': quiz.language or 'English'
                 })
             
             return ResponseFormatter.success({
