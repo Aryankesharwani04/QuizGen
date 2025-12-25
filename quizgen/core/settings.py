@@ -37,15 +37,15 @@ CHANNEL_LAYERS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+     'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'auth_app.middleware.CsrfExemptMiddleware',  # Exempt /api/ paths from CSRF
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'auth_app.middleware.CsrfExemptMiddleware',  # Exempt /api/ paths from CSRF
     'auth_app.middleware.SessionHardeningMiddleware',  # Enforce session validity
     'auth_app.middleware.AuthenticationMiddleware',  # Add user context
     'auth_app.middleware.RequestValidationMiddleware',  # Validate requests
@@ -123,7 +123,7 @@ REST_FRAMEWORK = {
 }
 
 # Disable CSRF for REST API endpoints
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:3000,http://localhost:5173,http://localhost:8000,http://localhost:8081', cast=Csv())
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:3000,http://localhost:5173,http://localhost:8000,http://localhost:8081,http://localhost:8080', cast=Csv())
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://localhost:8000,http://localhost:5173,http://localhost:8081,http://localhost:8080', cast=Csv())
