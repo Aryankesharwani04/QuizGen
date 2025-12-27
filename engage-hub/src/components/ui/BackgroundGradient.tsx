@@ -36,14 +36,14 @@ export const BackgroundGradient = () => {
 
             {/* Gradient Container */}
             <div className="absolute inset-0 overflow-hidden">
-                
+
                 {/* Blob 1: Soft Indigo/Blue (Top Left) 
                     - Light: Pastel Indigo
                     - Dark: Deep Indigo Glow
                 */}
                 <div className="absolute top-0 -left-20 w-[45vw] h-[45vw] rounded-full 
-                    bg-indigo-300/30 dark:bg-indigo-900/20 
-                    blur-[100px] animate-drift-1" 
+                    bg-indigo-300/30 dark:bg-indigo-900/10 
+                    blur-[100px] animate-drift-1"
                 />
 
                 {/* Blob 2: Soft Rose/Pink (Top Right) 
@@ -51,8 +51,8 @@ export const BackgroundGradient = () => {
                     - Dark: Deep Rose Glow
                 */}
                 <div className="absolute top-0 -right-20 w-[40vw] h-[40vw] rounded-full 
-                    bg-rose-300/30 dark:bg-rose-900/20 
-                    blur-[100px] animate-drift-2" 
+                    bg-rose-300/30 dark:bg-rose-900/8 
+                    blur-[100px] animate-drift-2"
                 />
 
                 {/* Blob 3: Soft Teal/Cyan (Bottom Left) 
@@ -60,8 +60,8 @@ export const BackgroundGradient = () => {
                     - Dark: Deep Teal Glow
                 */}
                 <div className="absolute -bottom-40 -left-20 w-[45vw] h-[45vw] rounded-full 
-                    bg-teal-300/30 dark:bg-teal-900/20 
-                    blur-[100px] animate-drift-3" 
+                    bg-teal-300/30 dark:bg-teal-900/10 
+                    blur-[100px] animate-drift-3"
                 />
 
                 {/* Blob 4: Soft Violet (Bottom Right) 
@@ -69,14 +69,14 @@ export const BackgroundGradient = () => {
                     - Dark: Deep Violet Glow
                 */}
                 <div className="absolute -bottom-40 -right-20 w-[40vw] h-[40vw] rounded-full 
-                    bg-violet-300/30 dark:bg-violet-900/20 
-                    blur-[100px] animate-drift-4" 
+                    bg-violet-300/30 dark:bg-violet-900/8 
+                    blur-[100px] animate-drift-4"
                 />
 
                 {/* Blob 5: Center Glow (Very subtle) */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] rounded-full 
                     bg-blue-200/20 dark:bg-blue-900/10 
-                    blur-[120px] animate-pulse-slow" 
+                    blur-[120px] animate-pulse-slow"
                 />
             </div>
 

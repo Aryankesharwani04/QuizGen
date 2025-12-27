@@ -46,7 +46,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
     return (
         <div className={` grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${className}`}>
             {/* Total Quizzes */}
-            <Card className="bg-background/60 border-border/50 card-shadow">
+            <Card className="border-border/60 hover:border-primary/30 transition-all duration-300">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -63,7 +63,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
             </Card>
 
             {/* Average Score */}
-            <Card className="bg-background/60 border-border/50 card-shadow">
+            <Card className="border-border/60 hover:border-primary/30 transition-all duration-300">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -80,7 +80,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
             </Card>
 
             {/* Time Spent */}
-            <Card className="bg-background/60 border-border/50 card-shadow">
+            <Card className="border-border/60 hover:border-primary/30 transition-all duration-300">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -97,7 +97,7 @@ export const StatsOverview = ({ className = "" }: StatsOverviewProps) => {
             </Card>
 
             {/* Current Streak */}
-            <Card className="bg-background/60 border-border/50 card-shadow">
+            <Card className="border-border/60 hover:border-primary/30 transition-all duration-300">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div>

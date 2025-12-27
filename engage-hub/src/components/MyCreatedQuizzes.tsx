@@ -75,7 +75,7 @@ export const MyCreatedQuizzes = ({
     }, [refreshTrigger]);
 
     return (
-        <Card className={`bg-background/60 border-border/50 card-shadow ${className}`}>
+        <Card className={`border-border/60 hover:border-primary/30 transition-all duration-300 ${className}`}>
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">

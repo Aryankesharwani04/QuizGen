@@ -35,7 +35,7 @@ export function ArcadeFunWidget() {
     ];
 
     return (
-        <Card className="bg-background/60 border-border/50 card-shadow overflow-hidden relative">
+        <Card className="border-border/60 hover:border-primary/30 transition-all duration-300 overflow-hidden relative">
             <div className="absolute top-0 right-0 p-4 opacity-5">
                 <Gamepad2 className="w-24 h-24" />
             </div>
@@ -60,9 +60,9 @@ export function ArcadeFunWidget() {
                         <div
                             key={idx}
                             onClick={() => navigate(`/fun-activities#${game.hash}`)}
-                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border border-transparent hover:border-border/50"
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-muted/70 hover:to-muted/40 transition-all duration-300 cursor-pointer group border border-border/50 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5"
                         >
-                            <div className={`p-2 rounded-md ${game.bg} ${game.color} group-hover:scale-110 transition-transform`}>
+                            <div className={`p-2.5 rounded-lg ${game.bg} ${game.color} group-hover:scale-110 transition-transform shadow-sm`}>
                                 <game.icon className="w-5 h-5" />
                             </div>
                             <div className="flex-1">
